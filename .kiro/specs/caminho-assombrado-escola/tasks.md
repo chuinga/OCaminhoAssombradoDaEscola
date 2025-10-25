@@ -133,15 +133,15 @@
   - Ensure sounds play correctly with weapon timing
   - _Requirements: 11.5_
 
-- [ ] 8. Create game completion and results system
-- [ ] 8.1 Implement game end conditions
+- [x] 8. Create game completion and results system
+- [x] 8.1 Implement game end conditions
   - Add victory condition when player reaches school gate with lives > 0
   - Implement defeat condition when player lives reach 0
   - Apply +500 bonus points for victory completion
   - Navigate to results page on game end
   - _Requirements: 7.5, 7.6_
 
-- [ ] 8.2 Build results page with score submission
+- [x] 8.2 Build results page with score submission
   - Create results page showing final score and game outcome
   - Display all leaderboard scores with scroll functionality
   - Add "Voltar ao início" button to return to home page
