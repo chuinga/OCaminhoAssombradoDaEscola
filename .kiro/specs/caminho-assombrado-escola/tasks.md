@@ -19,7 +19,7 @@
   - Create resetGame action to clear all state
   - _Requirements: 1.3, 2.4, 2.6, 7.1_
 
-- [ ] 3. Create navigation pages and routing
+- [x] 3. Create navigation pages and routing
 - [x] 3.1 Implement home page with leaderboard display
   - Create home page component that fetches and displays top 10 scores
   - Add "Jogar" button that navigates to name input page
@@ -54,7 +54,7 @@
   - _Requirements: 12.1, 12.2, 12.3, 2.6_
 
 - [ ] 4. Implement core game entities and physics
-- [ ] 4.1 Create Player class with movement and combat
+- [x] 4.1 Create Player class with movement and combat
   - Implement Player entity with position, lives, score, and weapon properties
   - Add movement methods (move left/right, jump, crouch) with physics
   - Implement attack method that uses selected weapon

@@ -7,7 +7,7 @@ export interface Player {
   y: number;
   lives: number;
   score: number;
-  weapon: WeaponEntity;
+  weapon: WeaponEntity | null;
   isInvulnerable: boolean;
   invulnerabilityTimer: number;
   
