@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
+import { ClientOnlyPhaserGame } from '@/components/game/ClientOnlyPhaserGame';
 
 export default function JogarPage() {
   const router = useRouter();
@@ -33,25 +34,37 @@ export default function JogarPage() {
     return null;
   }
 
+  const handleGameEnd = (score: number, victory: boolean) => {
+    // TODO: Navigate to results page with final score and victory status
+    console.log('Game ended:', { score, victory });
+    // router.push(`/final?score=${score}&victory=${victory}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-      <div className="text-center text-white">
-        <h1 className="text-4xl font-bold mb-4">Jogo</h1>
-        <p className="mb-4">O jogo será implementado nas próximas tarefas.</p>
-        <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6 max-w-md mx-auto">
-          <h2 className="text-xl font-bold mb-4">Configuração do Jogador:</h2>
-          <div className="text-left space-y-2">
-            <p><strong>Nome:</strong> {firstName} {lastName}</p>
-            <p><strong>Personagem:</strong> {character === 'boy' ? 'Menino' : 'Menina'}</p>
-            <p><strong>Arma:</strong> {weapon}</p>
-            <p><strong>Dificuldade:</strong> {difficulty}</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-indigo-900">
+      {/* Game Container */}
+      <div className="w-full h-screen">
+        <ClientOnlyPhaserGame 
+          difficulty={difficulty}
+          onGameEnd={handleGameEnd}
+          className="w-full h-full"
+        />
+      </div>
+      
+      {/* Debug Info - Remove in production */}
+      <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white text-sm">
+        <h3 className="font-bold mb-2">Player Config:</h3>
+        <div className="space-y-1">
+          <p>Nome: {firstName} {lastName}</p>
+          <p>Personagem: {character === 'boy' ? 'Menino' : 'Menina'}</p>
+          <p>Arma: {weapon}</p>
+          <p>Dificuldade: {difficulty}</p>
         </div>
         <button
           onClick={() => router.push('/dificuldade')}
-          className="mt-6 text-gray-400 hover:text-white transition-colors text-sm"
+          className="mt-2 text-gray-400 hover:text-white transition-colors text-xs"
         >
-          ← Voltar à Seleção de Dificuldade
+          ← Voltar
         </button>
       </div>
     </div>

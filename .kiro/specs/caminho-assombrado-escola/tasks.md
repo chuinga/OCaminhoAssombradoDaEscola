@@ -53,7 +53,7 @@
   - Add navigation to game page with complete state validation
   - _Requirements: 12.1, 12.2, 12.3, 2.6_
 
-- [ ] 4. Implement core game entities and physics
+- [x] 4. Implement core game entities and physics
 - [x] 4.1 Create Player class with movement and combat
   - Implement Player entity with position, lives, score, and weapon properties
   - Add movement methods (move left/right, jump, crouch) with physics
@@ -78,7 +78,7 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
 - [ ] 5. Build game scene and level mechanics
-- [ ] 5.1 Create main GameScene with Phaser setup
+- [x] 5.1 Create main GameScene with Phaser setup
   - Initialize Phaser scene with 3500x720px world size
   - Set up Arcade Physics with gravity and collision detection
   - Implement parallax background layers (moon_clouds, houses, trees, street)

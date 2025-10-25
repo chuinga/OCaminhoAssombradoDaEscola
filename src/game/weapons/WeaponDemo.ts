@@ -49,12 +49,12 @@ export class WeaponDemo {
     
     // Demonstrate bazooka ammunition system
     console.log('\n=== Bazooka Ammunition Demo ===');
-    console.log(`Bazooka initial ammo: ${bazooka.getAmmunition()}`);
+    console.log(`Bazooka initial ammo: ${bazooka.ammunition}`);
     
     for (let i = 1; i <= 3; i++) {
       if (bazooka.canAttack()) {
         bazooka.attack(100, 100);
-        console.log(`After shot ${i}: ${bazooka.getAmmunition()} ammo remaining`);
+        console.log(`After shot ${i}: ${bazooka.ammunition} ammo remaining`);
       }
     }
   }
