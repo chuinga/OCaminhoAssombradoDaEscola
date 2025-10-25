@@ -39,7 +39,7 @@
   - Add navigation to weapon selection page with state validation
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4 Implement weapon selection page
+- [x] 3.4 Implement weapon selection page
   - Create UI for selecting between Katana, Pistola de Laser, Taco de Basebol, Bazuca
   - Display weapon descriptions and characteristics
   - Save weapon choice to Zustand state
