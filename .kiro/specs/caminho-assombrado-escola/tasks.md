@@ -46,7 +46,7 @@
   - Add navigation to difficulty selection page
   - _Requirements: 2.3, 2.4_
 
-- [ ] 3.5 Create difficulty selection page
+- [x] 3.5 Create difficulty selection page
   - Build UI for selecting Easy, Medium, or Impossible difficulty
   - Display difficulty descriptions (enemy count and life items)
   - Save difficulty choice to Zustand state
