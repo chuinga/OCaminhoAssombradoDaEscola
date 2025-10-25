@@ -33,7 +33,7 @@
   - Add navigation to character selection page
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 3.3 Build character selection page
+- [x] 3.3 Build character selection page
   - Create UI for selecting between boy and girl characters
   - Save character choice to Zustand state
   - Add navigation to weapon selection page with state validation
