@@ -69,7 +69,7 @@
   - Add collision detection and damage dealing (all enemies remove 1 life and disappear)
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 7.3_
 
-- [ ] 4.3 Create weapon system with different attack types
+- [x] 4.3 Create weapon system with different attack types
   - Implement Katana class (40px range, 300ms cooldown, melee)
   - Create LaserGun class (projectile weapon, 500px/s speed, 200ms cooldown)
   - Implement BaseballBat class (55px range, 450ms cooldown, knockback)
