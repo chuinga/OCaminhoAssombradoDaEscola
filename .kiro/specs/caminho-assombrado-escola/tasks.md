@@ -113,7 +113,7 @@
   - Ensure touch controls work responsively across device sizes
   - _Requirements: 10.2_
 
-- [ ] 6.3 Implement keyboard input handling
+- [x] 6.3 Implement keyboard input handling
   - Add keyboard event listeners for A/D (left/right), W/↑ (jump), S/↓ (crouch)
   - Implement Space key for attack and Esc key for pause
   - Ensure keyboard controls work alongside touch controls

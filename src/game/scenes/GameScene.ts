@@ -279,25 +279,51 @@ export class GameScene extends Phaser.Scene {
   
   /**
    * Set up keyboard controls
+   * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6
    */
   private setupControls(): void {
-    // Create cursor keys
-    const cursors = this.input.keyboard?.createCursorKeys();
+    // Ensure keyboard input is available
+    if (!this.input.keyboard) {
+      console.warn('Keyboard input not available');
+      return;
+    }
     
-    // Create WASD keys
-    const wasd = this.input.keyboard?.addKeys('W,S,A,D');
+    // Create cursor keys (arrow keys)
+    const cursors = this.input.keyboard.createCursorKeys();
+    
+    // Create WASD keys for alternative movement controls
+    const wasd = this.input.keyboard.addKeys('W,S,A,D') as {
+      W: Phaser.Input.Keyboard.Key;
+      S: Phaser.Input.Keyboard.Key;
+      A: Phaser.Input.Keyboard.Key;
+      D: Phaser.Input.Keyboard.Key;
+    };
     
     // Create space key for attack
-    const spaceKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
     // Create escape key for pause
-    const escKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     
     // Store keys for use in update loop
     this.registry.set('cursors', cursors);
     this.registry.set('wasd', wasd);
     this.registry.set('spaceKey', spaceKey);
     this.registry.set('escKey', escKey);
+    
+    // Prevent default browser behavior for game keys
+    this.input.keyboard.addCapture([
+      Phaser.Input.Keyboard.KeyCodes.W,
+      Phaser.Input.Keyboard.KeyCodes.A,
+      Phaser.Input.Keyboard.KeyCodes.S,
+      Phaser.Input.Keyboard.KeyCodes.D,
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+      Phaser.Input.Keyboard.KeyCodes.UP,
+      Phaser.Input.Keyboard.KeyCodes.DOWN,
+      Phaser.Input.Keyboard.KeyCodes.LEFT,
+      Phaser.Input.Keyboard.KeyCodes.RIGHT,
+      Phaser.Input.Keyboard.KeyCodes.ESC
+    ]);
   }
   
   /**
@@ -348,46 +374,77 @@ export class GameScene extends Phaser.Scene {
   
   /**
    * Handle player input (keyboard and touch controls)
+   * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6
    */
   private handleInput(): void {
+    // Skip input handling if game is paused
+    if (this.scene.isPaused()) {
+      return;
+    }
+    
     const cursors = this.registry.get('cursors');
     const wasd = this.registry.get('wasd');
     const spaceKey = this.registry.get('spaceKey');
     const escKey = this.registry.get('escKey');
     
-    // Handle movement (keyboard + touch)
-    const moveLeft = (cursors?.left?.isDown || wasd?.A?.isDown || this.touchControls.moveLeft);
-    const moveRight = (cursors?.right?.isDown || wasd?.D?.isDown || this.touchControls.moveRight);
+    // Handle pause first (Esc key) - Requirement 3.6
+    if (escKey && Phaser.Input.Keyboard.JustDown(escKey)) {
+      this.handlePause();
+      return; // Don't process other inputs when pausing
+    }
     
-    if (moveLeft) {
+    // Handle movement (A/D keys and arrow keys) - Requirements 3.1, 3.2
+    const moveLeft = (
+      (cursors?.left?.isDown) || 
+      (wasd?.A?.isDown) || 
+      this.touchControls.moveLeft
+    );
+    const moveRight = (
+      (cursors?.right?.isDown) || 
+      (wasd?.D?.isDown) || 
+      this.touchControls.moveRight
+    );
+    
+    if (moveLeft && !moveRight) {
       this.player.move('left');
-    } else if (moveRight) {
+    } else if (moveRight && !moveLeft) {
       this.player.move('right');
     } else {
       this.player.stopMovement();
     }
     
-    // Handle jumping (keyboard + touch)
-    if (cursors?.up?.isDown || wasd?.W?.isDown || this.touchControls.jump) {
+    // Handle jumping (W/↑ keys) - Requirement 3.3
+    const shouldJump = (
+      (cursors?.up?.isDown) || 
+      (wasd?.W?.isDown) || 
+      this.touchControls.jump
+    );
+    
+    if (shouldJump) {
       this.player.jump();
     }
     
-    // Handle crouching (keyboard + touch)
-    if (cursors?.down?.isDown || wasd?.S?.isDown || this.touchControls.crouch) {
+    // Handle crouching (S/↓ keys) - Requirement 3.4
+    const shouldCrouch = (
+      (cursors?.down?.isDown) || 
+      (wasd?.S?.isDown) || 
+      this.touchControls.crouch
+    );
+    
+    if (shouldCrouch) {
       this.player.crouch();
     } else {
       this.player.stopCrouching();
     }
     
-    // Handle attack (keyboard + touch)
-    if (spaceKey?.isDown || this.touchControls.attack) {
-      this.player.attack();
-    }
+    // Handle attack (Space key) - Requirement 3.5
+    const shouldAttack = (
+      (spaceKey?.isDown) || 
+      this.touchControls.attack
+    );
     
-    // Handle pause (keyboard only)
-    if (escKey && Phaser.Input.Keyboard.JustDown(escKey)) {
-      this.scene.pause();
-      // TODO: Show pause menu
+    if (shouldAttack) {
+      this.player.attack();
     }
   }
   
@@ -764,6 +821,27 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
+   * Handle pause functionality
+   * Requirement 3.6
+   */
+  private handlePause(): void {
+    if (this.scene.isPaused()) {
+      // Resume game
+      this.scene.resume();
+      console.log('Game resumed');
+    } else {
+      // Pause game
+      this.scene.pause();
+      console.log('Game paused - Press ESC to resume');
+    }
+    
+    // Emit pause state change for UI components
+    this.events.emit('gamePauseToggled', {
+      isPaused: this.scene.isPaused()
+    });
+  }
+
+  /**
    * Handle game over (player died)
    */
   private handleGameOver(): void {
@@ -819,5 +897,59 @@ export class GameScene extends Phaser.Scene {
    */
   getTouchControlsState(): typeof this.touchControls {
     return { ...this.touchControls };
+  }
+  
+  /**
+   * Get current keyboard input state for debugging
+   */
+  getKeyboardState(): {
+    cursors: {
+      left: boolean;
+      right: boolean;
+      up: boolean;
+      down: boolean;
+    };
+    wasd: {
+      W: boolean;
+      A: boolean;
+      S: boolean;
+      D: boolean;
+    };
+    spaceKey: boolean;
+    escKey: boolean;
+  } {
+    const cursors = this.registry.get('cursors');
+    const wasd = this.registry.get('wasd');
+    const spaceKey = this.registry.get('spaceKey');
+    const escKey = this.registry.get('escKey');
+    
+    return {
+      cursors: {
+        left: cursors?.left?.isDown || false,
+        right: cursors?.right?.isDown || false,
+        up: cursors?.up?.isDown || false,
+        down: cursors?.down?.isDown || false,
+      },
+      wasd: {
+        W: wasd?.W?.isDown || false,
+        A: wasd?.A?.isDown || false,
+        S: wasd?.S?.isDown || false,
+        D: wasd?.D?.isDown || false,
+      },
+      spaceKey: spaceKey?.isDown || false,
+      escKey: escKey?.isDown || false,
+    };
+  }
+  
+  /**
+   * Check if keyboard controls are properly initialized
+   */
+  areKeyboardControlsReady(): boolean {
+    const cursors = this.registry.get('cursors');
+    const wasd = this.registry.get('wasd');
+    const spaceKey = this.registry.get('spaceKey');
+    const escKey = this.registry.get('escKey');
+    
+    return !!(cursors && wasd && spaceKey && escKey);
   }
 }
