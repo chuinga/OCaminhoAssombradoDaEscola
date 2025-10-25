@@ -61,7 +61,7 @@
   - Add takeDamage method with invulnerability timer (800ms)
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 7.3, 7.4_
 
-- [ ] 4.2 Implement enemy entities with different behaviors
+- [x] 4.2 Implement enemy entities with different behaviors
   - Create base Enemy interface and Ghost class (low floating movement)
   - Implement Bat class (low floating movement, similar to Ghost)
   - Create Vampire class (ground walking movement)
