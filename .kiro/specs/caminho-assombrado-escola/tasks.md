@@ -106,7 +106,7 @@
   - Position HUD appropriately for different screen sizes
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 6.2 Add mobile touch controls
+- [x] 6.2 Add mobile touch controls
   - Create touch control buttons for mobile and tablet devices
   - Position left-side controls for movement (left/right arrows)
   - Add right-side controls for actions (jump, crouch, attack buttons)

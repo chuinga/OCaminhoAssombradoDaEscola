@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Difficulty } from '../../types';
 import { useGameStore } from '../../store/gameStore';
 import { GameHUD } from './GameHUD';
+import { TouchControls } from './TouchControls';
 
 interface PhaserGameComponentProps {
   difficulty?: Difficulty;
@@ -19,6 +20,7 @@ export function PhaserGameComponent({
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const destroyGameRef = useRef<((game: Phaser.Game) => void) | null>(null);
+  const gameSceneRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -52,6 +54,9 @@ export function PhaserGameComponent({
         setTimeout(() => {
           const gameScene = gameRef.current?.scene.getScene('GameScene');
           if (gameScene) {
+            // Store reference to game scene for touch controls
+            gameSceneRef.current = gameScene;
+            
             gameScene.events.on('playerStatsChanged', (stats: { lives: number; score: number }) => {
               updateLives(stats.lives);
               updateScore(stats.score);
@@ -82,9 +87,18 @@ export function PhaserGameComponent({
         destroyGameRef.current(gameRef.current);
         gameRef.current = null;
         destroyGameRef.current = null;
+        gameSceneRef.current = null;
       }
     };
   }, [difficulty, onGameEnd]);
+
+  // Touch control handlers
+  const handleTouchControl = (control: 'moveLeft' | 'moveRight' | 'jump' | 'crouch' | 'attack') => 
+    (pressed: boolean) => {
+      if (gameSceneRef.current && typeof gameSceneRef.current.setTouchControl === 'function') {
+        gameSceneRef.current.setTouchControl(control, pressed);
+      }
+    };
 
   if (error) {
     return (
@@ -120,6 +134,17 @@ export function PhaserGameComponent({
       />
       {/* Game HUD overlay */}
       {!isLoading && !error && <GameHUD />}
+      
+      {/* Touch Controls overlay */}
+      {!isLoading && !error && (
+        <TouchControls
+          onMoveLeft={handleTouchControl('moveLeft')}
+          onMoveRight={handleTouchControl('moveRight')}
+          onJump={handleTouchControl('jump')}
+          onCrouch={handleTouchControl('crouch')}
+          onAttack={handleTouchControl('attack')}
+        />
+      )}
     </div>
   );
 }

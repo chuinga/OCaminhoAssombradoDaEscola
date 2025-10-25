@@ -31,6 +31,15 @@ export class GameScene extends Phaser.Scene {
   private spawnInterval: number = 1000; // Distance between spawn checks (px)
   private difficultyConfig!: DifficultyConfig;
   
+  // Touch controls state
+  private touchControls = {
+    moveLeft: false,
+    moveRight: false,
+    jump: false,
+    crouch: false,
+    attack: false
+  };
+  
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -338,7 +347,7 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
-   * Handle player input
+   * Handle player input (keyboard and touch controls)
    */
   private handleInput(): void {
     const cursors = this.registry.get('cursors');
@@ -346,36 +355,37 @@ export class GameScene extends Phaser.Scene {
     const spaceKey = this.registry.get('spaceKey');
     const escKey = this.registry.get('escKey');
     
-    if (!cursors || !wasd) return;
+    // Handle movement (keyboard + touch)
+    const moveLeft = (cursors?.left?.isDown || wasd?.A?.isDown || this.touchControls.moveLeft);
+    const moveRight = (cursors?.right?.isDown || wasd?.D?.isDown || this.touchControls.moveRight);
     
-    // Handle movement
-    if (cursors.left?.isDown || wasd.A?.isDown) {
+    if (moveLeft) {
       this.player.move('left');
-    } else if (cursors.right?.isDown || wasd.D?.isDown) {
+    } else if (moveRight) {
       this.player.move('right');
     } else {
       this.player.stopMovement();
     }
     
-    // Handle jumping
-    if (cursors.up?.isDown || wasd.W?.isDown) {
+    // Handle jumping (keyboard + touch)
+    if (cursors?.up?.isDown || wasd?.W?.isDown || this.touchControls.jump) {
       this.player.jump();
     }
     
-    // Handle crouching
-    if (cursors.down?.isDown || wasd.S?.isDown) {
+    // Handle crouching (keyboard + touch)
+    if (cursors?.down?.isDown || wasd?.S?.isDown || this.touchControls.crouch) {
       this.player.crouch();
     } else {
       this.player.stopCrouching();
     }
     
-    // Handle attack
-    if (spaceKey?.isDown) {
+    // Handle attack (keyboard + touch)
+    if (spaceKey?.isDown || this.touchControls.attack) {
       this.player.attack();
     }
     
-    // Handle pause
-    if (Phaser.Input.Keyboard.JustDown(escKey)) {
+    // Handle pause (keyboard only)
+    if (escKey && Phaser.Input.Keyboard.JustDown(escKey)) {
       this.scene.pause();
       // TODO: Show pause menu
     }
@@ -794,5 +804,20 @@ export class GameScene extends Phaser.Scene {
    */
   getLifeItems(): Phaser.Physics.Arcade.Group {
     return this.lifeItems;
+  }
+  
+  /**
+   * Handle touch control input from React component
+   * Requirements: 10.2
+   */
+  setTouchControl(control: 'moveLeft' | 'moveRight' | 'jump' | 'crouch' | 'attack', pressed: boolean): void {
+    this.touchControls[control] = pressed;
+  }
+  
+  /**
+   * Get current touch controls state for debugging
+   */
+  getTouchControlsState(): typeof this.touchControls {
+    return { ...this.touchControls };
   }
 }
