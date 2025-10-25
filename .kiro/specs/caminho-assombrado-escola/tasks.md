@@ -26,7 +26,7 @@
   - Implement responsive design for mobile, tablet, and desktop
   - _Requirements: 9.1, 10.1_
 
-- [ ] 3.2 Create name input page with validation
+- [x] 3.2 Create name input page with validation
   - Build form with firstName and lastName input fields
   - Implement validation that prevents advancing without both fields filled
   - Save names to Zustand state on successful submission

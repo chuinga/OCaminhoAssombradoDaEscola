@@ -7,7 +7,7 @@ export interface Player {
   y: number;
   lives: number;
   score: number;
-  weapon: Weapon;
+  weapon: WeaponEntity;
   isInvulnerable: boolean;
   invulnerabilityTimer: number;
   
@@ -29,7 +29,7 @@ export interface Enemy {
   destroy(): void;
 }
 
-export interface Weapon {
+export interface WeaponEntity {
   type: 'katana' | 'laser' | 'baseball' | 'bazooka';
   range: number;
   cooldown: number;
