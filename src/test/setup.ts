@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock Phaser for testing
 (global as any).Phaser = {
@@ -19,7 +19,7 @@ import '@testing-library/jest-dom'
       KeyCodes: {}
     }
   }
-}
+};
 
 // Mock Howler for testing
 (global as any).Howl = class MockHowl {
@@ -27,4 +27,4 @@ import '@testing-library/jest-dom'
   play() {}
   stop() {}
   volume() {}
-}
+};

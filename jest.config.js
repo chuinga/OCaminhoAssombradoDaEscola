@@ -1,7 +1,7 @@
 module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   testEnvironment: 'jsdom',
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],

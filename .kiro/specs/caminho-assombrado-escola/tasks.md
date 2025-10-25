@@ -77,7 +77,7 @@
   - Ensure all weapons eliminate enemies in one hit
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 5. Build game scene and level mechanics
+- [x] 5. Build game scene and level mechanics
 - [x] 5.1 Create main GameScene with Phaser setup
   - Initialize Phaser scene with 3500x720px world size
   - Set up Arcade Physics with gravity and collision detection
