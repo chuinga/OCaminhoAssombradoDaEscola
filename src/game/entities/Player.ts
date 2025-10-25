@@ -137,6 +137,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
   
   /**
+   * Check if player is currently attacking (for collision detection)
+   */
+  isAttacking(): boolean {
+    if (!this.weapon) return false;
+    
+    // Check if attack happened recently (within 100ms window)
+    const timeSinceAttack = this.scene.time.now - this.weapon.getLastAttackTime();
+    return timeSinceAttack <= 100;
+  }
+  
+  /**
    * Take damage and apply invulnerability
    * Requirements: 7.3, 7.4
    */

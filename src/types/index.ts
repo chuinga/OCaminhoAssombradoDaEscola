@@ -37,6 +37,7 @@ export interface WeaponEntity {
   
   attack(x: number, y: number): void;
   canAttack(): boolean;
+  getLastAttackTime(): number;
 }
 
 // Difficulty Configuration

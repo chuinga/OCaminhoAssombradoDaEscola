@@ -92,7 +92,7 @@
   - Position life items at heights requiring jumps to collect
   - _Requirements: 12.1, 12.2, 12.3, 6.1_
 
-- [ ] 5.3 Add collision detection and game mechanics
+- [x] 5.3 Add collision detection and game mechanics
   - Implement player-enemy collision with damage and invulnerability
   - Add player-life item collision with +1 life and +50 points
   - Create school gate collision for game completion (+500 bonus points)

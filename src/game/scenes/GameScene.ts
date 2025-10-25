@@ -491,31 +491,49 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Handle collision detection
+   * Requirements: 4.5, 4.6, 6.2, 6.3, 7.2, 7.5
    */
   private handleCollisions(): void {
-    // Player-enemy collisions
+    // Player-enemy collisions with damage and invulnerability
     this.physics.overlap(this.player, this.enemies, (player, enemy) => {
       this.handlePlayerEnemyCollision(player as Player, enemy as Phaser.GameObjects.GameObject);
     });
     
-    // Player-life item collisions
+    // Player-life item collisions with +1 life and +50 points
     this.physics.overlap(this.player, this.lifeItems, (player, item) => {
       this.handlePlayerLifeItemCollision(player as Player, item as Phaser.GameObjects.GameObject);
     });
     
-    // Player-school gate collision
+    // Player-school gate collision for game completion (+500 bonus points)
     this.physics.overlap(this.player, this.schoolGate, () => {
       this.handlePlayerSchoolGateCollision();
     });
+    
+    // Weapon-enemy collisions for enemy elimination (+100 points each)
+    this.handleWeaponEnemyCollisions();
   }
   
   /**
-   * Handle player-enemy collision
+   * Handle player-enemy collision with damage and invulnerability
+   * Requirements: 4.5, 7.3, 7.4
    */
   private handlePlayerEnemyCollision(player: Player, enemy: Phaser.GameObjects.GameObject): void {
-    // Player takes damage and enemy is destroyed
+    // Only process collision if player is not invulnerable
+    if (player.isInvulnerable) return;
+    
+    // Check if player can avoid damage based on position and enemy type
+    if (this.canPlayerAvoidDamage(player, enemy)) {
+      return;
+    }
+    
+    // Player takes damage (includes invulnerability timer)
     player.takeDamage();
+    
+    // Enemy disappears on contact (requirement 4.1-4.4)
     enemy.destroy();
+    
+    // Update game state store with new lives count
+    this.updateGameState();
     
     // Check for game over
     if (player.lives <= 0) {
@@ -524,28 +542,212 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
-   * Handle player-life item collision
+   * Check if player can avoid damage based on position and enemy type
+   * Requirements: 4.5, 4.6
+   */
+  private canPlayerAvoidDamage(player: Player, enemy: Phaser.GameObjects.GameObject): boolean {
+    // Get enemy type from the enemy object
+    const enemyType = (enemy as any).type;
+    
+    if (!enemyType) return false;
+    
+    // Player crouching avoids damage from floating enemies (Ghost, Bat)
+    if (player.isCrouching && (enemyType === 'ghost' || enemyType === 'bat')) {
+      return true;
+    }
+    
+    // Player jumping avoids damage from ground enemies (Vampire, Mummy)
+    if (player.isJumping && (enemyType === 'vampire' || enemyType === 'mummy')) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Handle player-life item collision with +1 life and +50 points
+   * Requirements: 6.2, 6.3
    */
   private handlePlayerLifeItemCollision(player: Player, item: Phaser.GameObjects.GameObject): void {
     if (item instanceof LifeItem) {
-      // Player gains life and points
-      player.addLife();
+      // Player gains life (up to maximum of 10) and points
+      player.addLife(); // +1 life (capped at 10 in Player class)
       player.addScore(item.getPointValue()); // +50 points for life item
       
-      // Handle collection (includes sound effect)
+      // Handle collection (includes sound effect and destruction)
       item.collect();
       
-      // TODO: Play item collection sound
+      // Update game state store
+      this.updateGameState();
+      
+      // TODO: Play item collection sound effect
+      // this.sound.play('item_collect');
     }
   }
   
   /**
-   * Handle player reaching school gate
+   * Handle player reaching school gate for game completion
+   * Requirements: 7.5
    */
   private handlePlayerSchoolGateCollision(): void {
-    // Player wins the game
+    // Only trigger if player has lives remaining
+    if (this.player.lives <= 0) return;
+    
+    // Player wins the game with bonus points
     this.player.addScore(500); // +500 bonus points for completion
+    
+    // Update game state store
+    this.updateGameState();
+    
+    // Handle game victory
     this.handleGameWin();
+  }
+  
+  /**
+   * Handle weapon-enemy collisions for enemy elimination
+   * Requirements: 5.5, 7.2
+   */
+  private handleWeaponEnemyCollisions(): void {
+    // Only check weapon collisions if player has a weapon and is attacking
+    if (!this.player.weapon) return;
+    
+    // Get weapon attack area based on weapon type and player position
+    const weaponAttackArea = this.getWeaponAttackArea();
+    if (!weaponAttackArea) return;
+    
+    // Check each enemy for collision with weapon attack area
+    this.enemies.children.entries.forEach((enemy) => {
+      if (!enemy.active) return;
+      
+      const enemySprite = enemy as Phaser.Physics.Arcade.Sprite;
+      
+      // Check if enemy is within weapon attack area
+      if (this.isEnemyInWeaponRange(enemySprite, weaponAttackArea)) {
+        this.handleWeaponHitEnemy(enemySprite);
+      }
+    });
+  }
+  
+  /**
+   * Get weapon attack area based on current weapon and player state
+   */
+  private getWeaponAttackArea(): { x: number; y: number; width: number; height: number } | null {
+    if (!this.player.weapon) return null;
+    
+    // Only return attack area if weapon was just used (within a small time window)
+    const timeSinceLastAttack = this.time.now - this.player.weapon.getLastAttackTime();
+    if (timeSinceLastAttack > 100) return null; // 100ms window for attack detection
+    
+    const weapon = this.player.weapon;
+    const playerX = this.player.x;
+    const playerY = this.player.y;
+    const facingLeft = this.player.flipX;
+    
+    // Calculate attack area based on weapon type
+    switch (weapon.type) {
+      case 'katana':
+        return {
+          x: facingLeft ? playerX - weapon.range : playerX,
+          y: playerY - 30,
+          width: weapon.range, // 40px
+          height: 60
+        };
+      
+      case 'baseball':
+        return {
+          x: facingLeft ? playerX - weapon.range : playerX,
+          y: playerY - 30,
+          width: weapon.range, // 55px
+          height: 60
+        };
+      
+      case 'laser':
+        // For projectile weapons, we'll handle this differently
+        // For now, return a basic area (projectile collision will be enhanced later)
+        return {
+          x: facingLeft ? playerX - 200 : playerX,
+          y: playerY - 10,
+          width: 200,
+          height: 20
+        };
+      
+      case 'bazooka':
+        // Area damage weapon
+        return {
+          x: facingLeft ? playerX - 100 : playerX,
+          y: playerY - 50,
+          width: 100,
+          height: 100
+        };
+      
+      default:
+        return null;
+    }
+  }
+  
+  /**
+   * Check if enemy is within weapon attack range
+   */
+  private isEnemyInWeaponRange(
+    enemy: Phaser.Physics.Arcade.Sprite, 
+    attackArea: { x: number; y: number; width: number; height: number }
+  ): boolean {
+    const enemyBounds = enemy.getBounds();
+    const attackBounds = new Phaser.Geom.Rectangle(
+      attackArea.x, 
+      attackArea.y, 
+      attackArea.width, 
+      attackArea.height
+    );
+    
+    return Phaser.Geom.Rectangle.Overlaps(enemyBounds, attackBounds);
+  }
+  
+  /**
+   * Handle weapon hitting enemy - eliminate enemy and award points
+   * Requirements: 5.5, 7.2
+   */
+  private handleWeaponHitEnemy(enemy: Phaser.Physics.Arcade.Sprite): void {
+    // Award points for enemy elimination
+    this.player.addScore(100); // +100 points for each enemy eliminated
+    
+    // Apply weapon-specific effects
+    if (this.player.weapon?.type === 'baseball') {
+      // Baseball bat applies knockback before destruction
+      this.applyKnockback(enemy);
+    }
+    
+    // Eliminate enemy immediately (all weapons eliminate in one hit)
+    enemy.destroy();
+    
+    // Update game state store
+    this.updateGameState();
+    
+    // TODO: Play weapon-specific sound effect
+    // this.playWeaponHitSound();
+  }
+  
+  /**
+   * Apply knockback effect for baseball bat
+   */
+  private applyKnockback(enemy: Phaser.Physics.Arcade.Sprite): void {
+    if (enemy.body instanceof Phaser.Physics.Arcade.Body) {
+      const knockbackForce = 200;
+      const direction = this.player.flipX ? -1 : 1;
+      enemy.body.setVelocityX(direction * knockbackForce);
+    }
+  }
+  
+  /**
+   * Update game state store with current player stats
+   */
+  private updateGameState(): void {
+    // This will be connected to the Zustand store
+    // For now, we'll emit events that can be caught by the React component
+    this.events.emit('playerStatsChanged', {
+      lives: this.player.lives,
+      score: this.player.score
+    });
   }
   
   /**

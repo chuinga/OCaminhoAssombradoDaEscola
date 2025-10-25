@@ -55,6 +55,13 @@ export abstract class BaseWeapon implements WeaponEntity {
   }
   
   /**
+   * Get the last attack time for collision detection
+   */
+  getLastAttackTime(): number {
+    return this.lastAttackTime;
+  }
+  
+  /**
    * Check for enemy collisions in a given area
    */
   protected checkEnemyCollisions(x: number, y: number, width: number, height: number): void {
