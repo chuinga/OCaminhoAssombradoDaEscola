@@ -213,6 +213,9 @@ export class GameScene extends Phaser.Scene {
     
     // Set player collision with world bounds
     this.player.setCollideWorldBounds(true);
+    
+    // Initialize HUD with player's starting stats
+    this.updateGameState();
   }
   
   /**

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Difficulty } from '../../types';
+import { useGameStore } from '../../store/gameStore';
+import { GameHUD } from './GameHUD';
 
 interface PhaserGameComponentProps {
   difficulty?: Difficulty;
@@ -19,6 +21,9 @@ export function PhaserGameComponent({
   const destroyGameRef = useRef<((game: Phaser.Game) => void) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get game store actions for updating HUD
+  const { updateLives, updateScore, setGameStatus } = useGameStore();
 
   useEffect(() => {
     if (!containerRef.current || typeof window === 'undefined') return;
@@ -39,7 +44,20 @@ export function PhaserGameComponent({
         // Set up game event listeners
         gameRef.current.events.on('ready', () => {
           setIsLoading(false);
+          setGameStatus('playing');
         });
+
+        // Listen for player stats changes from the game scene
+        // We need to wait for the scene to be created, so we'll set up the listener after a short delay
+        setTimeout(() => {
+          const gameScene = gameRef.current?.scene.getScene('GameScene');
+          if (gameScene) {
+            gameScene.events.on('playerStatsChanged', (stats: { lives: number; score: number }) => {
+              updateLives(stats.lives);
+              updateScore(stats.score);
+            });
+          }
+        }, 100);
 
         // Handle game end events (will be implemented when game logic is complete)
         // gameRef.current.events.on('gameEnd', (score: number, victory: boolean) => {
@@ -100,6 +118,8 @@ export function PhaserGameComponent({
         id="game-container"
         className="w-full h-full"
       />
+      {/* Game HUD overlay */}
+      {!isLoading && !error && <GameHUD />}
     </div>
   );
 }
