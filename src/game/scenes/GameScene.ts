@@ -861,23 +861,43 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Handle game over (player died)
+   * Requirements: 7.6
    */
   private handleGameOver(): void {
+    // Set game status to finished
+    this.updateGameState();
+    
     // Pause the game
     this.scene.pause();
     
-    // TODO: Navigate to results page with defeat status
+    // Emit game end event with defeat status
+    this.events.emit('gameEnd', {
+      score: this.player.score,
+      victory: false,
+      reason: 'defeat'
+    });
+    
     console.log('Game Over! Final Score:', this.player.score);
   }
   
   /**
    * Handle game win (reached school)
+   * Requirements: 7.5
    */
   private handleGameWin(): void {
+    // Set game status to finished
+    this.updateGameState();
+    
     // Pause the game
     this.scene.pause();
     
-    // TODO: Navigate to results page with victory status
+    // Emit game end event with victory status
+    this.events.emit('gameEnd', {
+      score: this.player.score,
+      victory: true,
+      reason: 'victory'
+    });
+    
     console.log('Victory! Final Score:', this.player.score);
   }
   

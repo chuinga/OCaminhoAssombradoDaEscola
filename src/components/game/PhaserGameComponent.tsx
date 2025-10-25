@@ -61,13 +61,14 @@ export function PhaserGameComponent({
               updateLives(stats.lives);
               updateScore(stats.score);
             });
+
+            // Handle game end events
+            gameScene.events.on('gameEnd', (gameEndData: { score: number; victory: boolean; reason: string }) => {
+              setGameStatus('finished');
+              onGameEnd?.(gameEndData.score, gameEndData.victory);
+            });
           }
         }, 100);
-
-        // Handle game end events (will be implemented when game logic is complete)
-        // gameRef.current.events.on('gameEnd', (score: number, victory: boolean) => {
-        //   onGameEnd?.(score, victory);
-        // });
 
         // Store destroyPhaserGame function for cleanup
         destroyGameRef.current = destroyPhaserGame;

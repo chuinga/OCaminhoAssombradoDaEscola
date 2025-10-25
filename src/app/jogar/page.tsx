@@ -35,9 +35,9 @@ export default function JogarPage() {
   }
 
   const handleGameEnd = (score: number, victory: boolean) => {
-    // TODO: Navigate to results page with final score and victory status
+    // Navigate to results page with final score and victory status
     console.log('Game ended:', { score, victory });
-    // router.push(`/final?score=${score}&victory=${victory}`);
+    router.push(`/final?score=${score}&victory=${victory}`);
   };
 
   return (
