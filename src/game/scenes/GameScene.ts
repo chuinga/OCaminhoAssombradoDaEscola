@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { DifficultyConfig } from '../../types';
+import { EnemyFactory, EnemyType } from '../entities/EnemyFactory';
+import { LifeItemFactory, LifeItem } from '../entities/LifeItem';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -24,6 +26,11 @@ export class GameScene extends Phaser.Scene {
   // Difficulty configuration
   private difficulty: 'easy' | 'medium' | 'impossible' = 'easy';
   
+  // Spawning system
+  private lastSpawnX: number = 0;
+  private spawnInterval: number = 1000; // Distance between spawn checks (px)
+  private difficultyConfig!: DifficultyConfig;
+  
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -34,6 +41,12 @@ export class GameScene extends Phaser.Scene {
   init(): void {
     // Get difficulty from game registry (set by React component)
     this.difficulty = this.registry.get('difficulty') || 'easy';
+    
+    // Initialize difficulty configuration
+    this.difficultyConfig = this.getDifficultyConfig();
+    
+    // Initialize spawning system
+    this.lastSpawnX = 0;
   }
   
   /**
@@ -75,6 +88,43 @@ export class GameScene extends Phaser.Scene {
       .fillStyle(0x8b4513)
       .fillRect(0, 0, 100, 200)
       .generateTexture('school_gate', 100, 200);
+    
+    // Enemy placeholders
+    this.add.graphics()
+      .fillStyle(0xffffff)
+      .fillRect(0, 0, 32, 32)
+      .generateTexture('ghost', 32, 32);
+    
+    this.add.graphics()
+      .fillStyle(0x8b4513)
+      .fillRect(0, 0, 24, 20)
+      .generateTexture('bat', 24, 20);
+    
+    this.add.graphics()
+      .fillStyle(0x800080)
+      .fillRect(0, 0, 32, 48)
+      .generateTexture('vampire', 32, 48);
+    
+    this.add.graphics()
+      .fillStyle(0xf5deb3)
+      .fillRect(0, 0, 32, 48)
+      .generateTexture('mummy', 32, 48);
+    
+    // Life item placeholders
+    this.add.graphics()
+      .fillStyle(0xff6600)
+      .fillRect(0, 0, 24, 24)
+      .generateTexture('life_item_pumpkin', 24, 24);
+    
+    this.add.graphics()
+      .fillStyle(0xff69b4)
+      .fillRect(0, 0, 24, 24)
+      .generateTexture('life_item_lollipop', 24, 24);
+    
+    this.add.graphics()
+      .fillStyle(0xff0000)
+      .fillRect(0, 0, 24, 24)
+      .generateTexture('life_item_apple', 24, 24);
   }
   
   /**
@@ -239,7 +289,8 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
-   * Get difficulty configuration
+   * Get difficulty configuration based on current difficulty setting
+   * Requirements: 12.1, 12.2, 12.3
    */
   private getDifficultyConfig(): DifficultyConfig {
     const configs: Record<string, DifficultyConfig> = {
@@ -275,6 +326,9 @@ export class GameScene extends Phaser.Scene {
     
     // Update parallax backgrounds
     this.updateParallax();
+    
+    // Handle spawning system
+    this.updateSpawning();
     
     // Handle collisions
     this.handleCollisions();
@@ -351,6 +405,91 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
+   * Update spawning system based on player position
+   * Requirements: 12.1, 12.2, 12.3, 6.1
+   */
+  private updateSpawning(): void {
+    const playerX = this.player.x;
+    
+    // Check if we need to spawn new entities
+    if (playerX > this.lastSpawnX + this.spawnInterval) {
+      this.spawnEntitiesInRegion(this.lastSpawnX + this.spawnInterval, this.lastSpawnX + this.spawnInterval + this.spawnInterval);
+      this.lastSpawnX += this.spawnInterval;
+    }
+  }
+  
+  /**
+   * Spawn entities in a specific region based on difficulty
+   * @param startX - Start X position of spawn region
+   * @param endX - End X position of spawn region
+   */
+  private spawnEntitiesInRegion(startX: number, endX: number): void {
+    const regionWidth = endX - startX;
+    const groundY = this.WORLD_HEIGHT - 100; // Ground level
+    
+    // Spawn enemies based on difficulty
+    this.spawnEnemiesInRegion(startX, endX, regionWidth, groundY);
+    
+    // Spawn life items based on difficulty
+    this.spawnLifeItemsInRegion(startX, endX, regionWidth, groundY);
+  }
+  
+  /**
+   * Spawn enemies in a region based on difficulty configuration
+   * Requirements: 12.1, 12.2, 12.3
+   */
+  private spawnEnemiesInRegion(startX: number, endX: number, regionWidth: number, groundY: number): void {
+    const enemyCount = Math.floor((regionWidth / 1000) * this.difficultyConfig.enemySpawnRate);
+    
+    for (let i = 0; i < enemyCount; i++) {
+      // Random position within the region
+      const spawnX = startX + Math.random() * regionWidth;
+      
+      // Select random enemy type from available types for this difficulty
+      const enemyType = this.getRandomEnemyType();
+      
+      // Get appropriate spawn height for enemy type
+      const spawnY = EnemyFactory.getSpawnHeight(enemyType, groundY);
+      
+      // Create enemy
+      const enemy = EnemyFactory.createEnemy(this, spawnX, spawnY, enemyType);
+      
+      // Add to enemies group
+      this.enemies.add(enemy);
+    }
+  }
+  
+  /**
+   * Spawn life items in a region based on difficulty configuration
+   * Requirements: 6.1
+   */
+  private spawnLifeItemsInRegion(startX: number, endX: number, regionWidth: number, groundY: number): void {
+    const lifeItemCount = Math.floor((regionWidth / 1000) * this.difficultyConfig.lifeItemSpawnRate);
+    
+    for (let i = 0; i < lifeItemCount; i++) {
+      // Random position within the region
+      const spawnX = startX + Math.random() * regionWidth;
+      
+      // Get spawn height that requires jumping to collect
+      const spawnY = LifeItemFactory.getSpawnHeight(groundY);
+      
+      // Create random life item
+      const lifeItem = LifeItemFactory.createRandomLifeItem(this, spawnX, spawnY);
+      
+      // Add to life items group
+      this.lifeItems.add(lifeItem);
+    }
+  }
+  
+  /**
+   * Get a random enemy type based on difficulty configuration
+   */
+  private getRandomEnemyType(): EnemyType {
+    const availableTypes = this.difficultyConfig.enemyTypes as EnemyType[];
+    return availableTypes[Math.floor(Math.random() * availableTypes.length)];
+  }
+
+  /**
    * Handle collision detection
    */
   private handleCollisions(): void {
@@ -388,14 +527,16 @@ export class GameScene extends Phaser.Scene {
    * Handle player-life item collision
    */
   private handlePlayerLifeItemCollision(player: Player, item: Phaser.GameObjects.GameObject): void {
-    // Player gains life and points
-    player.addLife();
-    player.addScore(50); // +50 points for life item
-    
-    // Destroy the item
-    item.destroy();
-    
-    // TODO: Play item collection sound
+    if (item instanceof LifeItem) {
+      // Player gains life and points
+      player.addLife();
+      player.addScore(item.getPointValue()); // +50 points for life item
+      
+      // Handle collection (includes sound effect)
+      item.collect();
+      
+      // TODO: Play item collection sound
+    }
   }
   
   /**

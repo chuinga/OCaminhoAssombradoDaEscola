@@ -85,7 +85,7 @@
   - Add camera following player with smooth scrolling
   - _Requirements: 10.4_
 
-- [ ] 5.2 Implement difficulty-based spawning system
+- [x] 5.2 Implement difficulty-based spawning system
   - Create DifficultyConfig interface and configuration objects
   - Implement enemy spawning based on difficulty (easy: 2/1000px, medium: 4/1000px, impossible: 8/1000px)
   - Add life item spawning based on difficulty (easy: 8/1000px, medium: 3/1000px, impossible: 0/1000px)
