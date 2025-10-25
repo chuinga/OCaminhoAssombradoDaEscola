@@ -1,27 +1,5 @@
-// Game State Types
-export interface GameState {
-  // Player data
-  firstName: string;
-  lastName: string;
-  character: 'boy' | 'girl' | null;
-  weapon: 'katana' | 'laser' | 'baseball' | 'bazooka' | null;
-  difficulty: 'easy' | 'medium' | 'impossible' | null;
-  
-  // Game progress
-  lives: number;
-  score: number;
-  gameStatus: 'menu' | 'playing' | 'paused' | 'finished';
-  
-  // Actions
-  setPlayerName: (firstName: string, lastName: string) => void;
-  setCharacter: (character: 'boy' | 'girl') => void;
-  setWeapon: (weapon: 'katana' | 'laser' | 'baseball' | 'bazooka') => void;
-  setDifficulty: (difficulty: 'easy' | 'medium' | 'impossible') => void;
-  updateLives: (lives: number) => void;
-  updateScore: (score: number) => void;
-  setGameStatus: (status: 'menu' | 'playing' | 'paused' | 'finished') => void;
-  resetGame: () => void;
-}
+// Export types from store
+export type { Character, Weapon, Difficulty, GameStatus } from '../store/gameStore';
 
 // Game Entity Types
 export interface Player {
