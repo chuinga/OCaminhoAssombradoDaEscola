@@ -59,19 +59,24 @@ export class AudioManager {
    * Requirements: 11.1
    */
   private loadBackgroundMusic(): void {
-    // For now, we'll create a placeholder for background music
-    // In a real implementation, this would load actual audio files
-    this.backgroundMusic = new Howl({
-      src: ['/assets/audio/background-ambient.mp3', '/assets/audio/background-ambient.ogg'],
-      loop: true,
-      volume: this.MUSIC_VOLUME,
-      autoplay: false,
-      onloaderror: (_, error) => {
-        console.warn('Failed to load background music:', error);
-        // Create a silent placeholder to prevent errors
-        this.backgroundMusic = this.createSilentSound(30000); // 30 second silent loop
-      }
-    });
+    try {
+      // For now, create a silent background music since audio file is placeholder
+      // In production, you would load actual ambient audio files
+      console.log('Creating silent background music (placeholder audio files detected)');
+      this.backgroundMusic = new Howl({
+        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+        loop: true,
+        volume: 0
+      });
+    } catch (error) {
+      console.warn('Error creating background music:', error);
+      // Create silent fallback
+      this.backgroundMusic = new Howl({
+        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+        loop: true,
+        volume: 0
+      });
+    }
   }
   
   /**
@@ -81,46 +86,108 @@ export class AudioManager {
   private loadSoundEffects(): void {
     const soundEffects = [
       // Player action sounds
-      { key: 'jump', src: ['/assets/audio/jump.mp3', '/assets/audio/jump.ogg'] },
-      { key: 'damage', src: ['/assets/audio/damage.mp3', '/assets/audio/damage.ogg'] },
-      { key: 'item_collect', src: ['/assets/audio/item-collect.mp3', '/assets/audio/item-collect.ogg'] },
+      { key: 'jump', fallbackFreq: 800, fallbackDuration: 150 },
+      { key: 'damage', fallbackFreq: 200, fallbackDuration: 300 },
+      { key: 'item_collect', fallbackFreq: 1000, fallbackDuration: 200 },
       
       // Weapon sounds
-      { key: 'slash', src: ['/assets/audio/slash.mp3', '/assets/audio/slash.ogg'] }, // Katana & Baseball Bat
-      { key: 'laser', src: ['/assets/audio/laser.mp3', '/assets/audio/laser.ogg'] }, // Laser Gun
-      { key: 'explosion', src: ['/assets/audio/explosion.mp3', '/assets/audio/explosion.ogg'] }, // Bazooka
+      { key: 'slash', fallbackFreq: 600, fallbackDuration: 100 },
+      { key: 'laser', fallbackFreq: 1200, fallbackDuration: 250 },
+      { key: 'explosion', fallbackFreq: 100, fallbackDuration: 400 },
     ];
     
-    soundEffects.forEach(({ key, src }) => {
-      const sound = new Howl({
-        src,
-        volume: this.SFX_VOLUME,
-        onloaderror: (_, error) => {
-          console.warn(`Failed to load sound effect '${key}':`, error);
-          // Create a silent placeholder to prevent errors
-          this.sounds.set(key, this.createSilentSound(500)); // 500ms silent sound
-        }
-      });
-      
-      this.sounds.set(key, sound);
+    soundEffects.forEach(({ key, fallbackFreq, fallbackDuration }) => {
+      try {
+        // For now, directly create fallback sounds since audio files are placeholders
+        // In production, you would first try to load actual audio files
+        console.log(`Creating fallback beep sound for: ${key}`);
+        const sound = this.createFallbackSound(fallbackFreq, fallbackDuration);
+        this.sounds.set(key, sound);
+      } catch (error) {
+        console.warn(`Error creating sound '${key}':`, error);
+        // Create silent fallback as last resort
+        this.sounds.set(key, new Howl({
+          src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+          volume: 0
+        }));
+      }
     });
   }
   
   /**
-   * Create a silent sound as fallback when audio files fail to load
+   * Create a simple beep sound as fallback when audio files fail to load
    */
-  private createSilentSound(duration: number): Howl {
-    // Create a minimal silent audio buffer
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    audioContext.createBuffer(1, audioContext.sampleRate * (duration / 1000), audioContext.sampleRate);
+  private createFallbackSound(frequency: number = 440, duration: number = 200): Howl {
+    // Create a simple beep sound using Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const sampleRate = audioContext.sampleRate;
+      const numSamples = Math.floor(sampleRate * (duration / 1000));
+      const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
+      const channelData = buffer.getChannelData(0);
+      
+      // Generate a simple sine wave
+      for (let i = 0; i < numSamples; i++) {
+        channelData[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.1; // Low volume
+      }
+      
+      // Convert buffer to WAV blob and create object URL
+      const wavBlob = this.bufferToWav(buffer);
+      const audioUrl = URL.createObjectURL(wavBlob);
+      
+      return new Howl({
+        src: [audioUrl],
+        volume: 0.1
+      });
+    } catch (error) {
+      console.warn('Failed to create fallback sound:', error);
+      // Return a completely silent sound as last resort
+      return new Howl({
+        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+        volume: 0
+      });
+    }
+  }
+  
+  /**
+   * Convert AudioBuffer to WAV blob
+   */
+  private bufferToWav(buffer: AudioBuffer): Blob {
+    const length = buffer.length;
+    const arrayBuffer = new ArrayBuffer(44 + length * 2);
+    const view = new DataView(arrayBuffer);
     
-    // Convert buffer to base64 data URL (silent audio)
-    const silentDataUrl = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';
+    // WAV header
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
     
-    return new Howl({
-      src: [silentDataUrl],
-      volume: 0
-    });
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + length * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, buffer.sampleRate, true);
+    view.setUint32(28, buffer.sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, length * 2, true);
+    
+    // Convert float samples to 16-bit PCM
+    const channelData = buffer.getChannelData(0);
+    let offset = 44;
+    for (let i = 0; i < length; i++) {
+      const sample = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(offset, sample * 0x7FFF, true);
+      offset += 2;
+    }
+    
+    return new Blob([arrayBuffer], { type: 'audio/wav' });
   }
   
   /**
@@ -307,6 +374,63 @@ export class AudioManager {
     
     this.isInitialized = false;
     console.log('AudioManager destroyed');
+  }
+  
+  /**
+   * Load real audio files (for when actual audio assets are available)
+   * This method can be called to replace fallback sounds with real audio
+   */
+  public loadRealAudioFiles(): void {
+    console.log('Attempting to load real audio files...');
+    
+    const soundEffects = [
+      { key: 'jump', src: ['/assets/audio/jump.mp3'] },
+      { key: 'damage', src: ['/assets/audio/damage.mp3'] },
+      { key: 'item_collect', src: ['/assets/audio/item-collect.mp3'] },
+      { key: 'slash', src: ['/assets/audio/slash.mp3'] },
+      { key: 'laser', src: ['/assets/audio/laser.mp3'] },
+      { key: 'explosion', src: ['/assets/audio/explosion.mp3'] },
+    ];
+    
+    soundEffects.forEach(({ key, src }) => {
+      const sound = new Howl({
+        src,
+        volume: this.SFX_VOLUME,
+        onload: () => {
+          console.log(`Successfully loaded real audio file: ${key}`);
+          // Replace the fallback sound with the real one
+          const oldSound = this.sounds.get(key);
+          if (oldSound) {
+            oldSound.unload();
+          }
+          this.sounds.set(key, sound);
+        },
+        onloaderror: (_, error) => {
+          console.warn(`Real audio file '${key}' still not available:`, error);
+          // Keep using fallback sound
+        }
+      });
+    });
+    
+    // Try to load real background music
+    const backgroundMusic = new Howl({
+      src: ['/assets/audio/background-ambient.mp3'],
+      loop: true,
+      volume: this.MUSIC_VOLUME,
+      autoplay: false,
+      onload: () => {
+        console.log('Successfully loaded real background music');
+        // Replace the silent background with real music
+        if (this.backgroundMusic) {
+          this.backgroundMusic.unload();
+        }
+        this.backgroundMusic = backgroundMusic;
+      },
+      onloaderror: (_, error) => {
+        console.warn('Real background music still not available:', error);
+        // Keep using silent background
+      }
+    });
   }
   
   /**
