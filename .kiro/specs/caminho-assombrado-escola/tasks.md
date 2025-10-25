@@ -99,7 +99,7 @@
   - Implement enemy elimination on weapon hit (+100 points each)
   - _Requirements: 4.5, 4.6, 6.2, 6.3, 7.2, 7.5_
 
-- [ ] 6. Create game UI and HUD system
+- [x] 6. Create game UI and HUD system
 - [x] 6.1 Implement in-game HUD display
   - Create HUD component showing player name, current lives, and score
   - Update HUD in real-time when values change
@@ -120,7 +120,7 @@
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
 - [ ] 7. Add audio system with Howler.js
-- [ ] 7.1 Implement background music and sound effects
+- [x] 7.1 Implement background music and sound effects
   - Set up Howler.js for audio management
   - Add looping background music (wind and crickets ambient sound)
   - Create sound effect system for jump, damage, and item collection

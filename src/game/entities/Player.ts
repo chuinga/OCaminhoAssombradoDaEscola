@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { WeaponEntity } from '../../types';
+import { audioManager } from '../utils/AudioManager';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public lives: number;
@@ -69,7 +70,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   
   /**
    * Make player jump
-   * Requirements: 3.3
+   * Requirements: 3.3, 11.2
    */
   jump(): void {
     if (!this.body || this.isCrouching) return;
@@ -80,6 +81,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (body.touching.down) {
       body.setVelocityY(this.JUMP_VELOCITY);
       this.isJumping = true;
+      
+      // Play jump sound effect
+      audioManager.playJumpSound();
     }
   }
   
@@ -120,7 +124,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   
   /**
    * Attack with selected weapon
-   * Requirements: 3.5
+   * Requirements: 3.5, 11.5
    */
   attack(): void {
     if (!this.weapon || this.isCrouching) return;
@@ -133,6 +137,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       
       // Execute weapon attack
       this.weapon.attack(attackX, attackY);
+      
+      // Play weapon-specific sound effect
+      audioManager.playWeaponSound(this.weapon.type);
     }
   }
   
@@ -149,7 +156,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   
   /**
    * Take damage and apply invulnerability
-   * Requirements: 7.3, 7.4
+   * Requirements: 7.3, 7.4, 11.3
    */
   takeDamage(): void {
     // Don't take damage if already invulnerable
@@ -164,6 +171,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Visual feedback - make player flash
     this.setAlpha(0.5);
+    
+    // Play damage sound effect
+    audioManager.playDamageSound();
     
     // Update game store with new lives count
     // This will be handled by the game scene that manages the player

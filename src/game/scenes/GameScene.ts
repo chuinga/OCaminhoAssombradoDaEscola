@@ -3,6 +3,7 @@ import { Player } from '../entities/Player';
 import { DifficultyConfig } from '../../types';
 import { EnemyFactory, EnemyType } from '../entities/EnemyFactory';
 import { LifeItemFactory, LifeItem } from '../entities/LifeItem';
+import { audioManager } from '../utils/AudioManager';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -146,6 +147,9 @@ export class GameScene extends Phaser.Scene {
     // Set up Arcade Physics with gravity
     this.physics.world.gravity.y = this.GRAVITY;
     
+    // Initialize audio system
+    this.setupAudio();
+    
     // Create parallax background layers
     this.createBackgroundLayers();
     
@@ -275,6 +279,20 @@ export class GameScene extends Phaser.Scene {
     
     // Set camera deadzone for smoother following
     this.cameras.main.setDeadzone(100, 50);
+  }
+  
+  /**
+   * Set up audio system
+   * Requirements: 11.1
+   */
+  private setupAudio(): void {
+    // Initialize audio manager
+    audioManager.initialize();
+    
+    // Start background music (wind and crickets ambient sound)
+    audioManager.playBackgroundMusic();
+    
+    console.log('Audio system initialized');
   }
   
   /**
@@ -636,7 +654,7 @@ export class GameScene extends Phaser.Scene {
   
   /**
    * Handle player-life item collision with +1 life and +50 points
-   * Requirements: 6.2, 6.3
+   * Requirements: 6.2, 6.3, 11.4
    */
   private handlePlayerLifeItemCollision(player: Player, item: Phaser.GameObjects.GameObject): void {
     if (item instanceof LifeItem) {
@@ -644,14 +662,14 @@ export class GameScene extends Phaser.Scene {
       player.addLife(); // +1 life (capped at 10 in Player class)
       player.addScore(item.getPointValue()); // +50 points for life item
       
-      // Handle collection (includes sound effect and destruction)
+      // Play item collection sound effect
+      audioManager.playItemCollectSound();
+      
+      // Handle collection (includes destruction)
       item.collect();
       
       // Update game state store
       this.updateGameState();
-      
-      // TODO: Play item collection sound effect
-      // this.sound.play('item_collect');
     }
   }
   
@@ -951,5 +969,16 @@ export class GameScene extends Phaser.Scene {
     const escKey = this.registry.get('escKey');
     
     return !!(cursors && wasd && spaceKey && escKey);
+  }
+  
+  /**
+   * Cleanup when scene is shut down
+   */
+  shutdown(): void {
+    // Stop background music when scene ends
+    audioManager.stopBackgroundMusic();
+    
+    // Call parent shutdown
+    super.shutdown();
   }
 }
