@@ -20,7 +20,7 @@
   - _Requirements: 1.3, 2.4, 2.6, 7.1_
 
 - [ ] 3. Create navigation pages and routing
-- [ ] 3.1 Implement home page with leaderboard display
+- [x] 3.1 Implement home page with leaderboard display
   - Create home page component that fetches and displays top 10 scores
   - Add "Jogar" button that navigates to name input page
   - Implement responsive design for mobile, tablet, and desktop
