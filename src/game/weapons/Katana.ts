@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseWeapon } from './BaseWeapon';
+import { audioManager } from '../utils/AudioManager';
 
 export class Katana extends BaseWeapon {
   constructor(scene: Phaser.Scene) {
@@ -24,8 +25,8 @@ export class Katana extends BaseWeapon {
     // Check for enemy collisions in melee range
     this.checkEnemyCollisions(x, y, attackWidth, attackHeight);
     
-    // Play slash sound effect (will be implemented in audio system)
-    // this.scene.sound.play('slash');
+    // Play slash sound effect for katana
+    audioManager.playWeaponSound('katana');
     
     // Visual effect for katana slash (optional enhancement)
     this.createSlashEffect(x, y);

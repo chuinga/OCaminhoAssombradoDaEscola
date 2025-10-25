@@ -66,7 +66,7 @@ export class AudioManager {
       loop: true,
       volume: this.MUSIC_VOLUME,
       autoplay: false,
-      onloaderror: (id, error) => {
+      onloaderror: (_, error) => {
         console.warn('Failed to load background music:', error);
         // Create a silent placeholder to prevent errors
         this.backgroundMusic = this.createSilentSound(30000); // 30 second silent loop
@@ -95,7 +95,7 @@ export class AudioManager {
       const sound = new Howl({
         src,
         volume: this.SFX_VOLUME,
-        onloaderror: (id, error) => {
+        onloaderror: (_, error) => {
           console.warn(`Failed to load sound effect '${key}':`, error);
           // Create a silent placeholder to prevent errors
           this.sounds.set(key, this.createSilentSound(500)); // 500ms silent sound
@@ -112,7 +112,7 @@ export class AudioManager {
   private createSilentSound(duration: number): Howl {
     // Create a minimal silent audio buffer
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const buffer = audioContext.createBuffer(1, audioContext.sampleRate * (duration / 1000), audioContext.sampleRate);
+    audioContext.createBuffer(1, audioContext.sampleRate * (duration / 1000), audioContext.sampleRate);
     
     // Convert buffer to base64 data URL (silent audio)
     const silentDataUrl = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';

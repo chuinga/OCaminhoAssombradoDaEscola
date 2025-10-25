@@ -971,14 +971,5 @@ export class GameScene extends Phaser.Scene {
     return !!(cursors && wasd && spaceKey && escKey);
   }
   
-  /**
-   * Cleanup when scene is shut down
-   */
-  shutdown(): void {
-    // Stop background music when scene ends
-    audioManager.stopBackgroundMusic();
-    
-    // Call parent shutdown
-    super.shutdown();
-  }
+
 }

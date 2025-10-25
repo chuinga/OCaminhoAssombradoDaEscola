@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseWeapon } from './BaseWeapon';
+import { audioManager } from '../utils/AudioManager';
 
 export class Bazooka extends BaseWeapon {
   private rockets: Phaser.Physics.Arcade.Group;
@@ -40,8 +41,8 @@ export class Bazooka extends BaseWeapon {
       rocket.fire(this.ROCKET_SPEED, this.EXPLOSION_RADIUS);
     }
     
-    // Play explosion sound effect (will be implemented in audio system)
-    // this.scene.sound.play('explosion');
+    // Play explosion sound effect for bazooka
+    audioManager.playWeaponSound('bazooka');
     
     console.log(`Bazooka fired! Ammunition remaining: ${this.ammunition}`);
   }

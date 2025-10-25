@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseWeapon } from './BaseWeapon';
+import { audioManager } from '../utils/AudioManager';
 
 export class LaserGun extends BaseWeapon {
   private projectiles: Phaser.Physics.Arcade.Group;
@@ -33,8 +34,8 @@ export class LaserGun extends BaseWeapon {
       projectile.fire(this.PROJECTILE_SPEED);
     }
     
-    // Play laser sound effect (will be implemented in audio system)
-    // this.scene.sound.play('laser');
+    // Play laser sound effect
+    audioManager.playWeaponSound('laser');
   }
   
   /**

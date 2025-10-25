@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseWeapon } from './BaseWeapon';
+import { audioManager } from '../utils/AudioManager';
 
 export class BaseballBat extends BaseWeapon {
   private readonly KNOCKBACK_FORCE = 200; // Knockback force in pixels
@@ -26,8 +27,8 @@ export class BaseballBat extends BaseWeapon {
     // Check for enemy collisions in melee range with knockback
     this.checkEnemyCollisionsWithKnockback(x, y, attackWidth, attackHeight);
     
-    // Play slash sound effect (will be implemented in audio system)
-    // this.scene.sound.play('slash');
+    // Play slash sound effect for baseball bat
+    audioManager.playWeaponSound('baseball');
     
     // Visual effect for baseball bat swing
     this.createSwingEffect(x, y);

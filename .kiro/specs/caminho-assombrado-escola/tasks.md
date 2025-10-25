@@ -119,14 +119,14 @@
   - Ensure keyboard controls work alongside touch controls
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 7. Add audio system with Howler.js
+- [x] 7. Add audio system with Howler.js
 - [x] 7.1 Implement background music and sound effects
   - Set up Howler.js for audio management
   - Add looping background music (wind and crickets ambient sound)
   - Create sound effect system for jump, damage, and item collection
   - _Requirements: 11.1, 11.2, 11.3, 11.4_
 
-- [ ] 7.2 Add weapon-specific attack sounds
+- [x] 7.2 Add weapon-specific attack sounds
   - Implement slash sound for Katana and Baseball Bat attacks
   - Add laser sound for Pistola de Laser attacks
   - Create explosion sound for Bazooka attacks
