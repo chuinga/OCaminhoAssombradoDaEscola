@@ -148,7 +148,12 @@
   - Reset game state when returning to start
   - _Requirements: 9.3_
 
-- [ ] 9. Implement API client and leaderboard system
+- [x] 9. Implement API client and leaderboard system
+
+
+
+
+
 - [x] 9.1 Create API client for score management
 
 
@@ -161,14 +166,25 @@
   - Include retry mechanism with exponential backoff
   - _Requirements: 9.1, 9.2, 9.4_
 
-- [ ] 9.2 Build API routes for AWS integration
+- [x] 9.2 Build API routes for AWS integration
+
+
+
+
+
   - Create Next.js API routes as proxy to AWS Lambda functions
   - Implement GET /api/scores/top10 endpoint for leaderboard
   - Add GET /api/scores endpoint for full score list with pagination
   - Create POST /api/scores endpoint for score submission
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ]* 9.3 Write unit tests for API client
+- [x] 9.3 Write unit tests for API client
+
+
+
+
+
+
   - Create tests for API client functions with mocked responses
   - Test error handling scenarios (network failures, server errors)
   - Verify retry mechanism and timeout handling
