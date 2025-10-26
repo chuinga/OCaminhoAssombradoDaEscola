@@ -163,10 +163,11 @@ export class ParticlePool {
 
     if (this.particles.length > 0) {
       emitter = this.particles.pop()!;
-      emitter.setConfig(config || {});
+      if (config) {
+        emitter.setConfig(config);
+      }
     } else {
-      const manager = this.scene.add.particles(0, 0, texture, config);
-      emitter = manager.createEmitter(config || {});
+      emitter = this.scene.add.particles(0, 0, texture, config);
     }
 
     this.activeParticles.add(emitter);
@@ -187,7 +188,7 @@ export class ParticlePool {
     if (this.particles.length < this.maxPoolSize) {
       this.particles.push(emitter);
     } else {
-      emitter.manager.destroy();
+      emitter.destroy();
     }
   }
 
@@ -196,15 +197,11 @@ export class ParticlePool {
    */
   clearAll(): void {
     this.particles.forEach(emitter => {
-      if (emitter.manager) {
-        emitter.manager.destroy();
-      }
+      emitter.destroy();
     });
 
     this.activeParticles.forEach(emitter => {
-      if (emitter.manager) {
-        emitter.manager.destroy();
-      }
+      emitter.destroy();
     });
 
     this.particles.length = 0;
@@ -234,7 +231,11 @@ export class TweenPool {
 
     if (this.tweens.length > 0) {
       tween = this.tweens.pop()!;
-      tween.updateTo(config, true);
+      // Reset the tween with new config
+      tween.stop();
+      tween.reset();
+      // For simplicity, just create a new tween instead of trying to reconfigure
+      tween = this.scene.tweens.add(config);
     } else {
       tween = this.scene.tweens.add(config);
     }

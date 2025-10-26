@@ -279,7 +279,7 @@ export class MemoryManager {
  */
 export function getDeviceCapabilities() {
   const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
   
   return {
     webGL: !!gl,

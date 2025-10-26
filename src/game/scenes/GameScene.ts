@@ -33,6 +33,12 @@ export class GameScene extends Phaser.Scene {
   private spawnInterval: number = 500; // Distance between spawn checks (px) - reduced for more frequent spawning
   private difficultyConfig!: DifficultyConfig;
   
+  // Side-scrolling spawning system
+  private lastEnemySpawnTime: number = 0;
+  private lastLifeItemSpawnTime: number = 0;
+  private enemySpawnInterval: number = 2000; // Base spawn interval in ms
+  private lifeItemSpawnInterval: number = 5000; // Life item spawn interval in ms
+  
   // Touch controls state
   private touchControls = {
     moveLeft: false,
@@ -58,6 +64,10 @@ export class GameScene extends Phaser.Scene {
     
     // Initialize spawning system
     this.lastSpawnX = 0;
+    
+    // Initialize side-scrolling spawning timers
+    this.lastEnemySpawnTime = 0;
+    this.lastLifeItemSpawnTime = 0;
   }
   
   /**
@@ -562,38 +572,41 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
-   * Spawn some initial enemies near the start for immediate gameplay
+   * Spawn some initial enemies for immediate gameplay
    */
   private spawnInitialEnemies(): void {
+    const camera = this.cameras.main;
     const groundY = this.WORLD_HEIGHT - 100;
     
-    // Spawn a few enemies at different distances from the start
+    // Spawn a few enemies at different distances from the right side of the screen
     const initialSpawns = [
-      { x: 300, type: 'ghost' as const },
-      { x: 500, type: 'bat' as const },
-      { x: 800, type: 'vampire' as const },
-      { x: 1200, type: 'mummy' as const }
+      { distance: 200, type: 'ghost' as const },
+      { distance: 400, type: 'bat' as const },
+      { distance: 600, type: 'vampire' as const },
+      { distance: 800, type: 'mummy' as const }
     ];
     
     initialSpawns.forEach(spawn => {
+      const spawnX = camera.width + spawn.distance; // Spawn to the right of the screen
       const spawnY = EnemyFactory.getSpawnHeight(spawn.type, groundY);
-      const enemy = EnemyFactory.createEnemy(this, spawn.x, spawnY, spawn.type);
+      const enemy = EnemyFactory.createEnemy(this, spawnX, spawnY, spawn.type);
       this.enemies.add(enemy);
-      console.log(`Initial spawn: ${spawn.type} at (${spawn.x}, ${spawnY})`);
+      console.log(`Initial spawn: ${spawn.type} at (${spawnX}, ${spawnY})`);
     });
     
     // Also spawn some life items for testing
     const lifeItemSpawns = [
-      { x: 400, type: 'pumpkin' },
-      { x: 700, type: 'lollipop' },
-      { x: 1000, type: 'apple' }
+      { distance: 300, type: 'pumpkin' as const },
+      { distance: 500, type: 'lollipop' as const },
+      { distance: 700, type: 'apple' as const }
     ];
     
     lifeItemSpawns.forEach(spawn => {
+      const spawnX = camera.width + spawn.distance; // Spawn to the right of the screen
       const spawnY = LifeItemFactory.getSpawnHeight(groundY);
-      const lifeItem = LifeItemFactory.createLifeItem(this, spawn.x, spawnY, spawn.type);
+      const lifeItem = LifeItemFactory.createLifeItem(this, spawnX, spawnY, spawn.type);
       this.lifeItems.add(lifeItem);
-      console.log(`Initial life item: ${spawn.type} at (${spawn.x}, ${spawnY})`);
+      console.log(`Initial life item: ${spawn.type} at (${spawnX}, ${spawnY})`);
     });
   }
   
@@ -843,6 +856,12 @@ export class GameScene extends Phaser.Scene {
     
     // Handle collisions
     this.handleCollisions();
+    
+    // Update game state and emit events to React
+    this.updateGameState();
+    
+    // Check for game end conditions
+    this.checkGameEndConditions();
   }
   
   /**
@@ -948,17 +967,18 @@ export class GameScene extends Phaser.Scene {
   }
   
   /**
-   * Update spawning system based on player position
+   * Update spawning system for side-scrolling gameplay
    * Requirements: 12.1, 12.2, 12.3, 6.1
    */
   private updateSpawning(): void {
-    const playerX = this.player.x;
+    // Spawn enemies from the right side of the screen continuously
+    this.updateEnemySpawning();
     
-    // Check if we need to spawn new entities
-    if (playerX > this.lastSpawnX + this.spawnInterval) {
-      this.spawnEntitiesInRegion(this.lastSpawnX + this.spawnInterval, this.lastSpawnX + this.spawnInterval + this.spawnInterval);
-      this.lastSpawnX += this.spawnInterval;
-    }
+    // Spawn life items occasionally
+    this.updateLifeItemSpawning();
+    
+    // Clean up enemies that have moved too far off screen
+    this.cleanupOffscreenEnemies();
   }
   
   /**
@@ -1155,8 +1175,12 @@ export class GameScene extends Phaser.Scene {
    * Requirements: 5.5, 7.2
    */
   private handleWeaponEnemyCollisions(): void {
-    // Only check weapon collisions if player has a weapon and is attacking
+    // Only check weapon collisions if player has a weapon
     if (!this.player.weapon) return;
+    
+    // Check if player just attacked (within the last 150ms)
+    const timeSinceLastAttack = this.time.now - this.player.weapon.getLastAttackTime();
+    if (timeSinceLastAttack > 150) return;
     
     // Get weapon attack area based on weapon type and player position
     const weaponAttackArea = this.getWeaponAttackArea();
@@ -1168,8 +1192,16 @@ export class GameScene extends Phaser.Scene {
       
       const enemySprite = enemy as Phaser.Physics.Arcade.Sprite;
       
-      // Check if enemy is within weapon attack area
-      if (this.isEnemyInWeaponRange(enemySprite, weaponAttackArea)) {
+      // Check if enemy is within weapon attack area and hasn't been hit recently
+      if (this.isEnemyInWeaponRange(enemySprite, weaponAttackArea) && !enemySprite.getData('justHit')) {
+        // Mark enemy as hit to prevent multiple hits from same attack
+        enemySprite.setData('justHit', true);
+        this.time.delayedCall(200, () => {
+          if (enemySprite.active) {
+            enemySprite.setData('justHit', false);
+          }
+        });
+        
         this.handleWeaponHitEnemy(enemySprite);
       }
     });
@@ -1180,10 +1212,6 @@ export class GameScene extends Phaser.Scene {
    */
   private getWeaponAttackArea(): { x: number; y: number; width: number; height: number } | null {
     if (!this.player.weapon) return null;
-    
-    // Only return attack area if weapon was just used (within a small time window)
-    const timeSinceLastAttack = this.time.now - this.player.weapon.getLastAttackTime();
-    if (timeSinceLastAttack > 100) return null; // 100ms window for attack detection
     
     const weapon = this.player.weapon;
     const playerX = this.player.x;
@@ -1285,17 +1313,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
   
-  /**
-   * Update game state store with current player stats
-   */
-  private updateGameState(): void {
-    // This will be connected to the Zustand store
-    // For now, we'll emit events that can be caught by the React component
-    this.events.emit('playerStatsChanged', {
-      lives: this.player.lives,
-      score: this.player.score
-    });
-  }
+
   
   /**
    * Handle pause functionality
@@ -1450,5 +1468,169 @@ export class GameScene extends Phaser.Scene {
     return !!(cursors && wasd && spaceKey && escKey);
   }
   
+  /**
+   * Update game state and emit events to React
+   */
+  private updateGameState(): void {
+    // Emit player stats changes to React
+    this.events.emit('playerStatsChanged', {
+      lives: this.player.lives,
+      score: this.player.score
+    });
+  }
+  
+  /**
+   * Check for game end conditions
+   */
+  private checkGameEndConditions(): void {
+    // Check if player has no lives left (defeat)
+    if (this.player.lives <= 0) {
+      this.endGame(false, 'No lives remaining');
+      return;
+    }
+    
+    // Check if player reached the school gate (victory)
+    if (this.physics.overlap(this.player, this.schoolGate)) {
+      // Add victory bonus
+      this.player.addScore(500);
+      this.endGame(true, 'Reached school gate');
+      return;
+    }
+  }
+  
+  /**
+   * End the game and emit event to React
+   */
+  private endGame(victory: boolean, reason: string): void {
+    console.log(`Game ended: ${victory ? 'Victory' : 'Defeat'} - ${reason}`);
+    
+    // Emit game end event to React
+    this.events.emit('gameEnd', {
+      score: this.player.score,
+      victory: victory,
+      reason: reason
+    });
+    
+    // Pause the scene to stop gameplay
+    this.scene.pause();
+  }
+  
+  /**
+   * Update enemy spawning for side-scrolling gameplay
+   */
+  private updateEnemySpawning(): void {
+    const currentTime = this.time.now;
+    
+    // Calculate spawn interval based on difficulty
+    const baseInterval = this.enemySpawnInterval;
+    const difficultyMultiplier = {
+      easy: 1.5,     // Slower spawning
+      medium: 1.0,   // Normal spawning
+      impossible: 0.5 // Faster spawning
+    }[this.difficulty];
+    
+    const actualInterval = baseInterval * difficultyMultiplier;
+    
+    // Check if it's time to spawn a new enemy
+    if (currentTime - this.lastEnemySpawnTime > actualInterval) {
+      this.spawnEnemyFromRight();
+      this.lastEnemySpawnTime = currentTime;
+    }
+  }
+  
+  /**
+   * Update life item spawning
+   */
+  private updateLifeItemSpawning(): void {
+    const currentTime = this.time.now;
+    
+    // Don't spawn life items on impossible difficulty
+    if (this.difficulty === 'impossible') return;
+    
+    // Calculate spawn interval based on difficulty
+    const baseInterval = this.lifeItemSpawnInterval;
+    const difficultyMultiplier = {
+      easy: 0.6,     // More frequent life items
+      medium: 1.0,   // Normal frequency
+      impossible: 0  // No life items
+    }[this.difficulty];
+    
+    const actualInterval = baseInterval * difficultyMultiplier;
+    
+    // Check if it's time to spawn a new life item
+    if (actualInterval > 0 && currentTime - this.lastLifeItemSpawnTime > actualInterval) {
+      this.spawnLifeItemFromRight();
+      this.lastLifeItemSpawnTime = currentTime;
+    }
+  }
+  
+  /**
+   * Spawn an enemy from the right side of the screen
+   */
+  private spawnEnemyFromRight(): void {
+    const camera = this.cameras.main;
+    const screenRight = camera.scrollX + camera.width + 100; // Spawn off-screen to the right
+    const groundY = this.WORLD_HEIGHT - 100;
+    
+    // Select random enemy type based on difficulty
+    const enemyType = this.getRandomEnemyType();
+    
+    // Get appropriate spawn height for enemy type
+    const spawnY = EnemyFactory.getSpawnHeight(enemyType, groundY);
+    
+    console.log(`Spawning ${enemyType} from right at (${screenRight}, ${spawnY})`);
+    
+    // Create enemy
+    const enemy = EnemyFactory.createEnemy(this, screenRight, spawnY, enemyType);
+    
+    // Add to enemies group
+    this.enemies.add(enemy);
+  }
+  
+  /**
+   * Spawn a life item from the right side of the screen
+   */
+  private spawnLifeItemFromRight(): void {
+    const camera = this.cameras.main;
+    const screenRight = camera.scrollX + camera.width + 100; // Spawn off-screen to the right
+    const groundY = this.WORLD_HEIGHT - 100;
+    
+    // Get spawn height that requires jumping to collect
+    const spawnY = LifeItemFactory.getSpawnHeight(groundY);
+    
+    console.log(`Spawning life item from right at (${screenRight}, ${spawnY})`);
+    
+    // Create random life item
+    const lifeItem = LifeItemFactory.createRandomLifeItem(this, screenRight, spawnY);
+    
+    // Add to life items group
+    this.lifeItems.add(lifeItem);
+  }
+  
+  /**
+   * Clean up enemies and items that have moved too far off screen
+   */
+  private cleanupOffscreenEnemies(): void {
+    const camera = this.cameras.main;
+    const screenLeft = camera.scrollX - 200; // Clean up when well off-screen
+    
+    // Clean up enemies
+    this.enemies.children.entries.forEach((enemy) => {
+      const enemySprite = enemy as Phaser.Physics.Arcade.Sprite;
+      if (enemySprite.x < screenLeft) {
+        enemySprite.destroy();
+      }
+    });
+    
+    // Clean up life items
+    this.lifeItems.children.entries.forEach((item) => {
+      const itemSprite = item as Phaser.Physics.Arcade.Sprite;
+      if (itemSprite.x < screenLeft) {
+        itemSprite.destroy();
+      }
+    });
+  }
+  
+
 
 }

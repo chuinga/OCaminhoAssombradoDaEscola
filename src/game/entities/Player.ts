@@ -143,9 +143,135 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       // Execute weapon attack
       this.weapon.attack(attackX, attackY);
       
+      // Show visual weapon attack
+      this.showWeaponAttack();
+      
       // Play weapon-specific sound effect
       audioManager.playWeaponSound(this.weapon.type);
     }
+  }
+  
+  /**
+   * Show visual weapon attack effect
+   */
+  private showWeaponAttack(): void {
+    if (!this.weapon) return;
+    
+    const scene = this.scene;
+    const facingLeft = this.flipX;
+    
+    // Create visual attack effect based on weapon type
+    switch (this.weapon.type) {
+      case 'katana':
+      case 'baseball':
+        this.showMeleeAttack(facingLeft);
+        break;
+      case 'laser':
+        this.showLaserAttack(facingLeft);
+        break;
+      case 'bazooka':
+        this.showBazookaAttack(facingLeft);
+        break;
+    }
+  }
+  
+  /**
+   * Show melee weapon attack (katana, baseball bat)
+   */
+  private showMeleeAttack(facingLeft: boolean): void {
+    if (!this.weapon) return;
+    
+    const scene = this.scene;
+    const attackX = facingLeft ? this.x - this.weapon.range/2 : this.x + this.weapon.range/2;
+    const attackY = this.y - 10;
+    
+    // Create attack slash effect
+    const slash = scene.add.graphics();
+    slash.lineStyle(3, 0xffffff, 0.8);
+    
+    if (facingLeft) {
+      slash.lineBetween(attackX + 20, attackY - 20, attackX - 20, attackY + 20);
+    } else {
+      slash.lineBetween(attackX - 20, attackY - 20, attackX + 20, attackY + 20);
+    }
+    
+    // Animate and destroy the slash effect
+    scene.tweens.add({
+      targets: slash,
+      alpha: 0,
+      duration: 150,
+      onComplete: () => slash.destroy()
+    });
+  }
+  
+  /**
+   * Show laser weapon attack
+   */
+  private showLaserAttack(facingLeft: boolean): void {
+    const scene = this.scene;
+    const startX = this.x;
+    const startY = this.y - 10;
+    const endX = facingLeft ? this.x - 200 : this.x + 200;
+    
+    // Create laser beam effect
+    const laser = scene.add.graphics();
+    laser.lineStyle(2, 0xff0000, 0.9);
+    laser.lineBetween(startX, startY, endX, startY);
+    
+    // Add glow effect
+    const glow = scene.add.graphics();
+    glow.lineStyle(6, 0xff0000, 0.3);
+    glow.lineBetween(startX, startY, endX, startY);
+    
+    // Animate and destroy the laser effect
+    scene.tweens.add({
+      targets: [laser, glow],
+      alpha: 0,
+      duration: 200,
+      onComplete: () => {
+        laser.destroy();
+        glow.destroy();
+      }
+    });
+  }
+  
+  /**
+   * Show bazooka weapon attack
+   */
+  private showBazookaAttack(facingLeft: boolean): void {
+    const scene = this.scene;
+    const startX = this.x;
+    const startY = this.y - 10;
+    const targetX = facingLeft ? this.x - 100 : this.x + 100;
+    
+    // Create explosion effect at target location
+    const explosion = scene.add.graphics();
+    explosion.fillStyle(0xff6600, 0.8);
+    explosion.fillCircle(targetX, startY, 30);
+    
+    // Add outer explosion ring
+    const ring = scene.add.graphics();
+    ring.lineStyle(3, 0xffff00, 0.6);
+    ring.strokeCircle(targetX, startY, 40);
+    
+    // Animate explosion
+    scene.tweens.add({
+      targets: explosion,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => explosion.destroy()
+    });
+    
+    scene.tweens.add({
+      targets: ring,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      duration: 400,
+      onComplete: () => ring.destroy()
+    });
   }
   
   /**

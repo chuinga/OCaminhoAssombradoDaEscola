@@ -224,14 +224,21 @@
   - Test API integration with mock backend
   - _Requirements: 1.1-1.3, 2.1-2.6, 7.1-7.6_
 
-- [ ] 12. Prepare for deployment
-- [ ] 12.1 Configure build optimization
+- [x] 12. Prepare for deployment
+
+
+
+
+
+- [x] 12.1 Configure build optimization
+
   - Set up Next.js production build configuration
   - Optimize bundle size with code splitting and tree shaking
   - Compress and optimize game assets (sprites, audio)
   - _Requirements: 10.1, 10.4_
 
-- [ ] 12.2 Set up AWS infrastructure preparation
+- [x] 12.2 Set up AWS infrastructure preparation
+
   - Document AWS CDK stack requirements for S3, CloudFront, API Gateway
   - Prepare environment variables and configuration files
   - Create deployment scripts and documentation

@@ -53,6 +53,9 @@ export class Weapon implements WeaponEntity {
     if (this.type === 'bazooka' && this.ammunition !== undefined) {
       this.ammunition = Math.max(0, this.ammunition - 1);
     }
+    
+    // Mark that an attack just happened for collision detection
+    console.log(`${this.type} attack at (${x}, ${y}) - Time: ${this.lastAttackTime}`);
   }
   
   canAttack(): boolean {
@@ -76,18 +79,7 @@ export class Weapon implements WeaponEntity {
   }
   
   private playAttackSound(): void {
-    switch (this.type) {
-      case 'katana':
-      case 'baseball':
-        audioManager.playSlashSound();
-        break;
-      case 'laser':
-        audioManager.playLaserSound();
-        break;
-      case 'bazooka':
-        audioManager.playExplosionSound();
-        break;
-    }
+    audioManager.playWeaponSound(this.type);
   }
   
   // Get remaining ammunition (for bazooka)

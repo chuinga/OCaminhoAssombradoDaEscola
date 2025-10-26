@@ -66,12 +66,14 @@ export function PhaserGameComponent({
             gameSceneRef.current = gameScene;
             
             gameScene.events.on('playerStatsChanged', (stats: { lives: number; score: number }) => {
+              console.log('Player stats changed:', stats);
               updateLives(stats.lives);
               updateScore(stats.score);
             });
 
             // Handle game end events
             gameScene.events.on('gameEnd', (gameEndData: { score: number; victory: boolean; reason: string }) => {
+              console.log('Game end event received:', gameEndData);
               setGameStatus('finished');
               onGameEnd?.(gameEndData.score, gameEndData.victory);
             });
