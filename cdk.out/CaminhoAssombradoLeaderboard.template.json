@@ -1,0 +1,1114 @@
+{
+ "Description": "Leaderboard system for Caminho Assombrado da Escola game",
+ "Resources": {
+  "ScoresTable6CB35494": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "scoreId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "createdAt",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "gameType",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "score",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "ScoreIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "gameType",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "score",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "scoreId",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "createdAt",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "TableName": "caminho-assombrado-scores"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/ScoresTable/Resource"
+   }
+  },
+  "GetTop10ScoresFunctionServiceRole40C57C3E": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetTop10ScoresFunction/ServiceRole/Resource"
+   }
+  },
+  "GetTop10ScoresFunctionServiceRoleDefaultPolicyBA211019": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ScoresTable6CB35494",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ScoresTable6CB35494",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GetTop10ScoresFunctionServiceRoleDefaultPolicyBA211019",
+    "Roles": [
+     {
+      "Ref": "GetTop10ScoresFunctionServiceRole40C57C3E"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetTop10ScoresFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "GetTop10ScoresFunction1C75FCA3": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\n        const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');\n        const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb');\n\n        const client = new DynamoDBClient({});\n        const docClient = DynamoDBDocumentClient.from(client);\n\n        exports.handler = async (event) => {\n          console.log('GetTop10Scores event:', JSON.stringify(event, null, 2));\n          \n          try {\n            const params = {\n              TableName: process.env.SCORES_TABLE_NAME,\n              IndexName: 'ScoreIndex',\n              KeyConditionExpression: 'gameType = :gameType',\n              ExpressionAttributeValues: {\n                ':gameType': 'caminho-assombrado'\n              },\n              ScanIndexForward: false, // Sort in descending order (highest scores first)\n              Limit: 10\n            };\n\n            const result = await docClient.send(new QueryCommand(params));\n            \n            const response = {\n              scores: result.Items || [],\n              total: result.Count || 0\n            };\n\n            return {\n              statusCode: 200,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',\n                'Access-Control-Allow-Headers': 'Content-Type, Authorization',\n              },\n              body: JSON.stringify(response),\n            };\n          } catch (error) {\n            console.error('Error fetching top 10 scores:', error);\n            return {\n              statusCode: 500,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n              },\n              body: JSON.stringify({ error: 'Internal server error' }),\n            };\n          }\n        };\n      "
+    },
+    "Environment": {
+     "Variables": {
+      "SCORES_TABLE_NAME": {
+       "Ref": "ScoresTable6CB35494"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GetTop10ScoresFunctionServiceRole40C57C3E",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "GetTop10ScoresFunctionServiceRoleDefaultPolicyBA211019",
+    "GetTop10ScoresFunctionServiceRole40C57C3E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetTop10ScoresFunction/Resource"
+   }
+  },
+  "GetAllScoresFunctionServiceRole524EB739": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetAllScoresFunction/ServiceRole/Resource"
+   }
+  },
+  "GetAllScoresFunctionServiceRoleDefaultPolicy83B6B781": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ScoresTable6CB35494",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ScoresTable6CB35494",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GetAllScoresFunctionServiceRoleDefaultPolicy83B6B781",
+    "Roles": [
+     {
+      "Ref": "GetAllScoresFunctionServiceRole524EB739"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetAllScoresFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "GetAllScoresFunctionD7E8C073": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\n        const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');\n        const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb');\n\n        const client = new DynamoDBClient({});\n        const docClient = DynamoDBDocumentClient.from(client);\n\n        exports.handler = async (event) => {\n          console.log('GetAllScores event:', JSON.stringify(event, null, 2));\n          \n          try {\n            const queryParams = event.queryStringParameters || {};\n            const limit = parseInt(queryParams.limit) || 50;\n            const nextToken = queryParams.nextToken;\n\n            const params = {\n              TableName: process.env.SCORES_TABLE_NAME,\n              IndexName: 'ScoreIndex',\n              KeyConditionExpression: 'gameType = :gameType',\n              ExpressionAttributeValues: {\n                ':gameType': 'caminho-assombrado'\n              },\n              ScanIndexForward: false, // Sort in descending order (highest scores first)\n              Limit: limit\n            };\n\n            if (nextToken) {\n              params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());\n            }\n\n            const result = await docClient.send(new QueryCommand(params));\n            \n            const response = {\n              scores: result.Items || [],\n              hasMore: !!result.LastEvaluatedKey\n            };\n\n            if (result.LastEvaluatedKey) {\n              response.nextToken = Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64');\n            }\n\n            return {\n              statusCode: 200,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',\n                'Access-Control-Allow-Headers': 'Content-Type, Authorization',\n              },\n              body: JSON.stringify(response),\n            };\n          } catch (error) {\n            console.error('Error fetching all scores:', error);\n            return {\n              statusCode: 500,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n              },\n              body: JSON.stringify({ error: 'Internal server error' }),\n            };\n          }\n        };\n      "
+    },
+    "Environment": {
+     "Variables": {
+      "SCORES_TABLE_NAME": {
+       "Ref": "ScoresTable6CB35494"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GetAllScoresFunctionServiceRole524EB739",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Timeout": 15
+   },
+   "DependsOn": [
+    "GetAllScoresFunctionServiceRoleDefaultPolicy83B6B781",
+    "GetAllScoresFunctionServiceRole524EB739"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GetAllScoresFunction/Resource"
+   }
+  },
+  "SubmitScoreFunctionServiceRole3CD1DDCA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/SubmitScoreFunction/ServiceRole/Resource"
+   }
+  },
+  "SubmitScoreFunctionServiceRoleDefaultPolicyFD2072FD": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ScoresTable6CB35494",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ScoresTable6CB35494",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SubmitScoreFunctionServiceRoleDefaultPolicyFD2072FD",
+    "Roles": [
+     {
+      "Ref": "SubmitScoreFunctionServiceRole3CD1DDCA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/SubmitScoreFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "SubmitScoreFunctionC95ED479": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\n        const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');\n        const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');\n        const { randomUUID } = require('crypto');\n\n        const client = new DynamoDBClient({});\n        const docClient = DynamoDBDocumentClient.from(client);\n\n        exports.handler = async (event) => {\n          console.log('SubmitScore event:', JSON.stringify(event, null, 2));\n          \n          try {\n            const body = JSON.parse(event.body || '{}');\n            \n            // Validate required fields\n            const { firstName, lastName, score, character, weapon, difficulty } = body;\n            \n            if (!firstName || !lastName || typeof score !== 'number') {\n              return {\n                statusCode: 400,\n                headers: {\n                  'Content-Type': 'application/json',\n                  'Access-Control-Allow-Origin': '*',\n                },\n                body: JSON.stringify({ error: 'Missing required fields: firstName, lastName, score' }),\n              };\n            }\n\n            // Validate character\n            if (!['boy', 'girl'].includes(character)) {\n              return {\n                statusCode: 400,\n                headers: {\n                  'Content-Type': 'application/json',\n                  'Access-Control-Allow-Origin': '*',\n                },\n                body: JSON.stringify({ error: 'Invalid character. Must be \"boy\" or \"girl\"' }),\n              };\n            }\n\n            // Validate weapon\n            if (!['katana', 'laser', 'baseball', 'bazooka'].includes(weapon)) {\n              return {\n                statusCode: 400,\n                headers: {\n                  'Content-Type': 'application/json',\n                  'Access-Control-Allow-Origin': '*',\n                },\n                body: JSON.stringify({ error: 'Invalid weapon' }),\n              };\n            }\n\n            // Validate difficulty\n            if (!['easy', 'medium', 'impossible'].includes(difficulty)) {\n              return {\n                statusCode: 400,\n                headers: {\n                  'Content-Type': 'application/json',\n                  'Access-Control-Allow-Origin': '*',\n                },\n                body: JSON.stringify({ error: 'Invalid difficulty' }),\n              };\n            }\n\n            // Validate score range\n            if (score < 0 || score > 999999) {\n              return {\n                statusCode: 400,\n                headers: {\n                  'Content-Type': 'application/json',\n                  'Access-Control-Allow-Origin': '*',\n                },\n                body: JSON.stringify({ error: 'Score must be between 0 and 999999' }),\n              };\n            }\n\n            const scoreId = randomUUID();\n            const createdAt = new Date().toISOString();\n            \n            const scoreItem = {\n              scoreId,\n              gameType: 'caminho-assombrado',\n              firstName: firstName.trim(),\n              lastName: lastName.trim(),\n              score,\n              character,\n              weapon,\n              difficulty,\n              createdAt\n            };\n\n            const params = {\n              TableName: process.env.SCORES_TABLE_NAME,\n              Item: scoreItem\n            };\n\n            await docClient.send(new PutCommand(params));\n\n            return {\n              statusCode: 201,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',\n                'Access-Control-Allow-Headers': 'Content-Type, Authorization',\n              },\n              body: JSON.stringify(scoreItem),\n            };\n          } catch (error) {\n            console.error('Error submitting score:', error);\n            return {\n              statusCode: 500,\n              headers: {\n                'Content-Type': 'application/json',\n                'Access-Control-Allow-Origin': '*',\n              },\n              body: JSON.stringify({ error: 'Internal server error' }),\n            };\n          }\n        };\n      "
+    },
+    "Environment": {
+     "Variables": {
+      "SCORES_TABLE_NAME": {
+       "Ref": "ScoresTable6CB35494"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "SubmitScoreFunctionServiceRole3CD1DDCA",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Timeout": 15
+   },
+   "DependsOn": [
+    "SubmitScoreFunctionServiceRoleDefaultPolicyFD2072FD",
+    "SubmitScoreFunctionServiceRole3CD1DDCA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/SubmitScoreFunction/Resource"
+   }
+  },
+  "GameLeaderboardApi3D395492": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "API for managing game scores and leaderboard",
+    "Name": "Caminho Assombrado Leaderboard API"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Resource"
+   }
+  },
+  "GameLeaderboardApiCloudWatchRole6E8A740D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/CloudWatchRole/Resource"
+   }
+  },
+  "GameLeaderboardApiAccount5880B567": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "GameLeaderboardApiCloudWatchRole6E8A740D",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "GameLeaderboardApi3D395492"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Account"
+   }
+  },
+  "GameLeaderboardApiDeployment5713927D5e852030c66d25dd080b32516b5345b3": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "API for managing game scores and leaderboard",
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "DependsOn": [
+    "GameLeaderboardApiOPTIONS98CB8E8D",
+    "GameLeaderboardApiscoresGET5018608C",
+    "GameLeaderboardApiscoresOPTIONSC52E9342",
+    "GameLeaderboardApiscoresPOSTED7B2B0C",
+    "GameLeaderboardApiscores0DABE98B",
+    "GameLeaderboardApiscorestop10GET01EECC99",
+    "GameLeaderboardApiscorestop10OPTIONSFFFA6155",
+    "GameLeaderboardApiscorestop101E8CFAB0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "GameLeaderboardApiDeploymentStageprod2C781EF4": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "GameLeaderboardApiDeployment5713927D5e852030c66d25dd080b32516b5345b3"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    },
+    "StageName": "prod"
+   },
+   "DependsOn": [
+    "GameLeaderboardApiAccount5880B567"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "GameLeaderboardApiOPTIONS98CB8E8D": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "GameLeaderboardApi3D395492",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/OPTIONS/Resource"
+   }
+  },
+  "GameLeaderboardApiscores0DABE98B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "GameLeaderboardApi3D395492",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "scores",
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/Resource"
+   }
+  },
+  "GameLeaderboardApiscoresOPTIONSC52E9342": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "GameLeaderboardApiscores0DABE98B"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/OPTIONS/Resource"
+   }
+  },
+  "GameLeaderboardApiscoresGETApiPermissionCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BGETscoresFE5BECEB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetAllScoresFunctionD7E8C073",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/",
+       {
+        "Ref": "GameLeaderboardApiDeploymentStageprod2C781EF4"
+       },
+       "/GET/scores"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/GET/ApiPermission.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.GET..scores"
+   }
+  },
+  "GameLeaderboardApiscoresGETApiPermissionTestCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BGETscores84F241E7": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetAllScoresFunctionD7E8C073",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/test-invoke-stage/GET/scores"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/GET/ApiPermission.Test.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.GET..scores"
+   }
+  },
+  "GameLeaderboardApiscoresGET5018608C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GetAllScoresFunctionD7E8C073",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GameLeaderboardApiscores0DABE98B"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/GET/Resource"
+   }
+  },
+  "GameLeaderboardApiscoresPOSTApiPermissionCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BPOSTscores87BE2BAF": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "SubmitScoreFunctionC95ED479",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/",
+       {
+        "Ref": "GameLeaderboardApiDeploymentStageprod2C781EF4"
+       },
+       "/POST/scores"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/POST/ApiPermission.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.POST..scores"
+   }
+  },
+  "GameLeaderboardApiscoresPOSTApiPermissionTestCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BPOSTscores8FEAB9B9": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "SubmitScoreFunctionC95ED479",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/test-invoke-stage/POST/scores"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/POST/ApiPermission.Test.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.POST..scores"
+   }
+  },
+  "GameLeaderboardApiscoresPOSTED7B2B0C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "SubmitScoreFunctionC95ED479",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GameLeaderboardApiscores0DABE98B"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/POST/Resource"
+   }
+  },
+  "GameLeaderboardApiscorestop101E8CFAB0": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "GameLeaderboardApiscores0DABE98B"
+    },
+    "PathPart": "top10",
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/top10/Resource"
+   }
+  },
+  "GameLeaderboardApiscorestop10OPTIONSFFFA6155": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "GameLeaderboardApiscorestop101E8CFAB0"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/top10/OPTIONS/Resource"
+   }
+  },
+  "GameLeaderboardApiscorestop10GETApiPermissionCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BGETscorestop10A9D2D4FC": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetTop10ScoresFunction1C75FCA3",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/",
+       {
+        "Ref": "GameLeaderboardApiDeploymentStageprod2C781EF4"
+       },
+       "/GET/scores/top10"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/top10/GET/ApiPermission.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.GET..scores.top10"
+   }
+  },
+  "GameLeaderboardApiscorestop10GETApiPermissionTestCaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526BGETscorestop103DB8E85C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetTop10ScoresFunction1C75FCA3",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-west-1:058264503354:",
+       {
+        "Ref": "GameLeaderboardApi3D395492"
+       },
+       "/test-invoke-stage/GET/scores/top10"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/top10/GET/ApiPermission.Test.CaminhoAssombradoLeaderboardGameLeaderboardApiAC2A526B.GET..scores.top10"
+   }
+  },
+  "GameLeaderboardApiscorestop10GET01EECC99": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:eu-west-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GetTop10ScoresFunction1C75FCA3",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GameLeaderboardApiscorestop101E8CFAB0"
+    },
+    "RestApiId": {
+     "Ref": "GameLeaderboardApi3D395492"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/GameLeaderboardApi/Default/scores/top10/GET/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WNzU7DMBCEn6V3ZwmReIAC4oaoUu5oYy9lW/9E8ZoosvzuKE4R5TTfzsxqOui6e2h3OMdGm0tjeYB8FNQXhXP8yGbx6IIZIL/jYEk9ffoKRVl0g0HIL8lr4eDX6JYPNDmOkYMvitFB7sP2X/UQLOul9ioVhSOfUGjGBXJPUfYj1/Yf7rUOyYt6ptGGxZGX1b25joKnOrFBTzGkSdMjRlKvJF/BrOGVftPrSOVS/tlvScYkRflgCM7x7rt7gBba3TkyN1Pywo6g3/QH38tYREkBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CaminhoAssombradoLeaderboard/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "GameLeaderboardApiEndpoint81452FD2": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "GameLeaderboardApi3D395492"
+      },
+      ".execute-api.eu-west-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "GameLeaderboardApiDeploymentStageprod2C781EF4"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiGatewayUrl": {
+   "Description": "API Gateway URL for the leaderboard system",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "GameLeaderboardApi3D395492"
+      },
+      ".execute-api.eu-west-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "GameLeaderboardApiDeploymentStageprod2C781EF4"
+      },
+      "/"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "CaminhoAssombradoApiUrl"
+   }
+  },
+  "ScoresTableName": {
+   "Description": "DynamoDB table name for scores",
+   "Value": {
+    "Ref": "ScoresTable6CB35494"
+   },
+   "Export": {
+    "Name": "CaminhoAssombradoScoresTable"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

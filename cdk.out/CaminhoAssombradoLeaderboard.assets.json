@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "821c31bb0336a89cff58d40bd6e8e086450b3c3402e775438067d40385274002": {
+      "displayName": "CaminhoAssombradoLeaderboard Template",
+      "source": {
+        "path": "CaminhoAssombradoLeaderboard.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "058264503354-eu-west-1-cc4fa02b": {
+          "bucketName": "cdk-hnb659fds-assets-058264503354-eu-west-1",
+          "objectKey": "821c31bb0336a89cff58d40bd6e8e086450b3c3402e775438067d40385274002.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::058264503354:role/cdk-hnb659fds-file-publishing-role-058264503354-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
