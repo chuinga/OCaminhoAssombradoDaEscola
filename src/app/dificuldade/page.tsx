@@ -212,6 +212,11 @@ export default function DificuldadePage() {
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-400">
+        <p>© 2025 - O Caminho Assombrado da Escola - Feito com ❤️ pela Sofia para o Halloween</p>
+      </footer>
     </div>
   );
 }

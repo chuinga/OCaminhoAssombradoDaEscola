@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 
 interface GameHUDProps {
@@ -8,6 +9,23 @@ interface GameHUDProps {
 
 export function GameHUD({ className = '' }: GameHUDProps) {
   const { firstName, lastName, lives, score, character, weapon, difficulty } = useGameStore();
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure this only renders on the client to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Debug: Log the current store values
+  console.log('GameHUD render - store values:', {
+    firstName, lastName, lives, score, character, weapon, difficulty, isClient
+  });
+
+  // Don't render on server or if we don't have the basic game data yet
+  if (!isClient || !firstName || !character || !weapon || !difficulty) {
+    console.log('GameHUD: Not ready to render', { isClient, firstName, character, weapon, difficulty });
+    return null;
+  }
 
   // Format player name for display
   const playerName = `${firstName} ${lastName}`.trim() || 'Player';
@@ -84,15 +102,14 @@ export function GameHUD({ className = '' }: GameHUDProps) {
             {Array.from({ length: 10 }, (_, i) => (
               <div
                 key={i}
-                className={`w-2 h-4 sm:w-3 sm:h-5 rounded-sm ${
-                  i < lives 
-                    ? lives > 6 
-                      ? 'bg-green-500' 
-                      : lives > 3 
-                        ? 'bg-yellow-500' 
-                        : 'bg-red-500'
-                    : 'bg-gray-700'
-                }`}
+                className={`w-2 h-4 sm:w-3 sm:h-5 rounded-sm ${i < lives
+                  ? lives > 6
+                    ? 'bg-green-500'
+                    : lives > 3
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
+                  : 'bg-gray-700'
+                  }`}
               />
             ))}
           </div>

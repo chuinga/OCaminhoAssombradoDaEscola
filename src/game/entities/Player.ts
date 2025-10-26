@@ -37,11 +37,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     
+    console.log('Player created at:', x, y, 'texture:', characterTexture);
+    console.log('Player body after physics:', !!this.body);
+    
     // Configure physics body
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.setCollideWorldBounds(true);
       this.body.setGravityY(300); // Apply gravity
       this.body.setSize(32, 48); // Set collision box size
+      console.log('Player physics body configured successfully');
+    } else {
+      console.error('Player physics body not created properly!');
     }
   }
   
@@ -50,7 +56,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * Requirements: 3.1, 3.2
    */
   move(direction: 'left' | 'right'): void {
-    if (!this.body || this.isCrouching) return;
+    if (!this.body || this.isCrouching) {
+      console.log('Movement blocked - no body or crouching');
+      return;
+    }
     
     const body = this.body as Phaser.Physics.Arcade.Body;
     

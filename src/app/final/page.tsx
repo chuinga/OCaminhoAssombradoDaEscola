@@ -23,16 +23,53 @@ function FinalPageContent() {
   const [nextToken, setNextToken] = useState<string | undefined>();
   const [hasMoreScores, setHasMoreScores] = useState(false);
 
-  // Validate that user came from a completed game
+  // Validate that user came from a completed game and auto-submit score
   useEffect(() => {
     if (!firstName || !lastName) {
       router.push('/');
       return;
     }
     
-    // Load initial leaderboard scores
-    loadAllScores();
+    // Auto-submit score when page loads
+    if (!scoreSubmitted && character && weapon && difficulty) {
+      autoSubmitScore();
+    } else {
+      // Load initial leaderboard scores if score already submitted
+      loadAllScores();
+    }
   }, [firstName, lastName, router]);
+
+  // Auto-submit score function
+  const autoSubmitScore = async () => {
+    if (isSubmitting || scoreSubmitted || !character || !weapon || !difficulty) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      const scoreData = {
+        firstName,
+        lastName,
+        score: finalScore,
+        character,
+        weapon,
+        difficulty
+      };
+      
+      console.log('Auto-submitting score:', scoreData);
+      await apiClient.submitScore(scoreData);
+      setScoreSubmitted(true);
+      
+      // Load leaderboard to show the new score
+      await loadAllScores();
+      
+    } catch (error) {
+      console.error('Failed to auto-submit score:', error);
+      setSubmitError('Falha ao enviar pontuação automaticamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const loadAllScores = async (token?: string) => {
     try {
@@ -70,33 +107,8 @@ function FinalPageContent() {
   };
 
   const handleSubmitScore = async () => {
-    if (isSubmitting || scoreSubmitted || !character || !weapon || !difficulty) return;
-    
-    setIsSubmitting(true);
-    setSubmitError(null);
-    
-    try {
-      const scoreData = {
-        firstName,
-        lastName,
-        score: finalScore,
-        character,
-        weapon,
-        difficulty
-      };
-      
-      await apiClient.submitScore(scoreData);
-      setScoreSubmitted(true);
-      
-      // Reload leaderboard to show the new score
-      await loadAllScores();
-      
-    } catch (error) {
-      console.error('Failed to submit score:', error);
-      setSubmitError('Falha ao enviar pontuação. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // This is now just a wrapper for manual retry if auto-submit failed
+    await autoSubmitScore();
   };
 
   if (!firstName || !lastName) {
@@ -148,23 +160,15 @@ function FinalPageContent() {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Score Submission Status */}
         <div className="space-y-4">
-          {!scoreSubmitted && (
-            <button
-              onClick={handleSubmitScore}
-              disabled={isSubmitting || !character || !weapon || !difficulty}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Enviando...
-                </div>
-              ) : (
-                'Enviar Pontuação'
-              )}
-            </button>
+          {isSubmitting && (
+            <div className="bg-blue-600/20 border border-blue-600/30 rounded-lg p-3 text-blue-400 text-center">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mr-2"></div>
+                Enviando pontuação automaticamente...
+              </div>
+            </div>
           )}
           
           {scoreSubmitted && (
@@ -174,7 +178,25 @@ function FinalPageContent() {
           )}
           
           {submitError && (
-            <p className="text-red-400 text-sm text-center">{submitError}</p>
+            <div className="space-y-3">
+              <div className="bg-red-600/20 border border-red-600/30 rounded-lg p-3 text-red-400 text-center">
+                ❌ {submitError}
+              </div>
+              <button
+                onClick={handleSubmitScore}
+                disabled={isSubmitting}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Tentando novamente...
+                  </div>
+                ) : (
+                  'Tentar Enviar Novamente'
+                )}
+              </button>
+            </div>
           )}
           
           <button
@@ -260,6 +282,11 @@ function FinalPageContent() {
           )}
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-400">
+        <p>© 2025 - O Caminho Assombrado da Escola - Feito com ❤️ pela Sofia para o Halloween</p>
+      </footer>
     </div>
   );
 }

@@ -24,6 +24,15 @@ export function PhaserGameComponent({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Keyboard state management (similar to touch controls)
+  const [keyboardState, setKeyboardState] = useState({
+    moveLeft: false,
+    moveRight: false,
+    jump: false,
+    crouch: false,
+    attack: false
+  });
+  
   // Get game store data and actions for updating HUD
   const { 
     character, 
@@ -32,6 +41,84 @@ export function PhaserGameComponent({
     updateScore, 
     setGameStatus 
   } = useGameStore();
+
+  // Browser-level keyboard event handling
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('Browser keydown:', event.code);
+      
+      switch (event.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+          setKeyboardState(prev => ({ ...prev, moveLeft: true }));
+          event.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'KeyD':
+          setKeyboardState(prev => ({ ...prev, moveRight: true }));
+          event.preventDefault();
+          break;
+        case 'ArrowUp':
+        case 'KeyW':
+          setKeyboardState(prev => ({ ...prev, jump: true }));
+          event.preventDefault();
+          break;
+        case 'ArrowDown':
+        case 'KeyS':
+          setKeyboardState(prev => ({ ...prev, crouch: true }));
+          event.preventDefault();
+          break;
+        case 'Space':
+          setKeyboardState(prev => ({ ...prev, attack: true }));
+          event.preventDefault();
+          break;
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      console.log('Browser keyup:', event.code);
+      
+      switch (event.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+          setKeyboardState(prev => ({ ...prev, moveLeft: false }));
+          break;
+        case 'ArrowRight':
+        case 'KeyD':
+          setKeyboardState(prev => ({ ...prev, moveRight: false }));
+          break;
+        case 'ArrowUp':
+        case 'KeyW':
+          setKeyboardState(prev => ({ ...prev, jump: false }));
+          break;
+        case 'ArrowDown':
+        case 'KeyS':
+          setKeyboardState(prev => ({ ...prev, crouch: false }));
+          break;
+        case 'Space':
+          setKeyboardState(prev => ({ ...prev, attack: false }));
+          break;
+      }
+    };
+
+    // Add event listeners to document
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // Send keyboard state to game scene
+  useEffect(() => {
+    if (gameSceneRef.current && typeof gameSceneRef.current.setKeyboardControls === 'function') {
+      console.log('Sending keyboard state to game:', keyboardState);
+      gameSceneRef.current.setKeyboardControls(keyboardState);
+    }
+  }, [keyboardState]);
 
   useEffect(() => {
     if (!containerRef.current || typeof window === 'undefined') return;
@@ -55,6 +142,12 @@ export function PhaserGameComponent({
         gameRef.current.events.on('ready', () => {
           setIsLoading(false);
           setGameStatus('playing');
+          
+          // Ensure the game canvas has focus for keyboard input
+          if (gameRef.current?.canvas) {
+            gameRef.current.canvas.focus();
+            gameRef.current.canvas.setAttribute('tabindex', '0');
+          }
         });
 
         // Listen for player stats changes from the game scene
@@ -142,6 +235,21 @@ export function PhaserGameComponent({
         ref={containerRef} 
         id="game-container"
         className="w-full h-full"
+        onClick={() => {
+          // Ensure canvas has focus when clicked
+          if (gameRef.current?.canvas) {
+            console.log('Focusing canvas on click');
+            gameRef.current.canvas.focus();
+          }
+        }}
+        onMouseEnter={() => {
+          // Also focus on mouse enter
+          if (gameRef.current?.canvas) {
+            console.log('Focusing canvas on mouse enter');
+            gameRef.current.canvas.focus();
+          }
+        }}
+        tabIndex={0}
       />
       {/* Game HUD overlay */}
       {!isLoading && !error && <GameHUD />}

@@ -84,7 +84,7 @@ const weapons: WeaponInfo[] = [
 export default function ArmaPage() {
   const router = useRouter();
   const { firstName, lastName, character, weapon, setWeapon } = useGameStore();
-  
+
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(weapon);
 
   // Validate that user has completed previous steps before accessing this page
@@ -107,7 +107,7 @@ export default function ArmaPage() {
     if (selectedWeapon) {
       // Save weapon choice to Zustand state
       setWeapon(selectedWeapon);
-      
+
       // Navigate to difficulty selection page
       router.push('/dificuldade');
     }
@@ -135,11 +135,10 @@ export default function ArmaPage() {
             <div
               key={weaponInfo.id}
               onClick={() => handleWeaponSelect(weaponInfo.id)}
-              className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${
-                selectedWeapon === weaponInfo.id
-                  ? 'border-purple-500 bg-purple-500/20'
-                  : 'border-gray-600 bg-white/10 hover:border-purple-400'
-              }`}
+              className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${selectedWeapon === weaponInfo.id
+                ? 'border-purple-500 bg-purple-500/20'
+                : 'border-gray-600 bg-white/10 hover:border-purple-400'
+                }`}
             >
               <div className="text-center mb-4">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-700 rounded-full flex items-center justify-center text-3xl">
@@ -200,11 +199,10 @@ export default function ArmaPage() {
           <button
             onClick={handleContinue}
             disabled={!selectedWeapon}
-            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent ${
-              selectedWeapon
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-            }`}
+            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent ${selectedWeapon
+              ? 'bg-purple-600 hover:bg-purple-700 text-white'
+              : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              }`}
           >
             {selectedWeapon ? 'Continuar' : 'Selecione uma arma'}
           </button>
@@ -219,6 +217,11 @@ export default function ArmaPage() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-400">
+        <p>© 2025 - O Caminho Assombrado da Escola - Feito com ❤️ pela Sofia para o Halloween</p>
+      </footer>
     </div>
   );
 }

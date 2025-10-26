@@ -76,6 +76,11 @@ export default function JogarPage() {
           </button>
         </div>
       )}
+      
+      {/* Footer */}
+      <footer className="absolute bottom-2 left-0 right-0 text-center text-gray-400 text-xs z-10">
+        <p>© 2025 - O Caminho Assombrado da Escola - Feito com ❤️ pela Sofia para o Halloween</p>
+      </footer>
     </div>
   );
 }
