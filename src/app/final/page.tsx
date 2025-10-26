@@ -104,8 +104,8 @@ function FinalPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-      <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full text-center text-white">
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md lg:max-w-lg w-full text-center text-white">
         {/* Game Result Header */}
         <div className="mb-8">
           {victory ? (
@@ -186,8 +186,8 @@ function FinalPageContent() {
         </div>
 
         {/* Leaderboard Display */}
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4 text-center">Leaderboard</h3>
+        <div className="mt-6 sm:mt-8">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-center">Leaderboard</h3>
           
           {loadingScores && allScores.length === 0 ? (
             <div className="text-center text-gray-400">
@@ -199,8 +199,8 @@ function FinalPageContent() {
               <p>Nenhuma pontuação encontrada.</p>
             </div>
           ) : (
-            <div className="bg-black/20 rounded-lg max-h-64 overflow-y-auto">
-              <div className="space-y-2 p-4">
+            <div className="bg-black/20 rounded-lg max-h-48 sm:max-h-64 lg:max-h-80 overflow-y-auto">
+              <div className="space-y-2 p-2 sm:p-4">
                 {allScores.map((scoreEntry, index) => (
                   <div
                     key={scoreEntry.scoreId}

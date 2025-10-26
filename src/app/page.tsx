@@ -45,7 +45,7 @@ export default function Home() {
         </header>
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto w-full">
+        <div className="flex-1 flex flex-col xl:flex-row gap-6 lg:gap-8 max-w-7xl mx-auto w-full">
           {/* Leaderboard Section */}
           <div className="flex-1 bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-orange-500/30">
             <h2 className="text-2xl md:text-3xl font-bold text-orange-400 mb-6 text-center">
@@ -127,7 +127,7 @@ export default function Home() {
           </div>
 
           {/* Game Start Section */}
-          <div className="lg:w-80 flex flex-col justify-center">
+          <div className="xl:w-80 xl:min-w-80 flex flex-col justify-center">
             <div className="bg-black/40 backdrop-blur-sm rounded-lg p-8 border border-orange-500/30 text-center">
               <div className="mb-6">
                 <div className="text-6xl mb-4">👻</div>
