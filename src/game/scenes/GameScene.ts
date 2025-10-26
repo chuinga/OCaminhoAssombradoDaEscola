@@ -3,13 +3,14 @@ import { Player } from '../entities/Player';
 import { DifficultyConfig } from '../../types';
 import { EnemyFactory, EnemyType } from '../entities/EnemyFactory';
 import { LifeItemFactory, LifeItem } from '../entities/LifeItem';
+import { WeaponFactory } from '../entities/WeaponFactory';
 import { audioManager } from '../utils/AudioManager';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
   private enemies!: Phaser.Physics.Arcade.Group;
   private lifeItems!: Phaser.Physics.Arcade.Group;
-  private schoolGate!: Phaser.GameObjects.Rectangle;
+  private schoolGate!: Phaser.GameObjects.Image;
   
   // Parallax background layers
   private backgroundLayers: {
@@ -610,13 +611,42 @@ export class GameScene extends Phaser.Scene {
    */
   private createPlayer(): void {
     // Create player at starting position (left side of the world)
-    this.player = new Player(this, 100, this.WORLD_HEIGHT - 200, 'player');
+    this.player = new Player(this, 100, this.WORLD_HEIGHT - 150, 'player');
     
     // Set player collision with world bounds
     this.player.setCollideWorldBounds(true);
     
+    // Initialize weapon based on game registry
+    const weaponType = this.registry.get('weapon') || 'katana';
+    const weapon = WeaponFactory.createWeapon(this, weaponType);
+    this.player.setWeapon(weapon);
+    
+    // Create ground platform for the player to stand on
+    this.createGround();
+    
     // Initialize HUD with player's starting stats
     this.updateGameState();
+  }
+  
+  /**
+   * Create ground platform for player physics
+   */
+  private createGround(): void {
+    // Create invisible ground platform at the bottom
+    const ground = this.add.rectangle(
+      this.WORLD_WIDTH / 2,
+      this.WORLD_HEIGHT - 50,
+      this.WORLD_WIDTH,
+      100,
+      0x000000,
+      0 // Invisible
+    );
+    
+    // Enable physics for ground collision
+    this.physics.add.existing(ground, true); // true = static body
+    
+    // Set up collision between player and ground
+    this.physics.add.collider(this.player, ground);
   }
   
   /**
@@ -638,13 +668,11 @@ export class GameScene extends Phaser.Scene {
    * Create the school gate at the end of the level
    */
   private createSchoolGate(): void {
-    // Place school gate at the end of the world
-    this.schoolGate = this.add.rectangle(
-      this.WORLD_WIDTH - 100, 
+    // Place school gate at the end of the world using the proper sprite
+    this.schoolGate = this.add.image(
+      this.WORLD_WIDTH - 50, 
       this.WORLD_HEIGHT - 100, 
-      100, 
-      200, 
-      0x8b4513
+      'school_gate'
     );
     
     // Enable physics for collision detection

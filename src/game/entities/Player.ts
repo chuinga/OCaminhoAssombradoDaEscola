@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { WeaponEntity } from '../../types';
 import { audioManager } from '../utils/AudioManager';
+import { WeaponFactory } from './WeaponFactory';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public lives: number;
