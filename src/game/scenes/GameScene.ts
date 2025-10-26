@@ -151,8 +151,12 @@ export class GameScene extends Phaser.Scene {
     girlGraphics.generateTexture('player_girl', 32, 50);
     girlGraphics.destroy();
 
-    // Use boy as default player texture
-    this.textures.addBase64('player', this.textures.get('player_boy').getSourceImage().src);
+    // Create default player texture (will be overridden by character selection)
+    const defaultGraphics = this.add.graphics();
+    defaultGraphics.fillStyle(0x00ff00);
+    defaultGraphics.fillRect(0, 0, 32, 50);
+    defaultGraphics.generateTexture('player', 32, 50);
+    defaultGraphics.destroy();
   }
 
   /**
@@ -377,13 +381,10 @@ export class GameScene extends Phaser.Scene {
     mummyGraphics.fillStyle(0xf5deb3);
     mummyGraphics.fillRect(8, 8, 16, 40);
     
-    // Bandage wrappings (white)
-    mummyGraphics.lineStyle(3, 0xffffff);
+    // Bandage wrappings (white) - using rectangles
+    mummyGraphics.fillStyle(0xffffff);
     for (let y = 10; y < 46; y += 6) {
-      mummyGraphics.beginPath();
-      mummyGraphics.moveTo(6, y);
-      mummyGraphics.lineTo(26, y);
-      mummyGraphics.strokePath();
+      mummyGraphics.fillRect(6, y, 20, 3);
     }
     
     // Head wrappings
@@ -415,16 +416,11 @@ export class GameScene extends Phaser.Scene {
     pumpkinGraphics.fillStyle(0xff6600);
     pumpkinGraphics.fillEllipse(12, 14, 20, 16);
     
-    // Pumpkin ridges
-    pumpkinGraphics.lineStyle(1, 0xcc5500);
-    pumpkinGraphics.beginPath();
-    pumpkinGraphics.moveTo(6, 8);
-    pumpkinGraphics.lineTo(4, 20);
-    pumpkinGraphics.moveTo(12, 6);
-    pumpkinGraphics.lineTo(12, 22);
-    pumpkinGraphics.moveTo(18, 8);
-    pumpkinGraphics.lineTo(20, 20);
-    pumpkinGraphics.strokePath();
+    // Pumpkin ridges - using thin rectangles
+    pumpkinGraphics.fillStyle(0xcc5500);
+    pumpkinGraphics.fillRect(5, 8, 1, 12);   // Left ridge
+    pumpkinGraphics.fillRect(12, 6, 1, 16);  // Center ridge
+    pumpkinGraphics.fillRect(19, 8, 1, 12);  // Right ridge
     
     // Stem
     pumpkinGraphics.fillStyle(0x228b22);
