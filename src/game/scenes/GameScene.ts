@@ -241,14 +241,12 @@ export class GameScene extends Phaser.Scene {
       treesGraphics.fillStyle(0x2d1b0e);
       treesGraphics.fillRect(x, 720 - treeHeight, 15, treeHeight);
       
-      // Tree branches (spooky)
-      treesGraphics.lineStyle(3, 0x2d1b0e);
-      treesGraphics.beginPath();
-      treesGraphics.moveTo(x + 7, 720 - treeHeight + 50);
-      treesGraphics.lineTo(x - 20, 720 - treeHeight + 20);
-      treesGraphics.moveTo(x + 7, 720 - treeHeight + 80);
-      treesGraphics.lineTo(x + 35, 720 - treeHeight + 30);
-      treesGraphics.strokePath();
+      // Tree branches (spooky) - simplified using rectangles
+      treesGraphics.fillStyle(0x2d1b0e);
+      // Left branch
+      treesGraphics.fillRect(x - 20, 720 - treeHeight + 20, 27, 3);
+      // Right branch  
+      treesGraphics.fillRect(x + 7, 720 - treeHeight + 30, 28, 3);
       
       // Dead leaves (sparse)
       if (Math.random() > 0.7) {
@@ -268,14 +266,11 @@ export class GameScene extends Phaser.Scene {
     streetGraphics.fillGradientStyle(0x533483, 0x533483, 0x2d1b69, 0x2d1b69, 1);
     streetGraphics.fillRect(0, 0, 800, 100);
     
-    // Street lines
-    streetGraphics.lineStyle(2, 0x666666);
-    streetGraphics.beginPath();
+    // Street lines - using rectangles instead of paths
+    streetGraphics.fillStyle(0x666666);
     for (let i = 0; i < 800; i += 60) {
-      streetGraphics.moveTo(i, 50);
-      streetGraphics.lineTo(i + 30, 50);
+      streetGraphics.fillRect(i, 49, 30, 2);
     }
-    streetGraphics.strokePath();
     
     // Sidewalk edge
     streetGraphics.fillStyle(0x696969);
@@ -296,16 +291,12 @@ export class GameScene extends Phaser.Scene {
     ghostGraphics.fillStyle(0xf0f0f0);
     ghostGraphics.fillEllipse(16, 20, 28, 32);
     
-    // Ghost tail (wavy bottom)
-    ghostGraphics.beginPath();
-    ghostGraphics.moveTo(2, 32);
-    ghostGraphics.quadraticCurveTo(8, 38, 12, 32);
-    ghostGraphics.quadraticCurveTo(16, 26, 20, 32);
-    ghostGraphics.quadraticCurveTo(24, 38, 30, 32);
-    ghostGraphics.lineTo(30, 20);
-    ghostGraphics.arc(16, 20, 14, 0, Math.PI, true);
-    ghostGraphics.closePath();
-    ghostGraphics.fillPath();
+    // Ghost tail (wavy bottom) - simplified approach
+    ghostGraphics.fillStyle(0xf0f0f0);
+    // Create wavy bottom using triangles
+    ghostGraphics.fillTriangle(2, 32, 8, 36, 12, 32);
+    ghostGraphics.fillTriangle(12, 32, 16, 28, 20, 32);
+    ghostGraphics.fillTriangle(20, 32, 24, 36, 30, 32);
     
     // Eyes (black)
     ghostGraphics.fillStyle(0x000000);
@@ -325,17 +316,14 @@ export class GameScene extends Phaser.Scene {
     batGraphics.fillStyle(0x2d1b0e);
     batGraphics.fillEllipse(12, 12, 8, 12);
     
-    // Bat wings
-    batGraphics.beginPath();
+    // Bat wings - simplified using triangles
+    batGraphics.fillStyle(0x2d1b0e);
     // Left wing
-    batGraphics.moveTo(4, 10);
-    batGraphics.quadraticCurveTo(0, 6, 2, 14);
-    batGraphics.quadraticCurveTo(6, 18, 8, 12);
-    // Right wing
-    batGraphics.moveTo(20, 10);
-    batGraphics.quadraticCurveTo(24, 6, 22, 14);
-    batGraphics.quadraticCurveTo(18, 18, 16, 12);
-    batGraphics.fillPath();
+    batGraphics.fillTriangle(4, 10, 0, 6, 8, 12);
+    batGraphics.fillTriangle(2, 14, 6, 18, 8, 12);
+    // Right wing  
+    batGraphics.fillTriangle(20, 10, 24, 6, 16, 12);
+    batGraphics.fillTriangle(22, 14, 18, 18, 16, 12);
     
     // Eyes (red)
     batGraphics.fillStyle(0xff0000);
@@ -448,10 +436,8 @@ export class GameScene extends Phaser.Scene {
     pumpkinGraphics.fillTriangle(16, 12, 18, 16, 14, 16); // Right eye
     pumpkinGraphics.fillRect(11, 18, 2, 1); // Nose
     
-    // Smile
-    pumpkinGraphics.beginPath();
-    pumpkinGraphics.arc(12, 16, 4, 0, Math.PI);
-    pumpkinGraphics.fillPath();
+    // Smile - simplified using rectangle
+    pumpkinGraphics.fillRect(8, 20, 8, 2);
     
     pumpkinGraphics.generateTexture('life_item_pumpkin', 24, 24);
     pumpkinGraphics.destroy();
@@ -467,13 +453,12 @@ export class GameScene extends Phaser.Scene {
     lollipopGraphics.fillStyle(0xff69b4);
     lollipopGraphics.fillCircle(12, 10, 8);
     
-    // Spiral pattern
-    lollipopGraphics.lineStyle(2, 0xffffff);
-    lollipopGraphics.beginPath();
-    lollipopGraphics.arc(12, 10, 6, 0, Math.PI * 2);
-    lollipopGraphics.arc(12, 10, 4, 0, Math.PI * 2);
-    lollipopGraphics.arc(12, 10, 2, 0, Math.PI * 2);
-    lollipopGraphics.strokePath();
+    // Spiral pattern - simplified using circles
+    lollipopGraphics.fillStyle(0xffffff);
+    lollipopGraphics.fillCircle(12, 10, 1);
+    lollipopGraphics.fillCircle(15, 8, 1);
+    lollipopGraphics.fillCircle(9, 12, 1);
+    lollipopGraphics.fillCircle(14, 12, 1);
     
     lollipopGraphics.generateTexture('life_item_lollipop', 24, 24);
     lollipopGraphics.destroy();
