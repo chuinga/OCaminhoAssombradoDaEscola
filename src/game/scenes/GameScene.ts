@@ -63,78 +63,485 @@ export class GameScene extends Phaser.Scene {
    * Preload assets for the game scene
    */
   preload(): void {
-    // Create placeholder colored rectangles for now since we don't have actual assets yet
-    // These will be replaced with actual sprites later
+    // Create Halloween-themed sprites using graphics
+    this.createPlayerSprites();
+    this.createBackgroundSprites();
+    this.createEnemySprites();
+    this.createLifeItemSprites();
+    this.createEnvironmentSprites();
+  }
+
+  /**
+   * Create player character sprites
+   */
+  private createPlayerSprites(): void {
+    // Boy character sprite
+    const boyGraphics = this.add.graphics();
     
-    // Player placeholder
-    this.add.graphics()
-      .fillStyle(0x00ff00)
-      .fillRect(0, 0, 32, 48)
-      .generateTexture('player', 32, 48);
+    // Head (skin tone)
+    boyGraphics.fillStyle(0xfdbcb4);
+    boyGraphics.fillCircle(16, 12, 8);
     
-    // Background layer placeholders
-    this.add.graphics()
-      .fillStyle(0x1a1a2e)
-      .fillRect(0, 0, 800, 720)
-      .generateTexture('moon_clouds', 800, 720);
+    // Hair (brown)
+    boyGraphics.fillStyle(0x8b4513);
+    boyGraphics.fillCircle(16, 8, 6);
     
-    this.add.graphics()
-      .fillStyle(0x16213e)
-      .fillRect(0, 0, 800, 720)
-      .generateTexture('houses', 800, 720);
+    // Eyes
+    boyGraphics.fillStyle(0x000000);
+    boyGraphics.fillCircle(13, 11, 1);
+    boyGraphics.fillCircle(19, 11, 1);
     
-    this.add.graphics()
-      .fillStyle(0x0f3460)
-      .fillRect(0, 0, 800, 720)
-      .generateTexture('trees', 800, 720);
+    // Body (shirt - blue)
+    boyGraphics.fillStyle(0x4169e1);
+    boyGraphics.fillRect(10, 20, 12, 16);
     
-    this.add.graphics()
-      .fillStyle(0x533483)
-      .fillRect(0, 0, 800, 720)
-      .generateTexture('street', 800, 720);
+    // Arms (skin tone)
+    boyGraphics.fillStyle(0xfdbcb4);
+    boyGraphics.fillRect(8, 22, 3, 12);
+    boyGraphics.fillRect(21, 22, 3, 12);
     
-    // School gate placeholder
-    this.add.graphics()
-      .fillStyle(0x8b4513)
-      .fillRect(0, 0, 100, 200)
-      .generateTexture('school_gate', 100, 200);
+    // Legs (pants - dark blue)
+    boyGraphics.fillStyle(0x191970);
+    boyGraphics.fillRect(12, 36, 3, 12);
+    boyGraphics.fillRect(17, 36, 3, 12);
     
-    // Enemy placeholders
-    this.add.graphics()
-      .fillStyle(0xffffff)
-      .fillRect(0, 0, 32, 32)
-      .generateTexture('ghost', 32, 32);
+    // Shoes (black)
+    boyGraphics.fillStyle(0x000000);
+    boyGraphics.fillRect(11, 46, 5, 3);
+    boyGraphics.fillRect(16, 46, 5, 3);
     
-    this.add.graphics()
-      .fillStyle(0x8b4513)
-      .fillRect(0, 0, 24, 20)
-      .generateTexture('bat', 24, 20);
+    boyGraphics.generateTexture('player_boy', 32, 50);
+    boyGraphics.destroy();
+
+    // Girl character sprite
+    const girlGraphics = this.add.graphics();
     
-    this.add.graphics()
-      .fillStyle(0x800080)
-      .fillRect(0, 0, 32, 48)
-      .generateTexture('vampire', 32, 48);
+    // Head (skin tone)
+    girlGraphics.fillStyle(0xfdbcb4);
+    girlGraphics.fillCircle(16, 12, 8);
     
-    this.add.graphics()
-      .fillStyle(0xf5deb3)
-      .fillRect(0, 0, 32, 48)
-      .generateTexture('mummy', 32, 48);
+    // Hair (blonde)
+    girlGraphics.fillStyle(0xffd700);
+    girlGraphics.fillCircle(16, 8, 7);
     
-    // Life item placeholders
-    this.add.graphics()
-      .fillStyle(0xff6600)
-      .fillRect(0, 0, 24, 24)
-      .generateTexture('life_item_pumpkin', 24, 24);
+    // Eyes
+    girlGraphics.fillStyle(0x000000);
+    girlGraphics.fillCircle(13, 11, 1);
+    girlGraphics.fillCircle(19, 11, 1);
     
-    this.add.graphics()
-      .fillStyle(0xff69b4)
-      .fillRect(0, 0, 24, 24)
-      .generateTexture('life_item_lollipop', 24, 24);
+    // Body (dress - pink)
+    girlGraphics.fillStyle(0xff69b4);
+    girlGraphics.fillRect(9, 20, 14, 18);
     
-    this.add.graphics()
-      .fillStyle(0xff0000)
-      .fillRect(0, 0, 24, 24)
-      .generateTexture('life_item_apple', 24, 24);
+    // Arms (skin tone)
+    girlGraphics.fillStyle(0xfdbcb4);
+    girlGraphics.fillRect(7, 22, 3, 12);
+    girlGraphics.fillRect(22, 22, 3, 12);
+    
+    // Legs (skin tone)
+    girlGraphics.fillStyle(0xfdbcb4);
+    girlGraphics.fillRect(12, 38, 3, 8);
+    girlGraphics.fillRect(17, 38, 3, 8);
+    
+    // Shoes (red)
+    girlGraphics.fillStyle(0xff0000);
+    girlGraphics.fillRect(11, 46, 5, 3);
+    girlGraphics.fillRect(16, 46, 5, 3);
+    
+    girlGraphics.generateTexture('player_girl', 32, 50);
+    girlGraphics.destroy();
+
+    // Use boy as default player texture
+    this.textures.addBase64('player', this.textures.get('player_boy').getSourceImage().src);
+  }
+
+  /**
+   * Create background layer sprites
+   */
+  private createBackgroundSprites(): void {
+    // Moon and clouds layer
+    const moonCloudsGraphics = this.add.graphics();
+    
+    // Night sky gradient
+    moonCloudsGraphics.fillGradientStyle(0x0f0f23, 0x0f0f23, 0x1a1a2e, 0x1a1a2e, 1);
+    moonCloudsGraphics.fillRect(0, 0, 800, 720);
+    
+    // Moon
+    moonCloudsGraphics.fillStyle(0xf5f5dc);
+    moonCloudsGraphics.fillCircle(650, 100, 40);
+    
+    // Moon craters
+    moonCloudsGraphics.fillStyle(0xe6e6d3);
+    moonCloudsGraphics.fillCircle(645, 95, 8);
+    moonCloudsGraphics.fillCircle(655, 105, 5);
+    
+    // Stars
+    moonCloudsGraphics.fillStyle(0xffffff);
+    for (let i = 0; i < 20; i++) {
+      const x = Math.random() * 800;
+      const y = Math.random() * 300;
+      moonCloudsGraphics.fillCircle(x, y, 1);
+    }
+    
+    // Clouds
+    moonCloudsGraphics.fillStyle(0x2f2f2f);
+    moonCloudsGraphics.fillEllipse(200, 150, 120, 40);
+    moonCloudsGraphics.fillEllipse(500, 200, 100, 35);
+    
+    moonCloudsGraphics.generateTexture('moon_clouds', 800, 720);
+    moonCloudsGraphics.destroy();
+
+    // Houses layer
+    const housesGraphics = this.add.graphics();
+    
+    // Dark sky
+    housesGraphics.fillGradientStyle(0x16213e, 0x16213e, 0x0f1a2e, 0x0f1a2e, 1);
+    housesGraphics.fillRect(0, 0, 800, 720);
+    
+    // House silhouettes
+    for (let i = 0; i < 5; i++) {
+      const x = i * 160 + 50;
+      const height = 150 + Math.random() * 100;
+      
+      // House body
+      housesGraphics.fillStyle(0x000000);
+      housesGraphics.fillRect(x, 720 - height, 120, height);
+      
+      // Roof
+      housesGraphics.fillTriangle(
+        x - 10, 720 - height,
+        x + 60, 720 - height - 40,
+        x + 130, 720 - height
+      );
+      
+      // Windows (some lit)
+      if (Math.random() > 0.5) {
+        housesGraphics.fillStyle(0xffff99);
+        housesGraphics.fillRect(x + 20, 720 - height + 30, 15, 20);
+        housesGraphics.fillRect(x + 85, 720 - height + 30, 15, 20);
+      }
+    }
+    
+    housesGraphics.generateTexture('houses', 800, 720);
+    housesGraphics.destroy();
+
+    // Trees layer
+    const treesGraphics = this.add.graphics();
+    
+    // Darker sky
+    treesGraphics.fillGradientStyle(0x0f3460, 0x0f3460, 0x0a2040, 0x0a2040, 1);
+    treesGraphics.fillRect(0, 0, 800, 720);
+    
+    // Spooky trees
+    for (let i = 0; i < 8; i++) {
+      const x = i * 100 + 30;
+      const treeHeight = 200 + Math.random() * 150;
+      
+      // Tree trunk
+      treesGraphics.fillStyle(0x2d1b0e);
+      treesGraphics.fillRect(x, 720 - treeHeight, 15, treeHeight);
+      
+      // Tree branches (spooky)
+      treesGraphics.lineStyle(3, 0x2d1b0e);
+      treesGraphics.beginPath();
+      treesGraphics.moveTo(x + 7, 720 - treeHeight + 50);
+      treesGraphics.lineTo(x - 20, 720 - treeHeight + 20);
+      treesGraphics.moveTo(x + 7, 720 - treeHeight + 80);
+      treesGraphics.lineTo(x + 35, 720 - treeHeight + 30);
+      treesGraphics.strokePath();
+      
+      // Dead leaves (sparse)
+      if (Math.random() > 0.7) {
+        treesGraphics.fillStyle(0x8b4513);
+        treesGraphics.fillCircle(x - 15, 720 - treeHeight + 25, 8);
+        treesGraphics.fillCircle(x + 30, 720 - treeHeight + 35, 6);
+      }
+    }
+    
+    treesGraphics.generateTexture('trees', 800, 720);
+    treesGraphics.destroy();
+
+    // Street layer
+    const streetGraphics = this.add.graphics();
+    
+    // Street/ground
+    streetGraphics.fillGradientStyle(0x533483, 0x533483, 0x2d1b69, 0x2d1b69, 1);
+    streetGraphics.fillRect(0, 0, 800, 100);
+    
+    // Street lines
+    streetGraphics.lineStyle(2, 0x666666);
+    streetGraphics.beginPath();
+    for (let i = 0; i < 800; i += 60) {
+      streetGraphics.moveTo(i, 50);
+      streetGraphics.lineTo(i + 30, 50);
+    }
+    streetGraphics.strokePath();
+    
+    // Sidewalk edge
+    streetGraphics.fillStyle(0x696969);
+    streetGraphics.fillRect(0, 0, 800, 5);
+    
+    streetGraphics.generateTexture('street', 800, 100);
+    streetGraphics.destroy();
+  }
+
+  /**
+   * Create enemy sprites with Halloween theme
+   */
+  private createEnemySprites(): void {
+    // Ghost sprite
+    const ghostGraphics = this.add.graphics();
+    
+    // Ghost body (white with transparency effect)
+    ghostGraphics.fillStyle(0xf0f0f0);
+    ghostGraphics.fillEllipse(16, 20, 28, 32);
+    
+    // Ghost tail (wavy bottom)
+    ghostGraphics.beginPath();
+    ghostGraphics.moveTo(2, 32);
+    ghostGraphics.quadraticCurveTo(8, 38, 12, 32);
+    ghostGraphics.quadraticCurveTo(16, 26, 20, 32);
+    ghostGraphics.quadraticCurveTo(24, 38, 30, 32);
+    ghostGraphics.lineTo(30, 20);
+    ghostGraphics.arc(16, 20, 14, 0, Math.PI, true);
+    ghostGraphics.closePath();
+    ghostGraphics.fillPath();
+    
+    // Eyes (black)
+    ghostGraphics.fillStyle(0x000000);
+    ghostGraphics.fillEllipse(10, 16, 4, 6);
+    ghostGraphics.fillEllipse(22, 16, 4, 6);
+    
+    // Mouth (surprised)
+    ghostGraphics.fillEllipse(16, 24, 3, 4);
+    
+    ghostGraphics.generateTexture('ghost', 32, 40);
+    ghostGraphics.destroy();
+
+    // Bat sprite
+    const batGraphics = this.add.graphics();
+    
+    // Bat body
+    batGraphics.fillStyle(0x2d1b0e);
+    batGraphics.fillEllipse(12, 12, 8, 12);
+    
+    // Bat wings
+    batGraphics.beginPath();
+    // Left wing
+    batGraphics.moveTo(4, 10);
+    batGraphics.quadraticCurveTo(0, 6, 2, 14);
+    batGraphics.quadraticCurveTo(6, 18, 8, 12);
+    // Right wing
+    batGraphics.moveTo(20, 10);
+    batGraphics.quadraticCurveTo(24, 6, 22, 14);
+    batGraphics.quadraticCurveTo(18, 18, 16, 12);
+    batGraphics.fillPath();
+    
+    // Eyes (red)
+    batGraphics.fillStyle(0xff0000);
+    batGraphics.fillCircle(10, 10, 1);
+    batGraphics.fillCircle(14, 10, 1);
+    
+    batGraphics.generateTexture('bat', 24, 20);
+    batGraphics.destroy();
+
+    // Vampire sprite
+    const vampireGraphics = this.add.graphics();
+    
+    // Head (pale skin)
+    vampireGraphics.fillStyle(0xe6e6e6);
+    vampireGraphics.fillCircle(16, 12, 8);
+    
+    // Hair (black)
+    vampireGraphics.fillStyle(0x000000);
+    vampireGraphics.fillCircle(16, 8, 6);
+    
+    // Cape collar
+    vampireGraphics.fillStyle(0x8b0000);
+    vampireGraphics.fillRect(8, 18, 16, 4);
+    
+    // Eyes (red)
+    vampireGraphics.fillStyle(0xff0000);
+    vampireGraphics.fillCircle(13, 11, 1);
+    vampireGraphics.fillCircle(19, 11, 1);
+    
+    // Fangs
+    vampireGraphics.fillStyle(0xffffff);
+    vampireGraphics.fillTriangle(12, 14, 14, 18, 16, 14);
+    vampireGraphics.fillTriangle(16, 14, 18, 18, 20, 14);
+    
+    // Body (black cape)
+    vampireGraphics.fillStyle(0x000000);
+    vampireGraphics.fillRect(6, 22, 20, 24);
+    
+    // Cape (red interior)
+    vampireGraphics.fillStyle(0x8b0000);
+    vampireGraphics.fillTriangle(6, 22, 2, 46, 10, 46);
+    vampireGraphics.fillTriangle(26, 22, 30, 46, 22, 46);
+    
+    vampireGraphics.generateTexture('vampire', 32, 48);
+    vampireGraphics.destroy();
+
+    // Mummy sprite
+    const mummyGraphics = this.add.graphics();
+    
+    // Body base (beige)
+    mummyGraphics.fillStyle(0xf5deb3);
+    mummyGraphics.fillRect(8, 8, 16, 40);
+    
+    // Bandage wrappings (white)
+    mummyGraphics.lineStyle(3, 0xffffff);
+    for (let y = 10; y < 46; y += 6) {
+      mummyGraphics.beginPath();
+      mummyGraphics.moveTo(6, y);
+      mummyGraphics.lineTo(26, y);
+      mummyGraphics.strokePath();
+    }
+    
+    // Head wrappings
+    mummyGraphics.fillStyle(0xffffff);
+    mummyGraphics.fillRect(10, 8, 12, 12);
+    
+    // Eyes (glowing)
+    mummyGraphics.fillStyle(0xffff00);
+    mummyGraphics.fillCircle(13, 14, 2);
+    mummyGraphics.fillCircle(19, 14, 2);
+    
+    // Eye pupils
+    mummyGraphics.fillStyle(0x000000);
+    mummyGraphics.fillCircle(13, 14, 1);
+    mummyGraphics.fillCircle(19, 14, 1);
+    
+    mummyGraphics.generateTexture('mummy', 32, 48);
+    mummyGraphics.destroy();
+  }
+
+  /**
+   * Create life item sprites with Halloween theme
+   */
+  private createLifeItemSprites(): void {
+    // Pumpkin life item
+    const pumpkinGraphics = this.add.graphics();
+    
+    // Pumpkin body
+    pumpkinGraphics.fillStyle(0xff6600);
+    pumpkinGraphics.fillEllipse(12, 14, 20, 16);
+    
+    // Pumpkin ridges
+    pumpkinGraphics.lineStyle(1, 0xcc5500);
+    pumpkinGraphics.beginPath();
+    pumpkinGraphics.moveTo(6, 8);
+    pumpkinGraphics.lineTo(4, 20);
+    pumpkinGraphics.moveTo(12, 6);
+    pumpkinGraphics.lineTo(12, 22);
+    pumpkinGraphics.moveTo(18, 8);
+    pumpkinGraphics.lineTo(20, 20);
+    pumpkinGraphics.strokePath();
+    
+    // Stem
+    pumpkinGraphics.fillStyle(0x228b22);
+    pumpkinGraphics.fillRect(11, 2, 2, 6);
+    
+    // Jack-o'-lantern face
+    pumpkinGraphics.fillStyle(0xffff00);
+    pumpkinGraphics.fillTriangle(8, 12, 10, 16, 6, 16);  // Left eye
+    pumpkinGraphics.fillTriangle(16, 12, 18, 16, 14, 16); // Right eye
+    pumpkinGraphics.fillRect(11, 18, 2, 1); // Nose
+    
+    // Smile
+    pumpkinGraphics.beginPath();
+    pumpkinGraphics.arc(12, 16, 4, 0, Math.PI);
+    pumpkinGraphics.fillPath();
+    
+    pumpkinGraphics.generateTexture('life_item_pumpkin', 24, 24);
+    pumpkinGraphics.destroy();
+
+    // Lollipop life item
+    const lollipopGraphics = this.add.graphics();
+    
+    // Stick
+    lollipopGraphics.fillStyle(0xffffff);
+    lollipopGraphics.fillRect(11, 12, 2, 10);
+    
+    // Candy (spiral)
+    lollipopGraphics.fillStyle(0xff69b4);
+    lollipopGraphics.fillCircle(12, 10, 8);
+    
+    // Spiral pattern
+    lollipopGraphics.lineStyle(2, 0xffffff);
+    lollipopGraphics.beginPath();
+    lollipopGraphics.arc(12, 10, 6, 0, Math.PI * 2);
+    lollipopGraphics.arc(12, 10, 4, 0, Math.PI * 2);
+    lollipopGraphics.arc(12, 10, 2, 0, Math.PI * 2);
+    lollipopGraphics.strokePath();
+    
+    lollipopGraphics.generateTexture('life_item_lollipop', 24, 24);
+    lollipopGraphics.destroy();
+
+    // Apple life item
+    const appleGraphics = this.add.graphics();
+    
+    // Apple body
+    appleGraphics.fillStyle(0xff0000);
+    appleGraphics.fillEllipse(12, 14, 16, 18);
+    
+    // Apple indent (top)
+    appleGraphics.fillStyle(0xcc0000);
+    appleGraphics.fillEllipse(12, 8, 8, 4);
+    
+    // Stem
+    appleGraphics.fillStyle(0x8b4513);
+    appleGraphics.fillRect(11, 4, 2, 6);
+    
+    // Leaf
+    appleGraphics.fillStyle(0x228b22);
+    appleGraphics.fillEllipse(15, 6, 4, 2);
+    
+    // Highlight
+    appleGraphics.fillStyle(0xff6666);
+    appleGraphics.fillEllipse(9, 11, 4, 6);
+    
+    appleGraphics.generateTexture('life_item_apple', 24, 24);
+    appleGraphics.destroy();
+  }
+
+  /**
+   * Create environment sprites
+   */
+  private createEnvironmentSprites(): void {
+    // School gate
+    const gateGraphics = this.add.graphics();
+    
+    // Gate posts
+    gateGraphics.fillStyle(0x2d1b0e);
+    gateGraphics.fillRect(10, 0, 15, 200);
+    gateGraphics.fillRect(75, 0, 15, 200);
+    
+    // Gate bars
+    gateGraphics.fillStyle(0x000000);
+    for (let i = 0; i < 6; i++) {
+      const x = 25 + i * 10;
+      gateGraphics.fillRect(x, 20, 3, 160);
+    }
+    
+    // Gate top
+    gateGraphics.fillRect(10, 20, 80, 8);
+    
+    // School sign
+    gateGraphics.fillStyle(0x8b4513);
+    gateGraphics.fillRect(20, 40, 60, 30);
+    
+    // Sign text background
+    gateGraphics.fillStyle(0xffffff);
+    gateGraphics.fillRect(22, 42, 56, 26);
+    
+    // Decorative elements
+    gateGraphics.fillStyle(0xffd700);
+    gateGraphics.fillCircle(15, 10, 3);
+    gateGraphics.fillCircle(85, 10, 3);
+    
+    gateGraphics.generateTexture('school_gate', 100, 200);
+    gateGraphics.destroy();
   }
   
   /**

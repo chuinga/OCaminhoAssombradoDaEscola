@@ -17,7 +17,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private readonly INVULNERABILITY_DURATION = 800; // 800ms as per requirement 7.4
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
-    super(scene, x, y, texture);
+    // Get character selection from game registry
+    const character = scene.registry.get('character') || 'boy';
+    const characterTexture = character === 'boy' ? 'player_boy' : 'player_girl';
+    
+    super(scene, x, y, characterTexture);
     
     // Initialize properties
     this.lives = 10; // Starting lives as per requirement 7.1

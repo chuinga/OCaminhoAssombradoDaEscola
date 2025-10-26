@@ -24,8 +24,14 @@ export function PhaserGameComponent({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Get game store actions for updating HUD
-  const { updateLives, updateScore, setGameStatus } = useGameStore();
+  // Get game store data and actions for updating HUD
+  const { 
+    character, 
+    weapon, 
+    updateLives, 
+    updateScore, 
+    setGameStatus 
+  } = useGameStore();
 
   useEffect(() => {
     if (!containerRef.current || typeof window === 'undefined') return;
@@ -40,8 +46,10 @@ export function PhaserGameComponent({
           parent: containerRef.current!
         });
 
-        // Set difficulty in game registry for the scene to access
+        // Set game configuration in registry for the scene to access
         gameRef.current.registry.set('difficulty', difficulty);
+        gameRef.current.registry.set('character', character);
+        gameRef.current.registry.set('weapon', weapon);
 
         // Set up game event listeners
         gameRef.current.events.on('ready', () => {
