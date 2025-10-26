@@ -30,7 +30,7 @@ export class GameScene extends Phaser.Scene {
   
   // Spawning system
   private lastSpawnX: number = 0;
-  private spawnInterval: number = 1000; // Distance between spawn checks (px)
+  private spawnInterval: number = 500; // Distance between spawn checks (px) - reduced for more frequent spawning
   private difficultyConfig!: DifficultyConfig;
   
   // Touch controls state
@@ -556,6 +556,45 @@ export class GameScene extends Phaser.Scene {
     
     // Set up input controls
     this.setupControls();
+    
+    // Spawn some initial enemies for testing
+    this.spawnInitialEnemies();
+  }
+  
+  /**
+   * Spawn some initial enemies near the start for immediate gameplay
+   */
+  private spawnInitialEnemies(): void {
+    const groundY = this.WORLD_HEIGHT - 100;
+    
+    // Spawn a few enemies at different distances from the start
+    const initialSpawns = [
+      { x: 300, type: 'ghost' as const },
+      { x: 500, type: 'bat' as const },
+      { x: 800, type: 'vampire' as const },
+      { x: 1200, type: 'mummy' as const }
+    ];
+    
+    initialSpawns.forEach(spawn => {
+      const spawnY = EnemyFactory.getSpawnHeight(spawn.type, groundY);
+      const enemy = EnemyFactory.createEnemy(this, spawn.x, spawnY, spawn.type);
+      this.enemies.add(enemy);
+      console.log(`Initial spawn: ${spawn.type} at (${spawn.x}, ${spawnY})`);
+    });
+    
+    // Also spawn some life items for testing
+    const lifeItemSpawns = [
+      { x: 400, type: 'pumpkin' },
+      { x: 700, type: 'lollipop' },
+      { x: 1000, type: 'apple' }
+    ];
+    
+    lifeItemSpawns.forEach(spawn => {
+      const spawnY = LifeItemFactory.getSpawnHeight(groundY);
+      const lifeItem = LifeItemFactory.createLifeItem(this, spawn.x, spawnY, spawn.type);
+      this.lifeItems.add(lifeItem);
+      console.log(`Initial life item: ${spawn.type} at (${spawn.x}, ${spawnY})`);
+    });
   }
   
   /**
@@ -945,6 +984,8 @@ export class GameScene extends Phaser.Scene {
   private spawnEnemiesInRegion(startX: number, endX: number, regionWidth: number, groundY: number): void {
     const enemyCount = Math.floor((regionWidth / 1000) * this.difficultyConfig.enemySpawnRate);
     
+    console.log(`Spawning ${enemyCount} enemies in region ${startX}-${endX} (difficulty: ${this.difficulty})`);
+    
     for (let i = 0; i < enemyCount; i++) {
       // Random position within the region
       const spawnX = startX + Math.random() * regionWidth;
@@ -954,6 +995,8 @@ export class GameScene extends Phaser.Scene {
       
       // Get appropriate spawn height for enemy type
       const spawnY = EnemyFactory.getSpawnHeight(enemyType, groundY);
+      
+      console.log(`Creating ${enemyType} enemy at (${spawnX}, ${spawnY})`);
       
       // Create enemy
       const enemy = EnemyFactory.createEnemy(this, spawnX, spawnY, enemyType);
