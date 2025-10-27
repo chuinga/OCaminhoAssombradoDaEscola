@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AdvancedPerformanceMonitor, NetworkPerformanceMonitor, MemoryManager, PerformanceDebugger } from '../../utils/performance';
+import { AdvancedPerformanceMonitor, NetworkPerformanceMonitor, MemoryManager, PerformanceDebugger, type PerformanceMetrics } from '../../utils/performance';
 
 interface PerformanceMonitorProps {
   isVisible: boolean;

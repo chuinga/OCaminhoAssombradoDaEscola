@@ -8,6 +8,8 @@ import { audioManager } from '../utils/AudioManager';
 import { batteryOptimizer } from '../../utils/mobileOptimization';
 import { analyticsService } from '../../lib/analytics';
 import { AdvancedPerformanceMonitor, PerformanceDebugger } from '../../utils/performance';
+import { performanceOptimizer } from '../../utils/performanceOptimizer';
+import { usePerformanceStore } from '../../store/performanceStore';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -52,6 +54,10 @@ export class GameScene extends Phaser.Scene {
   // Performance monitoring
   private performanceMonitor: AdvancedPerformanceMonitor;
   private performanceDebugger: PerformanceDebugger;
+  
+  // Performance optimization
+  private frameSkipCounter: number = 0;
+  private lastQualityCheck: number = 0;
 
   // Touch controls state
   private touchControls = {
@@ -1760,6 +1766,19 @@ export class GameScene extends Phaser.Scene {
     // Start performance measurement
     this.performanceMonitor.startUpdateMeasurement();
     
+    // Update performance optimizer
+    performanceOptimizer.update();
+    
+    // Check if we should skip this frame for performance
+    const optimizationSettings = performanceOptimizer.getOptimizationSettings();
+    if (optimizationSettings.skipFrames) {
+      this.frameSkipCounter++;
+      if (this.frameSkipCounter % 2 === 0) {
+        this.performanceMonitor.endUpdateMeasurement();
+        return; // Skip every other frame
+      }
+    }
+    
     // Debug: Count update calls
     this.updateCallCount++;
     if (this.updateCallCount % 60 === 0) { // Log every 60 frames
@@ -1773,11 +1792,19 @@ export class GameScene extends Phaser.Scene {
           frameTime: metrics.frameTime,
           activeObjects: metrics.activeObjects,
         });
+        
+        // Apply emergency optimizations if performance is critically low
+        if (metrics.fps < 15) {
+          performanceOptimizer.applyEmergencyOptimizations();
+        }
       }
     }
 
     // Apply battery optimization settings
     this.applyBatteryOptimizations();
+    
+    // Apply performance optimizations
+    this.applyPerformanceOptimizations();
 
     // Update player
     this.player.update(time, delta);
@@ -1785,14 +1812,17 @@ export class GameScene extends Phaser.Scene {
     // Handle input
     this.handleInput();
 
-    // Update parallax backgrounds (conditionally based on battery optimization)
-    const optimizationLevel = batteryOptimizer.getOptimizationLevel();
-    if (optimizationLevel !== 'high' || this.updateCallCount % 120 === 0) {
+    // Update parallax backgrounds (conditionally based on optimizations)
+    const shouldUpdateParallax = this.shouldUpdateParallax();
+    if (shouldUpdateParallax) {
       this.updateParallax();
     }
 
-    // Handle spawning system
-    this.updateSpawning();
+    // Handle spawning system (with reduced frequency if needed)
+    const shouldUpdateSpawning = this.shouldUpdateSpawning();
+    if (shouldUpdateSpawning) {
+      this.updateSpawning();
+    }
 
     // Handle collisions
     this.handleCollisions();
@@ -1806,6 +1836,16 @@ export class GameScene extends Phaser.Scene {
     // Record object count for performance monitoring
     const totalObjects = this.enemies.children.size + this.lifeItems.children.size + 1; // +1 for player
     this.performanceMonitor.recordObjectCount(totalObjects);
+    
+    // Cull off-screen objects if optimization is enabled
+    if (optimizationSettings.cullOffscreenObjects) {
+      this.cullOffscreenObjects();
+    }
+    
+    // Force garbage collection periodically if enabled
+    if (optimizationSettings.aggressiveGarbageCollection && this.updateCallCount % 300 === 0) {
+      performanceOptimizer.forceGarbageCollection();
+    }
     
     // End performance measurement
     this.performanceMonitor.endUpdateMeasurement();
@@ -2700,6 +2740,136 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Background processing optimization is handled in the main update loop
+  }
+
+  /**
+   * Apply performance optimizations based on current settings
+   * Requirements: 19.2 - Optimize for low-end devices
+   */
+  private applyPerformanceOptimizations(): void {
+    // Only check every 120 frames (about every 2 seconds) to avoid performance impact
+    if (this.updateCallCount % 120 !== 0) return;
+
+    const performanceSettings = usePerformanceStore.getState().settings;
+    const optimizationSettings = performanceOptimizer.getOptimizationSettings();
+
+    // Apply frame rate limit from performance settings
+    if (this.game.loop && performanceSettings.frameRateLimit > 0) {
+      const targetFPS = performanceSettings.frameRateLimit;
+      if (this.game.loop.targetFps !== targetFPS) {
+        this.game.loop.targetFps = targetFPS;
+        console.log(`Performance optimization: Set target FPS to ${targetFPS}`);
+      }
+    }
+
+    // Adjust enemy spawn rate based on performance settings
+    if (optimizationSettings.reduceUpdateFrequency) {
+      const baseSpawnInterval = 2000; // Base interval
+      const optimizedInterval = baseSpawnInterval * 1.5; // Reduce spawn frequency
+      
+      if (this.enemySpawnInterval !== optimizedInterval) {
+        this.enemySpawnInterval = optimizedInterval;
+        console.log(`Performance optimization: Reduced enemy spawn frequency`);
+      }
+    }
+
+    // Disable audio if performance is critically low
+    if (performanceSettings.lightweightMode && !audioManager.isMutedState()) {
+      audioManager.mute();
+      console.log('Performance optimization: Audio disabled in lightweight mode');
+    }
+  }
+
+  /**
+   * Determine if parallax backgrounds should be updated this frame
+   */
+  private shouldUpdateParallax(): boolean {
+    const optimizationSettings = performanceOptimizer.getOptimizationSettings();
+    const batteryOptimizationLevel = batteryOptimizer.getOptimizationLevel();
+    
+    // Always update on high quality
+    if (!optimizationSettings.reduceUpdateFrequency && batteryOptimizationLevel === 'none') {
+      return true;
+    }
+    
+    // Update every 2nd frame on medium optimization
+    if (batteryOptimizationLevel === 'medium' || optimizationSettings.reduceUpdateFrequency) {
+      return this.updateCallCount % 2 === 0;
+    }
+    
+    // Update every 4th frame on high optimization
+    if (batteryOptimizationLevel === 'high') {
+      return this.updateCallCount % 4 === 0;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Determine if spawning system should be updated this frame
+   */
+  private shouldUpdateSpawning(): boolean {
+    const optimizationSettings = performanceOptimizer.getOptimizationSettings();
+    
+    // Always update spawning unless we're in aggressive optimization mode
+    if (!optimizationSettings.reduceUpdateFrequency) {
+      return true;
+    }
+    
+    // Update every 2nd frame when optimizing
+    return this.updateCallCount % 2 === 0;
+  }
+
+  /**
+   * Cull objects that are far off-screen to improve performance
+   */
+  private cullOffscreenObjects(): void {
+    const camera = this.cameras.main;
+    const cullDistance = 400; // Distance beyond screen to start culling
+    const screenLeft = camera.scrollX - cullDistance;
+    const screenRight = camera.scrollX + camera.width + cullDistance;
+
+    // Cull enemies that are too far off-screen
+    this.enemies.children.entries.forEach((enemy) => {
+      const enemySprite = enemy as Phaser.Physics.Arcade.Sprite;
+      if (enemySprite.x < screenLeft || enemySprite.x > screenRight) {
+        // Instead of destroying, disable the enemy to save on object creation/destruction
+        enemySprite.setActive(false);
+        enemySprite.setVisible(false);
+        if (enemySprite.body) {
+          enemySprite.body.enable = false;
+        }
+      }
+    });
+
+    // Cull life items that are too far off-screen
+    this.lifeItems.children.entries.forEach((item) => {
+      const itemSprite = item as Phaser.Physics.Arcade.Sprite;
+      if (itemSprite.x < screenLeft || itemSprite.x > screenRight) {
+        itemSprite.setActive(false);
+        itemSprite.setVisible(false);
+        if (itemSprite.body) {
+          itemSprite.body.enable = false;
+        }
+      }
+    });
+  }
+
+  /**
+   * Get current performance optimization status for debugging
+   */
+  getPerformanceStatus(): {
+    optimizationSettings: any;
+    performanceSettings: any;
+    metrics: any;
+    frameSkipCounter: number;
+  } {
+    return {
+      optimizationSettings: performanceOptimizer.getOptimizationSettings(),
+      performanceSettings: usePerformanceStore.getState().settings,
+      metrics: performanceOptimizer.getMetrics(),
+      frameSkipCounter: this.frameSkipCounter,
+    };
   }
 
 }

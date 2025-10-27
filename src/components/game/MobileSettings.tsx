@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { mobileOptimization, type MobileSettings, type BatteryInfo } from '@/utils/mobileOptimization';
+import { PerformanceSettings } from '@/components/settings/PerformanceSettings';
 
 interface MobileSettingsProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function MobileSettings({ isOpen, onClose, className = '' }: MobileSettin
   });
 
   const [isApplying, setIsApplying] = useState(false);
+  const [showPerformanceSettings, setShowPerformanceSettings] = useState(false);
 
   // Load current settings and status
   useEffect(() => {
@@ -272,6 +274,24 @@ export function MobileSettings({ isOpen, onClose, className = '' }: MobileSettin
             )}
           </div>
 
+          {/* Performance Settings Button */}
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowPerformanceSettings(true)}
+              className="w-full p-4 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-600 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <h4 className="text-white font-medium">Graphics & Performance</h4>
+                  <p className="text-gray-400 text-sm">Optimize game performance for your device</p>
+                </div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
+
           {/* Apply Status */}
           {isApplying && (
             <div className="flex items-center justify-center py-2">
@@ -318,6 +338,12 @@ export function MobileSettings({ isOpen, onClose, className = '' }: MobileSettin
           border: 2px solid #1e40af;
         }
       `}</style>
+
+      {/* Performance Settings Modal */}
+      <PerformanceSettings
+        isOpen={showPerformanceSettings}
+        onClose={() => setShowPerformanceSettings(false)}
+      />
     </div>
   );
 }

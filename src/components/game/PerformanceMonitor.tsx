@@ -13,6 +13,10 @@ export function PerformanceMonitor({ enabled = false, className = '' }: Performa
     fps: 60,
     frameTime: 16.67,
     isLowPerformance: false,
+    renderTime: 0,
+    updateTime: 0,
+    drawCalls: 0,
+    activeObjects: 0,
   });
   const [monitor] = useState(() => new PerfMonitor());
 

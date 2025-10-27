@@ -7,6 +7,9 @@ import { MobileSettingsButton } from './MobileSettingsButton';
 import AnalyticsDashboard from '../analytics/AnalyticsDashboard';
 import { PerformanceMonitor } from '../debug/PerformanceMonitor';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
+import { usePerformanceMonitoring } from '../../hooks/usePerformanceMonitoring';
+import { PerformanceSettings } from '../settings/PerformanceSettings';
+import { PerformanceWarning } from './PerformanceWarning';
 
 interface GameHUDProps {
   className?: string;
@@ -15,12 +18,20 @@ interface GameHUDProps {
 export function GameHUD({ className = '' }: GameHUDProps) {
   const { firstName, lastName, lives, score, character, weapon, difficulty } = useGameStore();
   const [isClient, setIsClient] = useState(false);
+  const [showPerformanceSettings, setShowPerformanceSettings] = useState(false);
   
   // Performance monitoring
   const { isVisible: isPerformanceVisible, toggleVisibility: togglePerformance } = usePerformanceMonitor({
     enabled: process.env.NODE_ENV === 'development', // Only enable in development
     updateInterval: 100,
     autoProfile: true,
+  });
+
+  // Performance optimization monitoring
+  const { metrics, settings: performanceSettings } = usePerformanceMonitoring({
+    enabled: true,
+    updateInterval: 1000,
+    autoOptimize: true,
   });
 
   // Ensure this only renders on the client to prevent hydration issues
@@ -177,6 +188,32 @@ export function GameHUD({ className = '' }: GameHUDProps) {
           position="bottom-right"
         />
       )}
+
+      {/* Performance Settings Access (Desktop only) */}
+      {typeof window !== 'undefined' && window.innerWidth >= 1024 && (
+        <button
+          onClick={() => setShowPerformanceSettings(true)}
+          className="fixed bottom-4 left-4 z-30 bg-black/60 backdrop-blur-sm border border-white/20 rounded-lg p-2 text-white hover:bg-black/80 transition-all duration-200"
+          aria-label="Performance Settings"
+          title="Graphics & Performance Settings"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {metrics.isLowPerformance && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+          )}
+        </button>
+      )}
+
+      {/* Performance Settings Modal */}
+      <PerformanceSettings
+        isOpen={showPerformanceSettings}
+        onClose={() => setShowPerformanceSettings(false)}
+      />
+
+      {/* Performance Warning */}
+      <PerformanceWarning />
     </div>
   );
 }

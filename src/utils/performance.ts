@@ -320,11 +320,13 @@ export class NetworkPerformanceMonitor {
 
   private setupNetworkMonitoring(): void {
     // Monitor network connection changes
-    if ('connection' in navigator && navigator.connection && typeof navigator.connection.addEventListener === 'function') {
-      // @ts-ignore
-      navigator.connection.addEventListener('change', () => {
-        this.measureLatency();
-      });
+    if ('connection' in navigator && (navigator as any).connection) {
+      const connection = (navigator as any).connection;
+      if (typeof connection.addEventListener === 'function') {
+        connection.addEventListener('change', () => {
+          this.measureLatency();
+        });
+      }
     }
 
     // Monitor online/offline status
