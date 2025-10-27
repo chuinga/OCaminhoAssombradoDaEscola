@@ -72,23 +72,25 @@ export const useGameStore = create<GameState>((set) => ({
         analyticsService.trackProgression(state.difficulty, state.score, lives);
       }
       
-      // Announce life changes for screen readers
-      if (lives < state.lives) {
-        const livesLost = state.lives - lives;
-        window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
-          detail: { 
-            message: `Perdeu ${livesLost} vida${livesLost > 1 ? 's' : ''}. Vidas restantes: ${lives}`,
-            priority: 'assertive'
-          }
-        }));
-      } else if (lives > state.lives) {
-        const livesGained = lives - state.lives;
-        window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
-          detail: { 
-            message: `Ganhou ${livesGained} vida${livesGained > 1 ? 's' : ''}. Total de vidas: ${lives}`,
-            priority: 'polite'
-          }
-        }));
+      // Announce life changes for screen readers (client-side only)
+      if (typeof window !== 'undefined') {
+        if (lives < state.lives) {
+          const livesLost = state.lives - lives;
+          window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
+            detail: { 
+              message: `Perdeu ${livesLost} vida${livesLost > 1 ? 's' : ''}. Vidas restantes: ${lives}`,
+              priority: 'assertive'
+            }
+          }));
+        } else if (lives > state.lives) {
+          const livesGained = lives - state.lives;
+          window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
+            detail: { 
+              message: `Ganhou ${livesGained} vida${livesGained > 1 ? 's' : ''}. Total de vidas: ${lives}`,
+              priority: 'polite'
+            }
+          }));
+        }
       }
       
       return newState;
@@ -104,8 +106,8 @@ export const useGameStore = create<GameState>((set) => ({
         analyticsService.trackProgression(state.difficulty, score, state.lives);
       }
       
-      // Announce significant score increases for screen readers
-      if (score > state.score) {
+      // Announce significant score increases for screen readers (client-side only)
+      if (typeof window !== 'undefined' && score > state.score) {
         const scoreIncrease = score - state.score;
         if (scoreIncrease >= 100) { // Only announce significant score changes
           window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {

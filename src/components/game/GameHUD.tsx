@@ -5,6 +5,8 @@ import { useGameStore } from '../../store/gameStore';
 import { PumpkinIcon, SkullIcon } from '../ui/HalloweenIcons';
 import { MobileSettingsButton } from './MobileSettingsButton';
 import AnalyticsDashboard from '../analytics/AnalyticsDashboard';
+import { PerformanceMonitor } from '../debug/PerformanceMonitor';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 
 interface GameHUDProps {
   className?: string;
@@ -13,6 +15,13 @@ interface GameHUDProps {
 export function GameHUD({ className = '' }: GameHUDProps) {
   const { firstName, lastName, lives, score, character, weapon, difficulty } = useGameStore();
   const [isClient, setIsClient] = useState(false);
+  
+  // Performance monitoring
+  const { isVisible: isPerformanceVisible, toggleVisibility: togglePerformance } = usePerformanceMonitor({
+    enabled: process.env.NODE_ENV === 'development', // Only enable in development
+    updateInterval: 100,
+    autoProfile: true,
+  });
 
   // Ensure this only renders on the client to prevent hydration issues
   useEffect(() => {
@@ -159,6 +168,15 @@ export function GameHUD({ className = '' }: GameHUDProps) {
 
       {/* Analytics Dashboard */}
       <AnalyticsDashboard />
+
+      {/* Performance Monitor (Development only) */}
+      {process.env.NODE_ENV === 'development' && (
+        <PerformanceMonitor
+          isVisible={isPerformanceVisible}
+          onToggle={togglePerformance}
+          position="bottom-right"
+        />
+      )}
     </div>
   );
 }

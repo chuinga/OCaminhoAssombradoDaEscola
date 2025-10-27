@@ -26,6 +26,7 @@ import { GlobalScreenReaderAnnouncer } from "../components/ui/GlobalScreenReader
 import { AudioSubtitles } from "../components/ui/AudioSubtitles";
 import { VisualAudioIndicators } from "../components/ui/VisualAudioIndicators";
 import { ColorblindFriendlyUI } from "../components/ui/ColorblindFriendlyUI";
+import { ClientOnlyZustandHydration } from "../components/ClientOnlyZustandHydration";
 
 export default function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="pt">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased respect-motion-preference`}
+        suppressHydrationWarning={true}
       >
         <ColorblindFilters />
         <a 
@@ -45,17 +47,19 @@ export default function RootLayout({
         >
           Saltar para o conteúdo principal
         </a>
-        <AccessibilityProvider>
-          <ColorblindFriendlyUI>
-            <main id="main-content">
-              {children}
-            </main>
-            <KeyboardNavigationHelper />
-            <GlobalScreenReaderAnnouncer />
-            <AudioSubtitles />
-            <VisualAudioIndicators />
-          </ColorblindFriendlyUI>
-        </AccessibilityProvider>
+        <ClientOnlyZustandHydration>
+          <AccessibilityProvider>
+            <ColorblindFriendlyUI>
+              <main id="main-content">
+                {children}
+              </main>
+              <KeyboardNavigationHelper />
+              <GlobalScreenReaderAnnouncer />
+              <AudioSubtitles />
+              <VisualAudioIndicators />
+            </ColorblindFriendlyUI>
+          </AccessibilityProvider>
+        </ClientOnlyZustandHydration>
       </body>
     </html>
   );

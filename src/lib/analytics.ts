@@ -351,8 +351,75 @@ class AnalyticsService {
   }
 }
 
-// Create singleton instance
-export const analyticsService = new AnalyticsService();
+// Create singleton instance with lazy initialization
+let analyticsServiceInstance: AnalyticsService | null = null;
 
-// Load saved data on initialization
-analyticsService.loadFromLocalStorage();
+export const analyticsService = {
+  getInstance(): AnalyticsService {
+    if (!analyticsServiceInstance) {
+      analyticsServiceInstance = new AnalyticsService();
+      // Load saved data on first initialization
+      if (typeof window !== 'undefined') {
+        analyticsServiceInstance.loadFromLocalStorage();
+      }
+    }
+    return analyticsServiceInstance;
+  },
+
+  // Proxy methods to the singleton instance
+  trackProgression: (difficulty: Difficulty, score: number, lives: number) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().trackProgression(difficulty, score, lives);
+    }
+  },
+
+  trackWeaponUsage: (weapon: Weapon) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().trackWeaponUsage(weapon);
+    }
+  },
+
+  trackGameCompletion: (difficulty: Difficulty, finalScore: number, survived: boolean) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().trackGameCompletion(difficulty, finalScore, survived);
+    }
+  },
+
+  trackPerformanceMetrics: (loadTime?: number) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().trackPerformanceMetrics(loadTime);
+    }
+  },
+
+  setSessionInfo: (character: Character, weapon: Weapon, difficulty: Difficulty) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().setSessionInfo(character, weapon, difficulty);
+    }
+  },
+
+  getAnalyticsSummary: () => {
+    if (typeof window !== 'undefined') {
+      return analyticsService.getInstance().getAnalyticsSummary();
+    }
+    return null;
+  },
+
+  exportData: () => {
+    if (typeof window !== 'undefined') {
+      return analyticsService.getInstance().exportData();
+    }
+    return null;
+  },
+
+  importData: (data: Partial<AnalyticsData>) => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().importData(data);
+    }
+  },
+
+  clearData: () => {
+    if (typeof window !== 'undefined') {
+      analyticsService.getInstance().clearData();
+    }
+  }
+};

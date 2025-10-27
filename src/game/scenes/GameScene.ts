@@ -7,6 +7,7 @@ import { WeaponFactory } from '../entities/WeaponFactory';
 import { audioManager } from '../utils/AudioManager';
 import { batteryOptimizer } from '../../utils/mobileOptimization';
 import { analyticsService } from '../../lib/analytics';
+import { AdvancedPerformanceMonitor, PerformanceDebugger } from '../../utils/performance';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -48,6 +49,10 @@ export class GameScene extends Phaser.Scene {
   // Analytics tracking
   private sceneLoadStartTime: number = 0;
 
+  // Performance monitoring
+  private performanceMonitor: AdvancedPerformanceMonitor;
+  private performanceDebugger: PerformanceDebugger;
+
   // Touch controls state
   private touchControls = {
     moveLeft: false,
@@ -82,6 +87,10 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'GameScene' });
+    
+    // Initialize performance monitoring
+    this.performanceMonitor = new AdvancedPerformanceMonitor();
+    this.performanceDebugger = PerformanceDebugger.getInstance();
   }
 
   /**
@@ -1374,6 +1383,10 @@ export class GameScene extends Phaser.Scene {
    * Create game objects and set up the scene
    */
   create(): void {
+    // Start scene creation profiling
+    this.performanceDebugger.startProfile('scene-creation');
+    this.performanceDebugger.setMarker('scene-create-start');
+    
     // Set world bounds
     this.physics.world.setBounds(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT);
 
@@ -1408,11 +1421,52 @@ export class GameScene extends Phaser.Scene {
     const loadTime = performance.now() - this.sceneLoadStartTime;
     analyticsService.trackPerformanceMetrics(loadTime);
 
+    // End scene creation profiling
+    this.performanceDebugger.setMarker('scene-create-end');
+    const creationTime = this.performanceDebugger.endProfile('scene-creation');
+    this.performanceDebugger.log('info', 'Scene creation completed', {
+      loadTime,
+      creationTime,
+      totalObjects: this.enemies.children.size + this.lifeItems.children.size + 1,
+    });
+
+    // Set up render performance monitoring
+    this.setupRenderMonitoring();
+
     // Debug: Final scene state
     console.log('GameScene created successfully - isPaused:', this.scene.isPaused());
     console.log('Player position:', this.player.x, this.player.y);
     console.log('Player visible:', this.player.visible);
     console.log('Scene load time:', loadTime, 'ms');
+    console.log('Scene creation time:', creationTime, 'ms');
+  }
+
+  /**
+   * Set up render performance monitoring
+   */
+  private setupRenderMonitoring(): void {
+    // Hook into Phaser's render events
+    this.sys.events.on('prerender', () => {
+      this.performanceMonitor.startRenderMeasurement();
+    });
+
+    this.sys.events.on('postrender', () => {
+      this.performanceMonitor.endRenderMeasurement();
+      this.performanceMonitor.recordDrawCall();
+    });
+
+    // Monitor scene events for performance tracking
+    this.sys.events.on('pause', () => {
+      this.performanceDebugger.log('info', 'Scene paused');
+    });
+
+    this.sys.events.on('resume', () => {
+      this.performanceDebugger.log('info', 'Scene resumed');
+    });
+
+    this.sys.events.on('destroy', () => {
+      this.performanceDebugger.log('info', 'Scene destroyed');
+    });
   }
 
   /**
@@ -1703,10 +1757,23 @@ export class GameScene extends Phaser.Scene {
    * Update method called every frame
    */
   update(time: number, delta: number): void {
+    // Start performance measurement
+    this.performanceMonitor.startUpdateMeasurement();
+    
     // Debug: Count update calls
     this.updateCallCount++;
     if (this.updateCallCount % 60 === 0) { // Log every 60 frames
       console.log('Update called', this.updateCallCount, 'times');
+      
+      // Update performance metrics and log if performance is low
+      const metrics = this.performanceMonitor.update();
+      if (metrics.isLowPerformance) {
+        this.performanceDebugger.log('warn', 'Low performance detected', {
+          fps: metrics.fps,
+          frameTime: metrics.frameTime,
+          activeObjects: metrics.activeObjects,
+        });
+      }
     }
 
     // Apply battery optimization settings
@@ -1735,6 +1802,13 @@ export class GameScene extends Phaser.Scene {
 
     // Check for game end conditions
     this.checkGameEndConditions();
+    
+    // Record object count for performance monitoring
+    const totalObjects = this.enemies.children.size + this.lifeItems.children.size + 1; // +1 for player
+    this.performanceMonitor.recordObjectCount(totalObjects);
+    
+    // End performance measurement
+    this.performanceMonitor.endUpdateMeasurement();
   }
 
   /**

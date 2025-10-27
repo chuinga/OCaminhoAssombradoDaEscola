@@ -14,8 +14,16 @@ export const KeyboardNavigationHelper: React.FC<KeyboardNavigationHelperProps> =
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasBeenShown, setHasBeenShown] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side before accessing localStorage
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     // Check if user has seen the helper before
     const hasSeenHelper = localStorage.getItem('keyboard-navigation-helper-seen');
     
@@ -28,9 +36,11 @@ export const KeyboardNavigationHelper: React.FC<KeyboardNavigationHelperProps> =
 
       return () => clearTimeout(timer);
     }
-  }, [showOnFirstVisit]);
+  }, [showOnFirstVisit, isClient]);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     // Listen for keyboard events to show helper
     const handleKeyDown = (event: KeyboardEvent) => {
       // Show helper when Tab is pressed (keyboard navigation)
@@ -42,19 +52,23 @@ export const KeyboardNavigationHelper: React.FC<KeyboardNavigationHelperProps> =
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [hasBeenShown]);
+  }, [hasBeenShown, isClient]);
 
   const handleClose = () => {
     setIsVisible(false);
-    localStorage.setItem('keyboard-navigation-helper-seen', 'true');
+    if (isClient) {
+      localStorage.setItem('keyboard-navigation-helper-seen', 'true');
+    }
   };
 
   const handleDontShowAgain = () => {
     handleClose();
-    localStorage.setItem('keyboard-navigation-helper-dismissed', 'true');
+    if (isClient) {
+      localStorage.setItem('keyboard-navigation-helper-dismissed', 'true');
+    }
   };
 
-  if (!isVisible) return null;
+  if (!isClient || !isVisible) return null;
 
   return (
     <div className={`fixed bottom-4 right-4 z-50 max-w-sm ${className}`}>

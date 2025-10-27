@@ -8,8 +8,15 @@ export const GlobalScreenReaderAnnouncer: React.FC = () => {
     message: string;
     priority: 'polite' | 'assertive';
   } | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    
     const handleAnnouncement = (event: CustomEvent) => {
       const { message, priority = 'polite' } = event.detail;
       setAnnouncement({ message, priority });
@@ -21,9 +28,9 @@ export const GlobalScreenReaderAnnouncer: React.FC = () => {
     return () => {
       window.removeEventListener('screenReaderAnnounce', handleAnnouncement as EventListener);
     };
-  }, []);
+  }, [isClient]);
 
-  return announcement ? (
+  return isClient && announcement ? (
     <ScreenReaderAnnouncer 
       message={announcement.message} 
       priority={announcement.priority}

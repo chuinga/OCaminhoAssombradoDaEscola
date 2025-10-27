@@ -20,8 +20,14 @@ export const AudioSubtitles: React.FC<AudioSubtitlesProps> = ({ className = '' }
   const { display } = useSettingsStore();
   const [activeEvents, setActiveEvents] = useState<AudioEvent[]>([]);
   const [showSubtitles, setShowSubtitles] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     // Listen for audio events from the game
     const handleAudioEvent = (event: CustomEvent<{
       type: AudioEvent['type'];
@@ -108,7 +114,7 @@ export const AudioSubtitles: React.FC<AudioSubtitlesProps> = ({ className = '' }
     };
   }, [showSubtitles]);
 
-  if (!showSubtitles || activeEvents.length === 0) {
+  if (!isClient || !showSubtitles || activeEvents.length === 0) {
     return null;
   }
 

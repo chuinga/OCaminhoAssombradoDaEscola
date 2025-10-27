@@ -2,10 +2,6 @@
 
 - [x] 1. Set up project structure and dependencies
 
-
-
-
-
   - Create Next.js project with TypeScript and Tailwind CSS
   - Install and configure Phaser 3, Zustand, Howler.js, and testing dependencies
   - Set up folder structure for components, game logic, and assets
@@ -13,6 +9,7 @@
   - _Requirements: 10.1, 10.4_
 
 - [x] 2. Implement global state management with Zustand
+
   - Create GameState store with player data (firstName, lastName, character, weapon, difficulty)
   - Implement state actions for setPlayerName, setCharacter, setWeapon, setDifficulty
   - Add game progress state (lives, score, gameStatus) with update actions
@@ -21,12 +18,14 @@
 
 - [x] 3. Create navigation pages and routing
 - [x] 3.1 Implement home page with leaderboard display
+
   - Create home page component that fetches and displays top 10 scores
   - Add "Jogar" button that navigates to name input page
   - Implement responsive design for mobile, tablet, and desktop
   - _Requirements: 9.1, 10.1_
 
 - [x] 3.2 Create name input page with validation
+
   - Build form with firstName and lastName input fields
   - Implement validation that prevents advancing without both fields filled
   - Save names to Zustand state on successful submission
@@ -34,12 +33,14 @@
   - _Requirements: 1.1, 1.2, 1.3_
 
 - [x] 3.3 Build character selection page
+
   - Create UI for selecting between boy and girl characters
   - Save character choice to Zustand state
   - Add navigation to weapon selection page with state validation
   - _Requirements: 2.1, 2.2_
 
 - [x] 3.4 Implement weapon selection page
+
   - Create UI for selecting between Katana, Pistola de Laser, Taco de Basebol, Bazuca
   - Display weapon descriptions and characteristics
   - Save weapon choice to Zustand state
@@ -47,6 +48,7 @@
   - _Requirements: 2.3, 2.4_
 
 - [x] 3.5 Create difficulty selection page
+
   - Build UI for selecting Easy, Medium, or Impossible difficulty
   - Display difficulty descriptions (enemy count and life items)
   - Save difficulty choice to Zustand state
@@ -55,6 +57,7 @@
 
 - [x] 4. Implement core game entities and physics
 - [x] 4.1 Create Player class with movement and combat
+
   - Implement Player entity with position, lives, score, and weapon properties
   - Add movement methods (move left/right, jump, crouch) with physics
   - Implement attack method that uses selected weapon
@@ -62,6 +65,7 @@
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 7.3, 7.4_
 
 - [x] 4.2 Implement enemy entities with different behaviors
+
   - Create base Enemy interface and Ghost class (low floating movement)
   - Implement Bat class (low floating movement, similar to Ghost)
   - Create Vampire class (ground walking movement)
@@ -70,6 +74,7 @@
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 7.3_
 
 - [x] 4.3 Create weapon system with different attack types
+
   - Implement Katana class (40px range, 300ms cooldown, melee)
   - Create LaserGun class (projectile weapon, 500px/s speed, 200ms cooldown)
   - Implement BaseballBat class (55px range, 450ms cooldown, knockback)
@@ -79,6 +84,7 @@
 
 - [x] 5. Build game scene and level mechanics
 - [x] 5.1 Create main GameScene with Phaser setup
+
   - Initialize Phaser scene with 3500x720px world size
   - Set up Arcade Physics with gravity and collision detection
   - Implement parallax background layers (moon_clouds, houses, trees, street)
@@ -86,6 +92,7 @@
   - _Requirements: 10.4_
 
 - [x] 5.2 Implement difficulty-based spawning system
+
   - Create DifficultyConfig interface and configuration objects
   - Implement enemy spawning based on difficulty (easy: 2/1000px, medium: 4/1000px, impossible: 8/1000px)
   - Add life item spawning based on difficulty (easy: 8/1000px, medium: 3/1000px, impossible: 0/1000px)
@@ -93,6 +100,7 @@
   - _Requirements: 12.1, 12.2, 12.3, 6.1_
 
 - [x] 5.3 Add collision detection and game mechanics
+
   - Implement player-enemy collision with damage and invulnerability
   - Add player-life item collision with +1 life and +50 points
   - Create school gate collision for game completion (+500 bonus points)
@@ -101,12 +109,14 @@
 
 - [x] 6. Create game UI and HUD system
 - [x] 6.1 Implement in-game HUD display
+
   - Create HUD component showing player name, current lives, and score
   - Update HUD in real-time when values change
   - Position HUD appropriately for different screen sizes
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
 - [x] 6.2 Add mobile touch controls
+
   - Create touch control buttons for mobile and tablet devices
   - Position left-side controls for movement (left/right arrows)
   - Add right-side controls for actions (jump, crouch, attack buttons)
@@ -114,6 +124,7 @@
   - _Requirements: 10.2_
 
 - [x] 6.3 Implement keyboard input handling
+
   - Add keyboard event listeners for A/D (left/right), W/↑ (jump), S/↓ (crouch)
   - Implement Space key for attack and Esc key for pause
   - Ensure keyboard controls work alongside touch controls
@@ -121,12 +132,14 @@
 
 - [x] 7. Add audio system with Howler.js
 - [x] 7.1 Implement background music and sound effects
+
   - Set up Howler.js for audio management
   - Add looping background music (wind and crickets ambient sound)
   - Create sound effect system for jump, damage, and item collection
   - _Requirements: 11.1, 11.2, 11.3, 11.4_
 
 - [x] 7.2 Add weapon-specific attack sounds
+
   - Implement slash sound for Katana and Baseball Bat attacks
   - Add laser sound for Pistola de Laser attacks
   - Create explosion sound for Bazooka attacks
@@ -135,6 +148,7 @@
 
 - [x] 8. Create game completion and results system
 - [x] 8.1 Implement game end conditions
+
   - Add victory condition when player reaches school gate with lives > 0
   - Implement defeat condition when player lives reach 0
   - Apply +500 bonus points for victory completion
@@ -142,6 +156,7 @@
   - _Requirements: 7.5, 7.6_
 
 - [x] 8.2 Build results page with score submission
+
   - Create results page showing final score and game outcome
   - Display all leaderboard scores with scroll functionality
   - Add "Voltar ao início" button to return to home page
@@ -150,15 +165,7 @@
 
 - [x] 9. Implement API client and leaderboard system
 
-
-
-
-
 - [x] 9.1 Create API client for score management
-
-
-
-
 
   - Build API client functions for GET /api/scores (all scores with pagination)
   - Implement POST /api/scores for submitting new scores
@@ -168,10 +175,6 @@
 
 - [x] 9.2 Build API routes for AWS integration
 
-
-
-
-
   - Create Next.js API routes as proxy to AWS Lambda functions
   - Implement GET /api/scores/top10 endpoint for leaderboard
   - Add GET /api/scores endpoint for full score list with pagination
@@ -179,11 +182,6 @@
   - _Requirements: 9.1, 9.2, 9.3_
 
 - [x] 9.3 Write unit tests for API client
-
-
-
-
-
 
   - Create tests for API client functions with mocked responses
   - Test error handling scenarios (network failures, server errors)
@@ -193,10 +191,7 @@
 
 - [x] 10. Add responsive design and mobile optimization
 
-
-
 - [x] 10.1 Implement responsive layout system
-
 
   - Ensure all pages adapt to mobile, tablet, and desktop screen sizes
   - Optimize game canvas scaling for different aspect ratios
@@ -205,7 +200,6 @@
 
 - [x] 10.2 Optimize game performance for mobile
 
-
   - Implement sprite pooling for enemies and projectiles
   - Optimize asset loading and memory management
   - Add performance monitoring for frame rate stability
@@ -213,18 +207,7 @@
 
 - [x] 11. Write comprehensive tests
 
-
-
-
-
-
 - [x] 11.1 Create unit tests for game logic
-
-
-
-
-
-
 
   - Test weapon mechanics and damage calculations
   - Verify enemy behavior and movement patterns
@@ -233,21 +216,12 @@
 
 - [x] 11.2 Add integration tests for game flow
 
-
-
-
-
-
   - Test complete gameplay from start to finish
   - Verify state management across page navigation
   - Test API integration with mock backend
   - _Requirements: 1.1-1.3, 2.1-2.6, 7.1-7.6_
 
 - [x] 12. Prepare for deployment
-
-
-
-
 
 - [x] 12.1 Configure build optimization
 
@@ -265,15 +239,7 @@
 
 - [x] 13. Enhance audio system with real assets
 
-
-
-
-
 - [x] 13.1 Replace placeholder audio with real sound files
-
-
-
-
 
   - Load actual background ambient music (wind and crickets)
   - Replace fallback beep sounds with proper weapon sound effects
@@ -283,10 +249,6 @@
 
 - [x] 13.2 Add audio controls and settings
 
-
-
-
-
   - Implement volume controls for music and sound effects
   - Add mute/unmute functionality accessible during gameplay
   - Create audio settings page or in-game menu
@@ -295,16 +257,7 @@
 
 - [x] 14. Add visual assets and sprites
 
-
-
-
-
-
 - [x] 14.1 Create character and enemy sprites
-
-
-
-
 
   - Design boy and girl character sprites with animations
   - Create Ghost, Bat, Vampire, and Mummy enemy sprites
@@ -314,11 +267,6 @@
 
 - [x] 14.2 Add background and environment art
 
-
-
-
-
-
   - Create parallax background layers (moon_clouds, houses, trees, street)
   - Design school gate artwork
   - Add visual effects for weapon attacks and explosions
@@ -327,15 +275,7 @@
 
 - [x] 15. Implement pause menu and game controls
 
-
-
-
-
 - [x] 15.1 Create pause menu interface
-
-
-
-
 
   - Design pause menu overlay with resume, settings, and quit options
   - Add visual feedback when game is paused
@@ -345,10 +285,6 @@
 
 - [x] 15.2 Add game settings and preferences
 
-
-
-
-
   - Create settings page for audio, controls, and display options
   - Add difficulty selection preview with enemy/item counts
   - Implement control customization options
@@ -357,15 +293,7 @@
 
 - [x] 16. Enhance mobile experience
 
-
-
-
-
 - [x] 16.1 Improve touch controls responsiveness
-
-
-
-
 
   - Add haptic feedback for mobile devices
   - Implement gesture controls (swipe for movement)
@@ -375,11 +303,6 @@
 
 - [x] 16.2 Add mobile-specific features
 
-
-
-
-
-
   - Implement device orientation lock for landscape mode
   - Add fullscreen mode toggle for mobile browsers
   - Create mobile-optimized UI scaling
@@ -388,16 +311,7 @@
 
 - [x] 17. Add game analytics and metrics
 
-
-
-
-
 - [x] 17.1 Implement gameplay analytics
-
-
-
-
-
 
   - Track player progression through difficulty levels
   - Monitor weapon usage statistics
@@ -407,22 +321,15 @@
 
 - [x] 17.2 Add leaderboard enhancements
 
-
-
-
-
   - Implement filtering by difficulty level
   - Add weekly/monthly leaderboard views
   - Create player statistics dashboard
   - Add social sharing for high scores
   - _Requirements: 9.1, 9.3_
 
-- [ ] 18. Implement accessibility features
+- [x] 18. Implement accessibility features
+
 - [x] 18.1 Add keyboard navigation support
-
-
-
-
 
   - Ensure all UI elements are keyboard accessible
   - Add focus indicators and tab order
@@ -432,10 +339,6 @@
 
 - [x] 18.2 Add visual and motor accessibility
 
-
-
-
-
   - Implement colorblind-friendly color schemes
   - Add subtitle support for audio cues
   - Create simplified control schemes for motor impairments
@@ -443,7 +346,8 @@
   - _Requirements: 10.1, 11.1, 11.2, 11.3, 11.4, 11.5_
 
 - [ ] 19. Performance optimization and monitoring
-- [ ] 19.1 Implement advanced performance monitoring
+- [x] 19.1 Implement advanced performance monitoring
+
   - Add real-time FPS monitoring and display
   - Implement memory usage tracking
   - Add network performance metrics
@@ -451,6 +355,7 @@
   - _Requirements: 10.4_
 
 - [ ] 19.2 Optimize for low-end devices
+
   - Add graphics quality settings (low/medium/high)
   - Implement dynamic quality adjustment based on performance
   - Add option to disable particle effects and animations
@@ -459,6 +364,7 @@
 
 - [ ] 20. Add game content and features
 - [ ] 20.1 Implement additional game modes
+
   - Add endless mode with increasing difficulty
   - Create time attack mode with countdown timer
   - Implement survival mode with limited lives

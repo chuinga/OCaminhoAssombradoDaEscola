@@ -7,6 +7,8 @@ export const useAccessibility = () => {
   const { display, game } = useSettingsStore();
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     const body = document.body;
     const html = document.documentElement;
 
@@ -85,6 +87,8 @@ export const useAccessibility = () => {
 
   // FPS Counter
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (display.showFPS) {
       let fpsCounter = document.getElementById('fps-counter');
       if (!fpsCounter) {
@@ -130,6 +134,8 @@ export const useAccessibility = () => {
 
   // Control Hints
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (game.showControlHints) {
       let hintsElement = document.getElementById('control-hints');
       if (!hintsElement) {

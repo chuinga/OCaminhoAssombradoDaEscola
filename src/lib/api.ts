@@ -1,4 +1,5 @@
 import { LeaderboardResponse, AllScoresResponse, SubmitScoreRequest, Score, FilteredLeaderboardResponse, PlayerStats, ShareableScore } from '@/types';
+import { NetworkPerformanceMonitor } from '@/utils/performance';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 const DEFAULT_TIMEOUT = 10000; // 10 seconds
@@ -32,6 +33,12 @@ export class TimeoutError extends Error {
 
 // API client with comprehensive error handling and retry mechanism
 class ApiClient {
+  private networkMonitor: NetworkPerformanceMonitor;
+
+  constructor() {
+    this.networkMonitor = new NetworkPerformanceMonitor();
+  }
+
   private async fetchWithTimeout(
     url: string,
     options: RequestInit = {},
@@ -76,8 +83,14 @@ class ApiClient {
     let lastError: Error;
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
+      // Start network performance tracking
+      const requestId = this.networkMonitor.recordRequest(url);
+      
       try {
         const response = await this.fetchWithTimeout(url, options);
+        
+        // Record successful response
+        this.networkMonitor.recordResponse(requestId, response.ok);
         
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unknown error');
@@ -89,6 +102,8 @@ class ApiClient {
         
         return response;
       } catch (error) {
+        // Record failed response
+        this.networkMonitor.recordResponse(requestId, false);
         lastError = error as Error;
         
         // Don't retry on client errors (4xx) or timeout errors
@@ -328,6 +343,16 @@ class ApiClient {
       console.warn('API health check failed:', error);
       return false;
     }
+  }
+
+  // Get network performance metrics
+  getNetworkMetrics() {
+    return this.networkMonitor.getMetrics();
+  }
+
+  // Reset network performance tracking
+  resetNetworkMetrics() {
+    this.networkMonitor.reset();
   }
 }
 

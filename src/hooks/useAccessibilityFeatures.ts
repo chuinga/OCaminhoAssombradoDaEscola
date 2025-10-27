@@ -11,6 +11,8 @@ export const useAccessibilityFeatures = () => {
   const { display } = useSettingsStore();
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     const body = document.body;
     const html = document.documentElement;
 
@@ -103,9 +105,11 @@ export const useAccessibilityFeatures = () => {
 
   // Utility functions for accessibility
   const announceToScreenReader = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
-      detail: { message, priority }
-    }));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('screenReaderAnnounce', {
+        detail: { message, priority }
+      }));
+    }
   };
 
   const triggerVisualIndicator = (
@@ -116,7 +120,7 @@ export const useAccessibilityFeatures = () => {
       weaponType?: string;
     }
   ) => {
-    if (display.visualAudioIndicators) {
+    if (typeof window !== 'undefined' && display.visualAudioIndicators) {
       window.dispatchEvent(new CustomEvent('visualIndicator', {
         detail: { type, ...options }
       }));
@@ -127,7 +131,7 @@ export const useAccessibilityFeatures = () => {
     type: 'jump' | 'damage' | 'item_collect' | 'weapon_attack' | 'background_music',
     weaponType?: string
   ) => {
-    if (display.audioSubtitles) {
+    if (typeof window !== 'undefined' && display.audioSubtitles) {
       window.dispatchEvent(new CustomEvent('audioEvent', {
         detail: { type, weaponType }
       }));

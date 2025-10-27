@@ -22,8 +22,14 @@ export const VisualAudioIndicators: React.FC<VisualAudioIndicatorsProps> = ({
   const { display } = useSettingsStore();
   const [indicators, setIndicators] = useState<VisualIndicator[]>([]);
   const [showIndicators, setShowIndicators] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     const handleVisualIndicator = (event: CustomEvent<{
       type: VisualIndicator['type'];
       position?: { x: number; y: number };
@@ -109,7 +115,7 @@ export const VisualAudioIndicators: React.FC<VisualAudioIndicatorsProps> = ({
     };
   }, [showIndicators]);
 
-  if (!showIndicators) {
+  if (!isClient || !showIndicators) {
     return null;
   }
 
