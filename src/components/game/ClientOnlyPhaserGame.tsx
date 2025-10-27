@@ -1,10 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { Difficulty } from '../../types';
+import type { Difficulty, GameMode } from '../../types';
 
 interface ClientOnlyPhaserGameProps {
   difficulty?: Difficulty;
+  gameMode?: GameMode;
   onGameEnd?: (score: number, victory: boolean) => void;
   className?: string;
 }

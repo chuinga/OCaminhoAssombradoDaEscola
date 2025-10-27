@@ -1,5 +1,5 @@
 // Export types from store
-export type { Character, Weapon, Difficulty, GameStatus } from '../store/gameStore';
+export type { Character, Weapon, Difficulty, GameStatus, GameMode } from '../store/gameStore';
 
 // Game Entity Types
 export interface Player {
@@ -45,6 +45,19 @@ export interface DifficultyConfig {
   enemySpawnRate: number;    // Enemies per 1000px
   lifeItemSpawnRate: number; // Life items per 1000px
   enemyTypes: string[];      // Available enemy types
+}
+
+// Game Mode Configuration
+export interface GameModeConfig {
+  id: string;
+  name: string;
+  description: string;
+  characteristics: string[];
+  timeLimit?: number;        // Time limit in seconds (for time attack)
+  maxLives?: number;         // Maximum lives (for survival)
+  infiniteLives?: boolean;   // Unlimited lives (for practice)
+  increasingDifficulty?: boolean; // Difficulty increases over time (for endless)
+  worldLength?: number;      // World length in pixels (undefined for endless)
 }
 
 // API Types

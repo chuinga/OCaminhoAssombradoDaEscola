@@ -10,7 +10,7 @@ import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 export default function JogarPage() {
   const router = useRouter();
-  const { firstName, lastName, character, weapon, difficulty } = useGameStore();
+  const { firstName, lastName, character, weapon, difficulty, gameMode } = useGameStore();
   const { shouldOptimize, isInitialized } = useMobileOptimization();
 
   // Validate that user has completed all previous steps before accessing this page
@@ -31,10 +31,14 @@ export default function JogarPage() {
       router.push('/dificuldade');
       return;
     }
-  }, [firstName, lastName, character, weapon, difficulty, router]);
+    if (!gameMode) {
+      router.push('/modo');
+      return;
+    }
+  }, [firstName, lastName, character, weapon, difficulty, gameMode, router]);
 
   // Don't render if validation fails
-  if (!firstName || !lastName || !character || !weapon || !difficulty) {
+  if (!firstName || !lastName || !character || !weapon || !difficulty || !gameMode) {
     return null;
   }
 
@@ -51,6 +55,7 @@ export default function JogarPage() {
         <ResponsiveGameCanvas>
           <ClientOnlyPhaserGame 
             difficulty={difficulty}
+            gameMode={gameMode}
             onGameEnd={handleGameEnd}
             className="w-full h-full"
           />
@@ -69,9 +74,10 @@ export default function JogarPage() {
             <p>Personagem: {character === 'boy' ? 'Menino' : 'Menina'}</p>
             <p>Arma: {weapon}</p>
             <p>Dificuldade: {difficulty}</p>
+            <p>Modo: {gameMode}</p>
           </div>
           <button
-            onClick={() => router.push('/dificuldade')}
+            onClick={() => router.push('/modo')}
             className="mt-2 text-gray-400 hover:text-white transition-colors text-xs"
           >
             ← Voltar

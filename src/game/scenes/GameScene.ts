@@ -26,12 +26,15 @@ export class GameScene extends Phaser.Scene {
   } = {};
 
   // World configuration
-  private readonly WORLD_WIDTH = 3500;
+  private WORLD_WIDTH = 3500;
   private readonly WORLD_HEIGHT = 720;
   private readonly GRAVITY = 300;
 
   // Difficulty configuration
   private difficulty: 'easy' | 'medium' | 'impossible' = 'easy';
+  
+  // Game mode configuration
+  private gameMode: 'story' | 'endless' | 'timeAttack' | 'survival' | 'practice' = 'story';
 
   // Spawning system
   private lastSpawnX: number = 0;
@@ -50,6 +53,12 @@ export class GameScene extends Phaser.Scene {
 
   // Analytics tracking
   private sceneLoadStartTime: number = 0;
+  
+  // Game mode specific properties
+  private timeRemaining: number = 0; // For time attack mode
+  private survivalLives: number = 3; // For survival mode
+  private endlessDistance: number = 0; // For endless mode
+  private difficultyMultiplier: number = 1; // For endless mode increasing difficulty
 
   // Performance monitoring
   private performanceMonitor: AdvancedPerformanceMonitor;
@@ -106,11 +115,15 @@ export class GameScene extends Phaser.Scene {
     // Track scene load start time for performance metrics
     this.sceneLoadStartTime = performance.now();
 
-    // Get difficulty from game registry (set by React component)
+    // Get difficulty and game mode from game registry (set by React component)
     this.difficulty = this.registry.get('difficulty') || 'easy';
+    this.gameMode = this.registry.get('gameMode') || 'story';
 
     // Initialize difficulty configuration
     this.difficultyConfig = this.getDifficultyConfig();
+    
+    // Initialize game mode specific settings
+    this.initializeGameMode();
 
     // Initialize spawning system
     this.lastSpawnX = 0;
@@ -1571,6 +1584,9 @@ export class GameScene extends Phaser.Scene {
 
     // Set player collision with world bounds
     this.player.setCollideWorldBounds(true);
+    
+    // Set lives based on game mode
+    this.setPlayerLivesForGameMode();
 
     // Initialize weapon based on game registry
     const weaponType = this.registry.get('weapon') || 'katana';
@@ -1760,6 +1776,182 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Initialize game mode specific settings
+   */
+  private initializeGameMode(): void {
+    switch (this.gameMode) {
+      case 'timeAttack':
+        this.timeRemaining = 300; // 5 minutes in seconds
+        break;
+      case 'survival':
+        this.survivalLives = 3;
+        // Override difficulty config to remove life items
+        this.difficultyConfig.lifeItemSpawnRate = 0;
+        break;
+      case 'practice':
+        // Override difficulty to make it easier
+        this.difficultyConfig.enemySpawnRate = 1;
+        this.difficultyConfig.lifeItemSpawnRate = 10;
+        break;
+      case 'endless':
+        this.endlessDistance = 0;
+        this.difficultyMultiplier = 1;
+        // Start with easier settings that will increase
+        this.difficultyConfig.enemySpawnRate = 1;
+        this.difficultyConfig.lifeItemSpawnRate = 5;
+        break;
+      case 'story':
+      default:
+        // Use default difficulty settings
+        break;
+    }
+  }
+
+  /**
+   * Update game mode specific logic
+   */
+  private updateGameMode(time: number, delta: number): void {
+    switch (this.gameMode) {
+      case 'timeAttack':
+        this.updateTimeAttackMode(delta);
+        break;
+      case 'endless':
+        this.updateEndlessMode();
+        break;
+      case 'survival':
+        this.updateSurvivalMode();
+        break;
+      case 'practice':
+        this.updatePracticeMode();
+        break;
+      case 'story':
+      default:
+        // No special updates needed for story mode
+        break;
+    }
+  }
+
+  /**
+   * Update time attack mode - countdown timer
+   */
+  private updateTimeAttackMode(delta: number): void {
+    this.timeRemaining -= delta / 1000; // Convert delta to seconds
+    
+    if (this.timeRemaining <= 0) {
+      this.timeRemaining = 0;
+      // End game due to time running out
+      this.endGame(false, 'Time ran out!');
+    }
+    
+    // Emit time update for HUD
+    this.events.emit('timeUpdate', { timeRemaining: Math.ceil(this.timeRemaining) });
+    
+    // Also emit to window for React components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('timeUpdate', {
+        detail: { timeRemaining: Math.ceil(this.timeRemaining) }
+      }));
+    }
+  }
+
+  /**
+   * Update endless mode - increasing difficulty
+   */
+  private updateEndlessMode(): void {
+    // Calculate distance traveled
+    this.endlessDistance = this.player.x;
+    
+    // Increase difficulty every 1000px
+    const newMultiplier = 1 + Math.floor(this.endlessDistance / 1000) * 0.2;
+    if (newMultiplier > this.difficultyMultiplier) {
+      this.difficultyMultiplier = newMultiplier;
+      
+      // Update spawn rates based on multiplier
+      const baseConfig = this.getDifficultyConfig();
+      this.difficultyConfig.enemySpawnRate = Math.floor(baseConfig.enemySpawnRate * this.difficultyMultiplier);
+      this.difficultyConfig.lifeItemSpawnRate = Math.max(1, Math.floor(baseConfig.lifeItemSpawnRate / this.difficultyMultiplier));
+      
+      console.log(`Endless mode difficulty increased: ${this.difficultyMultiplier}x`);
+    }
+    
+    // Extend world bounds as player progresses
+    if (this.endlessDistance > this.WORLD_WIDTH - 1000) {
+      this.WORLD_WIDTH += 1000;
+      this.physics.world.setBounds(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT);
+      
+      // Update background layers
+      if (this.backgroundLayers.street) {
+        this.backgroundLayers.street.setSize(this.WORLD_WIDTH, 100);
+      }
+      if (this.backgroundLayers.trees) {
+        this.backgroundLayers.trees.setSize(this.WORLD_WIDTH, this.WORLD_HEIGHT);
+      }
+      if (this.backgroundLayers.houses) {
+        this.backgroundLayers.houses.setSize(this.WORLD_WIDTH, this.WORLD_HEIGHT);
+      }
+      if (this.backgroundLayers.moon_clouds) {
+        this.backgroundLayers.moon_clouds.setSize(this.WORLD_WIDTH, this.WORLD_HEIGHT);
+      }
+    }
+    
+    // Emit distance update for HUD
+    this.events.emit('distanceUpdate', { distance: Math.floor(this.endlessDistance) });
+    
+    // Also emit to window for React components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('distanceUpdate', {
+        detail: { 
+          distance: Math.floor(this.endlessDistance),
+          difficultyMultiplier: this.difficultyMultiplier
+        }
+      }));
+    }
+  }
+
+  /**
+   * Update survival mode - track limited lives
+   */
+  private updateSurvivalMode(): void {
+    // Lives are already tracked by the player entity
+    // Just emit survival stats for HUD
+    this.events.emit('survivalUpdate', { 
+      lives: this.player.lives,
+      maxLives: this.survivalLives 
+    });
+  }
+
+  /**
+   * Update practice mode - unlimited lives
+   */
+  private updatePracticeMode(): void {
+    // Ensure player always has lives in practice mode
+    if (this.player.lives <= 0) {
+      this.player.lives = 999;
+      this.updateGameState();
+    }
+  }
+
+  /**
+   * Set player lives based on game mode
+   */
+  private setPlayerLivesForGameMode(): void {
+    switch (this.gameMode) {
+      case 'survival':
+        this.player.lives = 3;
+        break;
+      case 'practice':
+        this.player.lives = 999;
+        break;
+      case 'story':
+      case 'timeAttack':
+      case 'endless':
+      default:
+        this.player.lives = 10; // Default lives
+        break;
+    }
+  }
+
+  /**
    * Update method called every frame
    */
   update(time: number, delta: number): void {
@@ -1808,6 +2000,9 @@ export class GameScene extends Phaser.Scene {
 
     // Update player
     this.player.update(time, delta);
+    
+    // Update game mode specific logic
+    this.updateGameMode(time, delta);
 
     // Handle input
     this.handleInput();
@@ -2546,19 +2741,24 @@ export class GameScene extends Phaser.Scene {
    * Check for game end conditions
    */
   private checkGameEndConditions(): void {
-    // Check if player has no lives left (defeat)
-    if (this.player.lives <= 0) {
+    // Check if player has no lives left (defeat) - except in practice mode
+    if (this.player.lives <= 0 && this.gameMode !== 'practice') {
       this.endGame(false, 'No lives remaining');
       return;
     }
 
-    // Check if player reached the school gate (victory)
-    if (this.physics.overlap(this.player, this.schoolGate)) {
+    // Check if player reached the school gate (victory) - not applicable in endless mode
+    if (this.gameMode !== 'endless' && this.physics.overlap(this.player, this.schoolGate)) {
       // Add victory bonus
       this.player.addScore(500);
       this.endGame(true, 'Reached school gate');
       return;
     }
+    
+    // Time attack mode - time runs out is handled in updateTimeAttackMode
+    // Endless mode - no end condition, continues indefinitely
+    // Survival mode - uses standard life check
+    // Practice mode - no defeat condition
   }
 
   /**
@@ -2566,12 +2766,30 @@ export class GameScene extends Phaser.Scene {
    */
   private endGame(victory: boolean, reason: string): void {
     console.log(`Game ended: ${victory ? 'Victory' : 'Defeat'} - ${reason}`);
+    
+    // Calculate final score based on game mode
+    let finalScore = this.player.score;
+    
+    if (this.gameMode === 'timeAttack' && victory) {
+      // Bonus points for remaining time
+      const timeBonus = Math.floor(this.timeRemaining * 10);
+      finalScore += timeBonus;
+    } else if (this.gameMode === 'endless') {
+      // Score based on distance in endless mode
+      finalScore += Math.floor(this.endlessDistance / 10);
+    }
 
     // Emit game end event to React
     this.events.emit('gameEnd', {
-      score: this.player.score,
+      score: finalScore,
       victory: victory,
-      reason: reason
+      reason: reason,
+      gameMode: this.gameMode,
+      stats: {
+        distance: this.gameMode === 'endless' ? this.endlessDistance : this.player.x,
+        timeRemaining: this.gameMode === 'timeAttack' ? this.timeRemaining : undefined,
+        difficultyMultiplier: this.gameMode === 'endless' ? this.difficultyMultiplier : undefined
+      }
     });
 
     // Pause the scene to stop gameplay

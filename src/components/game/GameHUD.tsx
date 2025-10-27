@@ -16,9 +16,14 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ className = '' }: GameHUDProps) {
-  const { firstName, lastName, lives, score, character, weapon, difficulty } = useGameStore();
+  const { firstName, lastName, lives, score, character, weapon, difficulty, gameMode, timeRemaining } = useGameStore();
   const [isClient, setIsClient] = useState(false);
   const [showPerformanceSettings, setShowPerformanceSettings] = useState(false);
+  const [gameModeData, setGameModeData] = useState<{
+    timeRemaining?: number;
+    distance?: number;
+    difficultyMultiplier?: number;
+  }>({});
   
   // Performance monitoring
   const { isVisible: isPerformanceVisible, toggleVisibility: togglePerformance } = usePerformanceMonitor({
@@ -37,6 +42,31 @@ export function GameHUD({ className = '' }: GameHUDProps) {
   // Ensure this only renders on the client to prevent hydration issues
   useEffect(() => {
     setIsClient(true);
+    
+    // Listen for game mode specific events from the game scene
+    const handleTimeUpdate = (event: CustomEvent) => {
+      setGameModeData(prev => ({ ...prev, timeRemaining: event.detail.timeRemaining }));
+    };
+    
+    const handleDistanceUpdate = (event: CustomEvent) => {
+      setGameModeData(prev => ({ ...prev, distance: event.detail.distance }));
+    };
+    
+    const handleDifficultyUpdate = (event: CustomEvent) => {
+      setGameModeData(prev => ({ ...prev, difficultyMultiplier: event.detail.difficultyMultiplier }));
+    };
+    
+    // Add event listeners
+    window.addEventListener('timeUpdate', handleTimeUpdate as EventListener);
+    window.addEventListener('distanceUpdate', handleDistanceUpdate as EventListener);
+    window.addEventListener('difficultyUpdate', handleDifficultyUpdate as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('timeUpdate', handleTimeUpdate as EventListener);
+      window.removeEventListener('distanceUpdate', handleDistanceUpdate as EventListener);
+      window.removeEventListener('difficultyUpdate', handleDifficultyUpdate as EventListener);
+    };
   }, []);
 
   // Debug: Log the current store values
@@ -45,8 +75,8 @@ export function GameHUD({ className = '' }: GameHUDProps) {
   });
 
   // Don't render on server or if we don't have the basic game data yet
-  if (!isClient || !firstName || !character || !weapon || !difficulty) {
-    console.log('GameHUD: Not ready to render', { isClient, firstName, character, weapon, difficulty });
+  if (!isClient || !firstName || !character || !weapon || !difficulty || !gameMode) {
+    console.log('GameHUD: Not ready to render', { isClient, firstName, character, weapon, difficulty, gameMode });
     return null;
   }
 
@@ -70,6 +100,22 @@ export function GameHUD({ className = '' }: GameHUDProps) {
     medium: 'text-yellow-400',
     impossible: 'text-red-400'
   }[difficulty || 'easy'];
+
+  // Get game mode display info
+  const gameModeInfo = {
+    story: { name: 'História', emoji: '📖', color: 'text-blue-400' },
+    endless: { name: 'Infinito', emoji: '♾️', color: 'text-purple-400' },
+    timeAttack: { name: 'Tempo', emoji: '⏱️', color: 'text-yellow-400' },
+    survival: { name: 'Sobrevivência', emoji: '💀', color: 'text-red-400' },
+    practice: { name: 'Treino', emoji: '🎯', color: 'text-green-400' }
+  }[gameMode || 'story'];
+
+  // Format time for display
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div 
@@ -99,6 +145,12 @@ export function GameHUD({ className = '' }: GameHUDProps) {
             <span className="text-orange-400">•</span>
             <span className={`${difficultyColor} font-bold`}>
               {difficulty?.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+            <span>{gameModeInfo.emoji}</span>
+            <span className={`${gameModeInfo.color} font-medium`}>
+              {gameModeInfo.name}
             </span>
           </div>
         </div>
@@ -136,6 +188,68 @@ export function GameHUD({ className = '' }: GameHUDProps) {
           </div>
         </div>
       </div>
+
+      {/* Game Mode Specific Displays */}
+      {gameMode === 'timeAttack' && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center">
+            <div className="text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
+              <span className="text-yellow-400">⏱️</span>
+              <span className="spooky-text">Time</span>
+            </div>
+            <div className={`text-lg sm:text-2xl font-bold ${(gameModeData.timeRemaining || 0) <= 30 ? 'text-red-400 flickering-text' : 'text-yellow-400'}`}>
+              {formatTime(gameModeData.timeRemaining || 0)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {gameMode === 'endless' && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center">
+            <div className="text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
+              <span className="text-purple-400">♾️</span>
+              <span className="spooky-text">Distance</span>
+            </div>
+            <div className="text-lg sm:text-2xl font-bold text-purple-400">
+              {(gameModeData.distance || 0).toLocaleString()}m
+            </div>
+            {gameModeData.difficultyMultiplier && gameModeData.difficultyMultiplier > 1 && (
+              <div className="text-xs text-red-400 mt-1">
+                Difficulty: {gameModeData.difficultyMultiplier.toFixed(1)}x
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {gameMode === 'survival' && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center">
+            <div className="text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
+              <span className="text-red-400">💀</span>
+              <span className="spooky-text">Survival</span>
+            </div>
+            <div className="text-sm text-red-400 font-bold">
+              {lives}/3 Lives Only
+            </div>
+          </div>
+        </div>
+      )}
+
+      {gameMode === 'practice' && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center">
+            <div className="text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
+              <span className="text-green-400">🎯</span>
+              <span className="spooky-text">Practice</span>
+            </div>
+            <div className="text-sm text-green-400 font-bold">
+              Unlimited Lives
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced health bar visualization */}
       <div className="absolute top-16 sm:top-20 right-2 sm:right-4">

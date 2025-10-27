@@ -99,8 +99,8 @@ export default function DificuldadePage() {
       // Save difficulty choice to Zustand state
       setDifficulty(selectedDifficulty);
       
-      // Navigate to game page with complete state validation
-      router.push('/jogar');
+      // Navigate to game mode selection page
+      router.push('/modo');
     }
   };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { Difficulty } from '../../types';
+import type { Difficulty, GameMode } from '../../types';
 import { useGameStore } from '../../store/gameStore';
 import { useAudioStore } from '../../store/audioStore';
 import { GameHUD } from './GameHUD';
@@ -10,12 +10,14 @@ import { PauseMenu } from './PauseMenu';
 
 interface PhaserGameComponentProps {
   difficulty?: Difficulty;
+  gameMode?: GameMode;
   onGameEnd?: (score: number, victory: boolean) => void;
   className?: string;
 }
 
 export function PhaserGameComponent({ 
-  difficulty = 'easy', 
+  difficulty = 'easy',
+  gameMode = 'story',
   onGameEnd,
   className = '' 
 }: PhaserGameComponentProps) {
@@ -148,6 +150,7 @@ export function PhaserGameComponent({
 
         // Set game configuration in registry for the scene to access
         gameRef.current.registry.set('difficulty', difficulty);
+        gameRef.current.registry.set('gameMode', gameMode);
         gameRef.current.registry.set('character', character);
         gameRef.current.registry.set('weapon', weapon);
 
@@ -221,7 +224,7 @@ export function PhaserGameComponent({
         gameSceneRef.current = null;
       }
     };
-  }, [difficulty, onGameEnd]);
+  }, [difficulty, gameMode, onGameEnd]);
 
   // Touch control handlers
   const handleTouchControl = (control: 'moveLeft' | 'moveRight' | 'jump' | 'crouch' | 'attack') => 
