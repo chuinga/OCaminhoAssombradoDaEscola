@@ -84,3 +84,36 @@ body {
   background: #6b7280;
   cursor: not-allowed;
 }
+
+/* Touch controls animations */
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateY(10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 4s ease-in-out;
+}
+
+/* Enhanced button press animations */
+@keyframes button-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.animate-button-press {
+  animation: button-press 0.15s ease-in-out;
+}
+
+/* Gesture trail effect */
+@keyframes gesture-trail {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.animate-gesture-trail {
+  animation: gesture-trail 0.3s ease-out forwards;
+}
