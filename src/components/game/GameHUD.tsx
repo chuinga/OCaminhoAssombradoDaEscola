@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { PumpkinIcon, SkullIcon } from '../ui/HalloweenIcons';
 import { MobileSettingsButton } from './MobileSettingsButton';
+import AnalyticsDashboard from '../analytics/AnalyticsDashboard';
 
 interface GameHUDProps {
   className?: string;
@@ -139,6 +140,9 @@ export function GameHUD({ className = '' }: GameHUDProps) {
 
       {/* Mobile Settings Button */}
       <MobileSettingsButton />
+
+      {/* Analytics Dashboard */}
+      <AnalyticsDashboard />
     </div>
   );
 }

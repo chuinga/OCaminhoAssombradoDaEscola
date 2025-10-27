@@ -57,7 +57,7 @@ export function MobileOptimizationTest() {
 
       // Test 6: Device Orientation Lock (if supported)
       console.log('Testing orientation lock...');
-      if (screen.orientation && screen.orientation.lock) {
+      if (screen.orientation && (screen.orientation as any).lock) {
         results.orientationLock = true;
       } else {
         results.orientationLock = false; // Not supported, but not an error

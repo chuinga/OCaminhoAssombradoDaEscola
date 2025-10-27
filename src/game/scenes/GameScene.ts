@@ -6,6 +6,7 @@ import { LifeItemFactory, LifeItem } from '../entities/LifeItem';
 import { WeaponFactory } from '../entities/WeaponFactory';
 import { audioManager } from '../utils/AudioManager';
 import { batteryOptimizer } from '../../utils/mobileOptimization';
+import { analyticsService } from '../../lib/analytics';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -43,6 +44,9 @@ export class GameScene extends Phaser.Scene {
   // Debug counters
   private inputCallCount: number = 0;
   private updateCallCount: number = 0;
+
+  // Analytics tracking
+  private sceneLoadStartTime: number = 0;
 
   // Touch controls state
   private touchControls = {
@@ -84,6 +88,9 @@ export class GameScene extends Phaser.Scene {
    * Initialize scene data
    */
   init(): void {
+    // Track scene load start time for performance metrics
+    this.sceneLoadStartTime = performance.now();
+
     // Get difficulty from game registry (set by React component)
     this.difficulty = this.registry.get('difficulty') || 'easy';
 
@@ -1397,10 +1404,15 @@ export class GameScene extends Phaser.Scene {
     // Spawn some initial enemies for testing
     this.spawnInitialEnemies();
 
+    // Track scene load time for analytics
+    const loadTime = performance.now() - this.sceneLoadStartTime;
+    analyticsService.trackPerformanceMetrics(loadTime);
+
     // Debug: Final scene state
     console.log('GameScene created successfully - isPaused:', this.scene.isPaused());
     console.log('Player position:', this.player.x, this.player.y);
     console.log('Player visible:', this.player.visible);
+    console.log('Scene load time:', loadTime, 'ms');
   }
 
   /**
@@ -1849,6 +1861,12 @@ export class GameScene extends Phaser.Scene {
 
     if (shouldAttack) {
       this.player.attack();
+      
+      // Track weapon usage for analytics
+      const weaponType = this.registry.get('weapon');
+      if (weaponType) {
+        analyticsService.trackWeaponUsage(weaponType);
+      }
     }
   }
 

@@ -25,7 +25,7 @@ export interface BatteryInfo {
 export class OrientationManager {
   private static instance: OrientationManager;
   private isLocked = false;
-  private preferredOrientation: OrientationLockType = 'landscape-primary';
+  private preferredOrientation: string = 'landscape-primary';
 
   static getInstance(): OrientationManager {
     if (!OrientationManager.instance) {
@@ -39,8 +39,8 @@ export class OrientationManager {
    */
   async lockToLandscape(): Promise<boolean> {
     try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock('landscape-primary');
+      if (screen.orientation && (screen.orientation as any).lock) {
+        await (screen.orientation as any).lock('landscape-primary');
         this.isLocked = true;
         this.preferredOrientation = 'landscape-primary';
         console.log('Orientation locked to landscape');
