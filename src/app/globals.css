@@ -117,3 +117,109 @@ body {
 .animate-gesture-trail {
   animation: gesture-trail 0.3s ease-out forwards;
 }
+
+/* Mobile UI Scaling Support */
+:root {
+  --mobile-ui-scale: 1;
+}
+
+/* Apply mobile UI scaling to game elements */
+.mobile-scaled {
+  transform: scale(var(--mobile-ui-scale));
+  transform-origin: center center;
+}
+
+/* Touch control optimizations */
+[data-touch-control] {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Fullscreen optimizations */
+.fullscreen-game {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+}
+
+/* Orientation lock styles */
+@media screen and (orientation: portrait) {
+  .landscape-only {
+    display: none;
+  }
+  
+  .portrait-warning {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 10000;
+    text-align: center;
+    padding: 2rem;
+  }
+}
+
+@media screen and (orientation: landscape) {
+  .portrait-warning {
+    display: none;
+  }
+}
+
+/* Battery optimization styles */
+.battery-saver-mode {
+  filter: brightness(0.8) contrast(0.9);
+}
+
+.battery-saver-mode * {
+  animation-duration: 2s !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Mobile-specific game UI adjustments */
+@media (max-width: 768px) {
+  .game-hud {
+    font-size: calc(0.75rem * var(--mobile-ui-scale));
+  }
+  
+  .mobile-scaled .game-hud {
+    font-size: calc(0.875rem * var(--mobile-ui-scale));
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-scaled {
+    transform: scale(calc(var(--mobile-ui-scale) * 0.9));
+  }
+}
+
+/* Safe area support for devices with notches */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+  
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}

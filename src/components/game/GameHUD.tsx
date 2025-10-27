@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { PumpkinIcon, SkullIcon } from '../ui/HalloweenIcons';
+import { MobileSettingsButton } from './MobileSettingsButton';
 
 interface GameHUDProps {
   className?: string;
@@ -135,6 +136,9 @@ export function GameHUD({ className = '' }: GameHUDProps) {
           </div>
         </div>
       )}
+
+      {/* Mobile Settings Button */}
+      <MobileSettingsButton />
     </div>
   );
 }

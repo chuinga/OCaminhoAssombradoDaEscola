@@ -6,10 +6,12 @@ import { useGameStore } from '@/store/gameStore';
 import { ClientOnlyPhaserGame } from '@/components/game/ClientOnlyPhaserGame';
 import { ResponsiveGameCanvas } from '@/components/game/ResponsiveGameCanvas';
 import { PerformanceIndicator } from '@/components/game/PerformanceMonitor';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 export default function JogarPage() {
   const router = useRouter();
   const { firstName, lastName, character, weapon, difficulty } = useGameStore();
+  const { shouldOptimize, isInitialized } = useMobileOptimization();
 
   // Validate that user has completed all previous steps before accessing this page
   useEffect(() => {

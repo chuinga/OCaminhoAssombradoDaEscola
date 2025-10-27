@@ -5,6 +5,7 @@ import { EnemyFactory, EnemyType } from '../entities/EnemyFactory';
 import { LifeItemFactory, LifeItem } from '../entities/LifeItem';
 import { WeaponFactory } from '../entities/WeaponFactory';
 import { audioManager } from '../utils/AudioManager';
+import { batteryOptimizer } from '../../utils/mobileOptimization';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -1696,14 +1697,20 @@ export class GameScene extends Phaser.Scene {
       console.log('Update called', this.updateCallCount, 'times');
     }
 
+    // Apply battery optimization settings
+    this.applyBatteryOptimizations();
+
     // Update player
     this.player.update(time, delta);
 
     // Handle input
     this.handleInput();
 
-    // Update parallax backgrounds
-    this.updateParallax();
+    // Update parallax backgrounds (conditionally based on battery optimization)
+    const optimizationLevel = batteryOptimizer.getOptimizationLevel();
+    if (optimizationLevel !== 'high' || this.updateCallCount % 120 === 0) {
+      this.updateParallax();
+    }
 
     // Handle spawning system
     this.updateSpawning();
@@ -2555,6 +2562,52 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Apply battery optimization settings to game performance
+   * Requirements: 10.4 - Battery usage optimization settings
+   */
+  private applyBatteryOptimizations(): void {
+    // Only check every 60 frames (about once per second) to avoid performance impact
+    if (this.updateCallCount % 60 !== 0) return;
 
+    const optimizationSettings = batteryOptimizer.getOptimizationSettings();
+    const optimizationLevel = batteryOptimizer.getOptimizationLevel();
+
+    // Apply frame rate optimization
+    if (this.game.loop) {
+      const targetFPS = optimizationSettings.frameRate;
+      if (this.game.loop.targetFps !== targetFPS) {
+        this.game.loop.targetFps = targetFPS;
+        console.log(`Battery optimization: Set target FPS to ${targetFPS}`);
+      }
+    }
+
+    // Apply particle count optimization
+    if (optimizationLevel === 'high' || optimizationLevel === 'medium') {
+      // Reduce enemy spawn rate for better performance
+      const baseSpawnInterval = this.enemySpawnInterval;
+      const optimizedInterval = baseSpawnInterval * (optimizationLevel === 'high' ? 1.5 : 1.2);
+      
+      if (this.enemySpawnInterval !== optimizedInterval) {
+        this.enemySpawnInterval = optimizedInterval;
+        console.log(`Battery optimization: Adjusted enemy spawn interval to ${optimizedInterval}ms`);
+      }
+    }
+
+    // Disable audio for high battery optimization
+    if (optimizationLevel === 'high' && !optimizationSettings.audioEnabled) {
+      if (!audioManager.isMutedState()) {
+        audioManager.mute();
+        console.log('Battery optimization: Audio disabled to save battery');
+      }
+    } else if (optimizationLevel !== 'high' && optimizationSettings.audioEnabled) {
+      if (audioManager.isMutedState()) {
+        audioManager.unmute();
+        console.log('Battery optimization: Audio re-enabled');
+      }
+    }
+
+    // Background processing optimization is handled in the main update loop
+  }
 
 }
