@@ -48,10 +48,14 @@ describe('AudioManager', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       
       manager.initialize();
-      manager.initialize(); // Second call should be ignored
+      const firstCallCount = consoleSpy.mock.calls.length;
       
+      manager.initialize(); // Second call should be ignored
+      const secondCallCount = consoleSpy.mock.calls.length;
+      
+      // Should have the same number of calls (no additional calls from second initialization)
+      expect(secondCallCount).toBe(firstCallCount);
       expect(consoleSpy).toHaveBeenCalledWith('AudioManager initialized successfully');
-      expect(consoleSpy).toHaveBeenCalledTimes(1);
       
       consoleSpy.mockRestore();
     });

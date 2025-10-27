@@ -60,16 +60,27 @@ export class AudioManager {
    */
   private loadBackgroundMusic(): void {
     try {
-      // For now, create a silent background music since audio file is placeholder
-      // In production, you would load actual ambient audio files
-      console.log('Creating silent background music (placeholder audio files detected)');
+      console.log('Loading real background ambient music...');
       this.backgroundMusic = new Howl({
-        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+        src: ['/assets/audio/background-ambient.mp3'],
         loop: true,
-        volume: 0
+        volume: this.MUSIC_VOLUME,
+        autoplay: false,
+        onload: () => {
+          console.log('Background ambient music loaded successfully');
+        },
+        onloaderror: (_, error) => {
+          console.warn('Failed to load background music, creating silent fallback:', error);
+          // Create silent fallback if real audio fails
+          this.backgroundMusic = new Howl({
+            src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+            loop: true,
+            volume: 0
+          });
+        }
       });
     } catch (error) {
-      console.warn('Error creating background music:', error);
+      console.warn('Error loading background music:', error);
       // Create silent fallback
       this.backgroundMusic = new Howl({
         src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
@@ -86,30 +97,47 @@ export class AudioManager {
   private loadSoundEffects(): void {
     const soundEffects = [
       // Player action sounds
-      { key: 'jump', fallbackFreq: 800, fallbackDuration: 150 },
-      { key: 'damage', fallbackFreq: 200, fallbackDuration: 300 },
-      { key: 'item_collect', fallbackFreq: 1000, fallbackDuration: 200 },
+      { key: 'jump', src: '/assets/audio/jump.mp3', fallbackFreq: 800, fallbackDuration: 150 },
+      { key: 'damage', src: '/assets/audio/damage.mp3', fallbackFreq: 200, fallbackDuration: 300 },
+      { key: 'item_collect', src: '/assets/audio/item-collect.mp3', fallbackFreq: 1000, fallbackDuration: 200 },
       
       // Weapon sounds
-      { key: 'slash', fallbackFreq: 600, fallbackDuration: 100 },
-      { key: 'laser', fallbackFreq: 1200, fallbackDuration: 250 },
-      { key: 'explosion', fallbackFreq: 100, fallbackDuration: 400 },
+      { key: 'slash', src: '/assets/audio/slash.mp3', fallbackFreq: 600, fallbackDuration: 100 },
+      { key: 'laser', src: '/assets/audio/laser.mp3', fallbackFreq: 1200, fallbackDuration: 250 },
+      { key: 'explosion', src: '/assets/audio/explosion.mp3', fallbackFreq: 100, fallbackDuration: 400 },
     ];
     
-    soundEffects.forEach(({ key, fallbackFreq, fallbackDuration }) => {
+    soundEffects.forEach(({ key, src, fallbackFreq, fallbackDuration }) => {
       try {
-        // For now, directly create fallback sounds since audio files are placeholders
-        // In production, you would first try to load actual audio files
-        console.log(`Creating fallback beep sound for: ${key}`);
-        const sound = this.createFallbackSound(fallbackFreq, fallbackDuration);
+        console.log(`Loading real audio file for: ${key}`);
+        const sound = new Howl({
+          src: [src],
+          volume: this.SFX_VOLUME,
+          onload: () => {
+            console.log(`Successfully loaded real audio file: ${key}`);
+          },
+          onloaderror: (_, error) => {
+            console.warn(`Failed to load real audio file '${key}', creating fallback:`, error);
+            // Replace with fallback sound if real audio fails
+            const fallbackSound = this.createFallbackSound(fallbackFreq, fallbackDuration);
+            this.sounds.set(key, fallbackSound);
+          }
+        });
         this.sounds.set(key, sound);
       } catch (error) {
-        console.warn(`Error creating sound '${key}':`, error);
-        // Create silent fallback as last resort
-        this.sounds.set(key, new Howl({
-          src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
-          volume: 0
-        }));
+        console.warn(`Error loading sound '${key}':`, error);
+        // Create fallback sound as backup
+        try {
+          const fallbackSound = this.createFallbackSound(fallbackFreq, fallbackDuration);
+          this.sounds.set(key, fallbackSound);
+        } catch (fallbackError) {
+          console.warn(`Failed to create fallback for '${key}':`, fallbackError);
+          // Create silent fallback as last resort
+          this.sounds.set(key, new Howl({
+            src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAAAQESsAEAEAAABAAgAZGF0YQAAAAA='],
+            volume: 0
+          }));
+        }
       }
     });
   }
@@ -376,62 +404,7 @@ export class AudioManager {
     console.log('AudioManager destroyed');
   }
   
-  /**
-   * Load real audio files (for when actual audio assets are available)
-   * This method can be called to replace fallback sounds with real audio
-   */
-  public loadRealAudioFiles(): void {
-    console.log('Attempting to load real audio files...');
-    
-    const soundEffects = [
-      { key: 'jump', src: ['/assets/audio/jump.mp3'] },
-      { key: 'damage', src: ['/assets/audio/damage.mp3'] },
-      { key: 'item_collect', src: ['/assets/audio/item-collect.mp3'] },
-      { key: 'slash', src: ['/assets/audio/slash.mp3'] },
-      { key: 'laser', src: ['/assets/audio/laser.mp3'] },
-      { key: 'explosion', src: ['/assets/audio/explosion.mp3'] },
-    ];
-    
-    soundEffects.forEach(({ key, src }) => {
-      const sound = new Howl({
-        src,
-        volume: this.SFX_VOLUME,
-        onload: () => {
-          console.log(`Successfully loaded real audio file: ${key}`);
-          // Replace the fallback sound with the real one
-          const oldSound = this.sounds.get(key);
-          if (oldSound) {
-            oldSound.unload();
-          }
-          this.sounds.set(key, sound);
-        },
-        onloaderror: (_, error) => {
-          console.warn(`Real audio file '${key}' still not available:`, error);
-          // Keep using fallback sound
-        }
-      });
-    });
-    
-    // Try to load real background music
-    const backgroundMusic = new Howl({
-      src: ['/assets/audio/background-ambient.mp3'],
-      loop: true,
-      volume: this.MUSIC_VOLUME,
-      autoplay: false,
-      onload: () => {
-        console.log('Successfully loaded real background music');
-        // Replace the silent background with real music
-        if (this.backgroundMusic) {
-          this.backgroundMusic.unload();
-        }
-        this.backgroundMusic = backgroundMusic;
-      },
-      onloaderror: (_, error) => {
-        console.warn('Real background music still not available:', error);
-        // Keep using silent background
-      }
-    });
-  }
+
   
   /**
    * Get debug information about loaded sounds
@@ -448,7 +421,7 @@ export class AudioManager {
       isMuted: this.isMuted,
       backgroundMusicLoaded: !!this.backgroundMusic,
       soundEffectsLoaded: Array.from(this.sounds.keys()),
-      masterVolume: Howler.volume()
+      masterVolume: typeof Howler.volume === 'function' ? Howler.volume() : 1.0
     };
   }
 }
