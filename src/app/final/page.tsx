@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { apiClient } from '@/lib/api';
 import { Score } from '@/types';
+import ShareButton from '@/components/ui/ShareButton';
 
 function FinalPageContent() {
   const router = useRouter();
@@ -247,13 +248,25 @@ function FinalPageContent() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-yellow-400">
-                        {scoreEntry.score.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(scoreEntry.createdAt).toLocaleDateString('pt-PT')}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="font-bold text-yellow-400">
+                          {scoreEntry.score.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(scoreEntry.createdAt).toLocaleDateString('pt-PT')}
+                        </p>
+                      </div>
+                      
+                      {scoreEntry.firstName === firstName && 
+                       scoreEntry.lastName === lastName && 
+                       scoreEntry.score === finalScore && (
+                        <ShareButton 
+                          scoreId={scoreEntry.scoreId} 
+                          size="sm" 
+                          variant="ghost"
+                        />
+                      )}
                     </div>
                   </div>
                 ))}

@@ -1,4 +1,4 @@
-import { LeaderboardResponse, AllScoresResponse, SubmitScoreRequest, Score } from '@/types';
+import { LeaderboardResponse, AllScoresResponse, SubmitScoreRequest, Score, FilteredLeaderboardResponse, PlayerStats, ShareableScore } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 const DEFAULT_TIMEOUT = 10000; // 10 seconds
@@ -238,6 +238,80 @@ class ApiClient {
         error.message = `Score submission failed: ${error.message}`;
       }
       
+      throw error;
+    }
+  }
+
+  async getFilteredLeaderboard(
+    difficulty?: 'easy' | 'medium' | 'impossible',
+    period?: 'all' | 'weekly' | 'monthly',
+    limit: number = 10
+  ): Promise<FilteredLeaderboardResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (difficulty) params.append('difficulty', difficulty);
+      if (period && period !== 'all') params.append('period', period);
+      params.append('limit', limit.toString());
+      
+      const url = `${API_BASE_URL}/scores/leaderboard${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await this.fetchWithRetry(url);
+      const data = await response.json();
+      
+      if (!Array.isArray(data.scores)) {
+        throw new ApiError('Invalid response format: scores must be an array');
+      }
+      
+      return {
+        scores: data.scores,
+        total: data.total || data.scores.length,
+        filters: { difficulty, period }
+      };
+    } catch (error) {
+      console.error('Failed to fetch filtered leaderboard:', error);
+      
+      if (error instanceof NetworkError || error instanceof TimeoutError || 
+          (error instanceof ApiError && error.status && error.status >= 500)) {
+        return { scores: [], total: 0, filters: { difficulty, period } };
+      }
+      
+      throw error;
+    }
+  }
+
+  async getPlayerStats(firstName: string, lastName: string): Promise<PlayerStats | null> {
+    try {
+      const params = new URLSearchParams();
+      params.append('firstName', firstName);
+      params.append('lastName', lastName);
+      
+      const url = `${API_BASE_URL}/scores/player-stats?${params.toString()}`;
+      const response = await this.fetchWithRetry(url);
+      
+      if (response.status === 404) {
+        return null; // Player not found
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch player stats:', error);
+      
+      if (error instanceof NetworkError || error instanceof TimeoutError || 
+          (error instanceof ApiError && error.status && error.status >= 500)) {
+        return null;
+      }
+      
+      throw error;
+    }
+  }
+
+  async generateShareableScore(scoreId: string): Promise<ShareableScore> {
+    try {
+      const response = await this.fetchWithRetry(`${API_BASE_URL}/scores/${scoreId}/share`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to generate shareable score:', error);
       throw error;
     }
   }

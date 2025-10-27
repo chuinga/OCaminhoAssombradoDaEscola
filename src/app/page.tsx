@@ -66,7 +66,21 @@ export default function Home() {
                 🎮 Jogar
               </Link>
 
-              <div className="mt-4">
+              <div className="mt-4 space-y-2">
+                <Link
+                  href="/leaderboard"
+                  className="inline-block w-full px-6 py-3 bg-purple-700 hover:bg-purple-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                >
+                  🏆 Leaderboard Completo
+                </Link>
+                
+                <Link
+                  href="/estatisticas"
+                  className="inline-block w-full px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                >
+                  📊 Estatísticas
+                </Link>
+                
                 <Link
                   href="/configuracoes"
                   className="inline-block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
