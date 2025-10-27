@@ -85,6 +85,14 @@ export default function Home() {
                 </Link>
                 
                 <Link
+                  href="/conquistas"
+                  className="inline-block w-full px-6 py-3 bg-yellow-700 hover:bg-yellow-600 focus:bg-yellow-600 text-white font-medium rounded-lg transition-all transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-500/50"
+                  aria-label="Ver suas conquistas e progresso"
+                >
+                  🏅 Conquistas
+                </Link>
+                
+                <Link
                   href="/configuracoes"
                   className="inline-block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 focus:bg-gray-600 text-white font-medium rounded-lg transition-all transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500/50"
                   aria-label="Configurar áudio e acessibilidade"

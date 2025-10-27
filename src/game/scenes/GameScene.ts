@@ -10,6 +10,7 @@ import { analyticsService } from '../../lib/analytics';
 import { AdvancedPerformanceMonitor, PerformanceDebugger } from '../../utils/performance';
 import { performanceOptimizer } from '../../utils/performanceOptimizer';
 import { usePerformanceStore } from '../../store/performanceStore';
+import { useAchievementStore } from '../../store/achievementStore';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -1440,6 +1441,9 @@ export class GameScene extends Phaser.Scene {
     const loadTime = performance.now() - this.sceneLoadStartTime;
     analyticsService.trackPerformanceMetrics(loadTime);
 
+    // Initialize achievements and trigger game start
+    this.initializeAchievements();
+
     // End scene creation profiling
     this.performanceDebugger.setMarker('scene-create-end');
     const creationTime = this.performanceDebugger.endProfile('scene-creation');
@@ -2335,6 +2339,9 @@ export class GameScene extends Phaser.Scene {
     // Player takes damage (includes invulnerability timer)
     player.takeDamage();
 
+    // Trigger damage taken achievement
+    this.triggerDamageTakenAchievement();
+
     // Enemy disappears on contact (requirement 4.1-4.4)
     enemy.destroy();
 
@@ -2380,6 +2387,12 @@ export class GameScene extends Phaser.Scene {
       player.addLife(); // +1 life (capped at 10 in Player class)
       player.addScore(item.getPointValue()); // +50 points for life item
 
+      // Trigger life collected achievement
+      this.triggerLifeCollectedAchievement();
+
+      // Trigger score achievement check
+      this.triggerScoreAchievement(player.score);
+
       // Play item collection sound effect
       audioManager.playItemCollectSound();
 
@@ -2401,6 +2414,17 @@ export class GameScene extends Phaser.Scene {
 
     // Player wins the game with bonus points
     this.player.addScore(500); // +500 bonus points for completion
+
+    // Calculate game time for achievements
+    const achievementStore = useAchievementStore.getState();
+    const gameTime = achievementStore.sessionStats?.gameStartTime ? 
+      (Date.now() - achievementStore.sessionStats.gameStartTime) / 1000 : 0;
+
+    // Trigger game completion achievements
+    this.triggerGameCompletionAchievement(true, this.player.score, gameTime);
+
+    // Trigger score achievement check
+    this.triggerScoreAchievement(this.player.score);
 
     // Update game state store
     this.updateGameState();
@@ -2524,6 +2548,16 @@ export class GameScene extends Phaser.Scene {
   private handleWeaponHitEnemy(enemy: Phaser.Physics.Arcade.Sprite): void {
     // Award points for enemy elimination
     this.player.addScore(100); // +100 points for each enemy eliminated
+
+    // Get enemy type for achievement tracking
+    const enemyType = (enemy as any).type || 'unknown';
+    const weaponType = this.player.weapon?.type || 'unknown';
+
+    // Trigger enemy killed achievement
+    this.triggerEnemyKilledAchievement(enemyType, weaponType);
+
+    // Trigger score achievement check
+    this.triggerScoreAchievement(this.player.score);
 
     // Apply weapon-specific effects
     if (this.player.weapon?.type === 'baseball') {
@@ -3088,6 +3122,105 @@ export class GameScene extends Phaser.Scene {
       metrics: performanceOptimizer.getMetrics(),
       frameSkipCounter: this.frameSkipCounter,
     };
+  }
+
+  /**
+   * Initialize achievements and trigger game start event
+   */
+  private initializeAchievements(): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    // Initialize achievements if not already done
+    achievementStore.initializeAchievements();
+    
+    // Reset session stats for new game
+    achievementStore.resetSessionStats();
+    
+    // Trigger game start achievement check
+    achievementStore.triggerAchievementCheck('game_started', 1, {
+      character: this.registry.get('character'),
+      weapon: this.registry.get('weapon'),
+      difficulty: this.difficulty,
+      gameMode: this.gameMode
+    });
+  }
+
+  /**
+   * Trigger achievement for enemy elimination
+   */
+  private triggerEnemyKilledAchievement(enemyType: string, weapon: string, multiKill = false): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    achievementStore.triggerAchievementCheck('enemy_killed', 1, {
+      enemyType,
+      weapon,
+      multiKill
+    });
+    
+    // Also trigger weapon usage tracking
+    achievementStore.triggerAchievementCheck('weapon_used', 1, {
+      weapon
+    });
+  }
+
+  /**
+   * Trigger achievement for life item collection
+   */
+  private triggerLifeCollectedAchievement(): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    achievementStore.triggerAchievementCheck('life_collected', 1);
+  }
+
+  /**
+   * Trigger achievement for taking damage
+   */
+  private triggerDamageTakenAchievement(): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    achievementStore.triggerAchievementCheck('damage_taken', 1);
+  }
+
+  /**
+   * Trigger achievement for score milestones
+   */
+  private triggerScoreAchievement(score: number): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    achievementStore.triggerAchievementCheck('score_reached', score);
+  }
+
+  /**
+   * Trigger achievement for game completion
+   */
+  private triggerGameCompletionAchievement(survived: boolean, finalScore: number, gameTime: number): void {
+    const achievementStore = useAchievementStore.getState();
+    
+    if (survived) {
+      achievementStore.triggerAchievementCheck('game_completed', 1, {
+        character: this.registry.get('character'),
+        weapon: this.registry.get('weapon'),
+        difficulty: this.difficulty,
+        livesRemaining: this.player.lives,
+        finalScore,
+        gameTime
+      });
+      
+      // Check for difficulty-specific achievements
+      achievementStore.triggerAchievementCheck('difficulty_completed', 1, {
+        difficulty: this.difficulty
+      });
+      
+      // Check for perfect run (no damage taken)
+      if (this.player.lives === 10) {
+        achievementStore.triggerAchievementCheck('perfect_run', 1);
+      }
+      
+      // Check for speed run (less than 5 minutes)
+      if (gameTime < 300) {
+        achievementStore.triggerAchievementCheck('speed_run', gameTime);
+      }
+    }
   }
 
 }

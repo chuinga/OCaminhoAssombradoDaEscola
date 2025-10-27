@@ -27,6 +27,7 @@ import { AudioSubtitles } from "../components/ui/AudioSubtitles";
 import { VisualAudioIndicators } from "../components/ui/VisualAudioIndicators";
 import { ColorblindFriendlyUI } from "../components/ui/ColorblindFriendlyUI";
 import { ClientOnlyZustandHydration } from "../components/ClientOnlyZustandHydration";
+import { AchievementNotificationContainer } from "../components/achievements/AchievementNotification";
 
 export default function RootLayout({
   children,
@@ -57,6 +58,7 @@ export default function RootLayout({
               <GlobalScreenReaderAnnouncer />
               <AudioSubtitles />
               <VisualAudioIndicators />
+              <AchievementNotificationContainer />
             </ColorblindFriendlyUI>
           </AccessibilityProvider>
         </ClientOnlyZustandHydration>

@@ -1,0 +1,137 @@
+/* Achievement notification animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes achievement-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes achievement-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.achievement-enter {
+  animation: achievement-slide-in 0.3s ease-out forwards;
+}
+
+.achievement-exit {
+  animation: achievement-slide-out 0.3s ease-in forwards;
+}
+
+/* Achievement card hover effects */
+.achievement-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.achievement-card:hover {
+  transform: translateY(-2px);
+}
+
+.achievement-unlocked {
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-unlocked::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: achievement-shine 2s ease-in-out infinite;
+}
+
+@keyframes achievement-shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+}
+
+/* Rarity-specific glows */
+.achievement-common {
+  box-shadow: 0 0 10px rgba(156, 163, 175, 0.3);
+}
+
+.achievement-rare {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.achievement-epic {
+  box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+}
+
+.achievement-legendary {
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+  animation: legendary-glow 3s ease-in-out infinite;
+}
+
+@keyframes legendary-glow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.8);
+  }
+}
+
+/* Progress bar animations */
+.achievement-progress-bar {
+  transition: width 0.5s ease-out;
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-glow,
+  .achievement-unlocked::before,
+  .achievement-legendary {
+    animation: none;
+  }
+  
+  .achievement-card:hover {
+    transform: none;
+  }
+  
+  .achievement-enter,
+  .achievement-exit {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+}
