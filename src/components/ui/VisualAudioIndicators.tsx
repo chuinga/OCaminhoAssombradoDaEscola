@@ -34,7 +34,8 @@ export const VisualAudioIndicators: React.FC<VisualAudioIndicatorsProps> = ({
 
       const { type, position, intensity = 'medium', weaponType } = event.detail;
       const timestamp = Date.now();
-      const id = `${type}-${timestamp}`;
+      const randomId = Math.random().toString(36).substr(2, 9);
+      const id = `${type}-${timestamp}-${randomId}`;
 
       // Default position (center of screen)
       const defaultPosition = { x: 50, y: 50 };
@@ -79,7 +80,15 @@ export const VisualAudioIndicators: React.FC<VisualAudioIndicatorsProps> = ({
         timestamp
       };
 
-      setIndicators(prev => [...prev, indicator]);
+      setIndicators(prev => {
+        // Remove old indicators of the same type to prevent spam
+        const filtered = prev.filter(i => 
+          i.type !== type || (timestamp - i.timestamp) > 100
+        );
+        // Keep maximum of 10 indicators to prevent performance issues
+        const limited = [...filtered, indicator].slice(-10);
+        return limited;
+      });
 
       // Remove indicator after duration
       setTimeout(() => {
