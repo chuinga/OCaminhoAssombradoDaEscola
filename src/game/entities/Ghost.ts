@@ -5,6 +5,9 @@ export class Ghost extends BaseEnemy {
   private floatFrequency: number;
   private initialY: number;
   private timeOffset: number;
+  private animationFrame: number;
+  private animationTimer: number;
+  private readonly ANIMATION_SPEED = 300; // ms per frame
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string = 'ghost') {
     super(scene, x, y, texture, 'ghost');
@@ -16,6 +19,10 @@ export class Ghost extends BaseEnemy {
     this.floatFrequency = 0.002; // How fast it bobs
     this.initialY = y;
     this.timeOffset = Math.random() * Math.PI * 2; // Random start phase
+    
+    // Initialize animation
+    this.animationFrame = 0;
+    this.animationTimer = 0;
     
     // Configure physics for floating
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
@@ -44,5 +51,30 @@ export class Ghost extends BaseEnemy {
     
     // Optional: slight transparency effect for ghostly appearance
     this.setAlpha(0.8 + Math.sin(time * 0.003) * 0.2);
+  }
+
+  /**
+   * Update animation frame
+   */
+  private updateAnimation(delta: number): void {
+    this.animationTimer += delta;
+    
+    if (this.animationTimer >= this.ANIMATION_SPEED) {
+      this.animationTimer = 0;
+      this.animationFrame = (this.animationFrame + 1) % 3; // Cycle through 3 frames
+      
+      const frameTexture = `ghost_${this.animationFrame}`;
+      if (this.scene.textures.exists(frameTexture)) {
+        this.setTexture(frameTexture);
+      }
+    }
+  }
+
+  /**
+   * Override update to include animation
+   */
+  update(time: number, delta: number): void {
+    super.update(time, delta);
+    this.updateAnimation(delta);
   }
 }

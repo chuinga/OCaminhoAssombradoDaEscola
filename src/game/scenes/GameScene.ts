@@ -113,91 +113,213 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Create player character sprites
+   * Create player character sprites with animation frames
    */
   private createPlayerSprites(): void {
-    // Boy character sprite
-    const boyGraphics = this.add.graphics();
-
-    // Head (skin tone)
-    boyGraphics.fillStyle(0xfdbcb4);
-    boyGraphics.fillCircle(16, 12, 8);
-
-    // Hair (brown)
-    boyGraphics.fillStyle(0x8b4513);
-    boyGraphics.fillCircle(16, 8, 6);
-
-    // Eyes
-    boyGraphics.fillStyle(0x000000);
-    boyGraphics.fillCircle(13, 11, 1);
-    boyGraphics.fillCircle(19, 11, 1);
-
-    // Body (shirt - blue)
-    boyGraphics.fillStyle(0x4169e1);
-    boyGraphics.fillRect(10, 20, 12, 16);
-
-    // Arms (skin tone)
-    boyGraphics.fillStyle(0xfdbcb4);
-    boyGraphics.fillRect(8, 22, 3, 12);
-    boyGraphics.fillRect(21, 22, 3, 12);
-
-    // Legs (pants - dark blue)
-    boyGraphics.fillStyle(0x191970);
-    boyGraphics.fillRect(12, 36, 3, 12);
-    boyGraphics.fillRect(17, 36, 3, 12);
-
-    // Shoes (black)
-    boyGraphics.fillStyle(0x000000);
-    boyGraphics.fillRect(11, 46, 5, 3);
-    boyGraphics.fillRect(16, 46, 5, 3);
-
-    boyGraphics.generateTexture('player_boy', 32, 50);
-    boyGraphics.destroy();
-
-    // Girl character sprite
-    const girlGraphics = this.add.graphics();
-
-    // Head (skin tone)
-    girlGraphics.fillStyle(0xfdbcb4);
-    girlGraphics.fillCircle(16, 12, 8);
-
-    // Hair (blonde)
-    girlGraphics.fillStyle(0xffd700);
-    girlGraphics.fillCircle(16, 8, 7);
-
-    // Eyes
-    girlGraphics.fillStyle(0x000000);
-    girlGraphics.fillCircle(13, 11, 1);
-    girlGraphics.fillCircle(19, 11, 1);
-
-    // Body (dress - pink)
-    girlGraphics.fillStyle(0xff69b4);
-    girlGraphics.fillRect(9, 20, 14, 18);
-
-    // Arms (skin tone)
-    girlGraphics.fillStyle(0xfdbcb4);
-    girlGraphics.fillRect(7, 22, 3, 12);
-    girlGraphics.fillRect(22, 22, 3, 12);
-
-    // Legs (skin tone)
-    girlGraphics.fillStyle(0xfdbcb4);
-    girlGraphics.fillRect(12, 38, 3, 8);
-    girlGraphics.fillRect(17, 38, 3, 8);
-
-    // Shoes (red)
-    girlGraphics.fillStyle(0xff0000);
-    girlGraphics.fillRect(11, 46, 5, 3);
-    girlGraphics.fillRect(16, 46, 5, 3);
-
-    girlGraphics.generateTexture('player_girl', 32, 50);
-    girlGraphics.destroy();
-
+    this.createBoyCharacterSprites();
+    this.createGirlCharacterSprites();
+    
     // Create default player texture (will be overridden by character selection)
     const defaultGraphics = this.add.graphics();
     defaultGraphics.fillStyle(0x00ff00);
     defaultGraphics.fillRect(0, 0, 32, 50);
     defaultGraphics.generateTexture('player', 32, 50);
     defaultGraphics.destroy();
+  }
+
+  /**
+   * Create boy character sprites with animation frames
+   */
+  private createBoyCharacterSprites(): void {
+    const frameWidth = 32;
+    const frameHeight = 50;
+    const frames = 4; // idle, walk1, walk2, jump
+    
+    // Create spritesheet canvas
+    const canvas = this.add.renderTexture(0, 0, frameWidth * frames, frameHeight);
+    
+    // Frame 0: Idle
+    this.drawBoyFrame(canvas, 0, 'idle');
+    
+    // Frame 1: Walk 1
+    this.drawBoyFrame(canvas, 1, 'walk1');
+    
+    // Frame 2: Walk 2  
+    this.drawBoyFrame(canvas, 2, 'walk2');
+    
+    // Frame 3: Jump
+    this.drawBoyFrame(canvas, 3, 'jump');
+    
+    // Generate texture from canvas
+    canvas.saveTexture('player_boy_spritesheet');
+    canvas.destroy();
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawBoyFrameGraphics(frameGraphics, i === 1 ? 'walk1' : i === 2 ? 'walk2' : i === 3 ? 'jump' : 'idle');
+      frameGraphics.generateTexture(`player_boy_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main boy texture (idle frame)
+    const boyGraphics = this.add.graphics();
+    this.drawBoyFrameGraphics(boyGraphics, 'idle');
+    boyGraphics.generateTexture('player_boy', frameWidth, frameHeight);
+    boyGraphics.destroy();
+  }
+
+  /**
+   * Draw boy character frame on render texture
+   */
+  private drawBoyFrame(canvas: Phaser.GameObjects.RenderTexture, frameIndex: number, pose: string): void {
+    const frameWidth = 32;
+    const x = frameIndex * frameWidth;
+    
+    const graphics = this.add.graphics();
+    this.drawBoyFrameGraphics(graphics, pose);
+    
+    canvas.draw(graphics, x, 0);
+    graphics.destroy();
+  }
+
+  /**
+   * Draw boy character graphics for different poses
+   */
+  private drawBoyFrameGraphics(graphics: Phaser.GameObjects.Graphics, pose: string): void {
+    const legOffset = pose === 'walk1' ? 2 : pose === 'walk2' ? -2 : 0;
+    const armOffset = pose === 'walk1' ? -1 : pose === 'walk2' ? 1 : 0;
+    const jumpOffset = pose === 'jump' ? -3 : 0;
+    
+    // Head (skin tone)
+    graphics.fillStyle(0xfdbcb4);
+    graphics.fillCircle(16, 12 + jumpOffset, 8);
+
+    // Hair (brown)
+    graphics.fillStyle(0x8b4513);
+    graphics.fillCircle(16, 8 + jumpOffset, 6);
+
+    // Eyes
+    graphics.fillStyle(0x000000);
+    graphics.fillCircle(13, 11 + jumpOffset, 1);
+    graphics.fillCircle(19, 11 + jumpOffset, 1);
+
+    // Body (shirt - blue)
+    graphics.fillStyle(0x4169e1);
+    graphics.fillRect(10, 20 + jumpOffset, 12, 16);
+
+    // Arms (skin tone) - animated
+    graphics.fillStyle(0xfdbcb4);
+    graphics.fillRect(8, 22 + jumpOffset + armOffset, 3, 12);
+    graphics.fillRect(21, 22 + jumpOffset - armOffset, 3, 12);
+
+    // Legs (pants - dark blue) - animated
+    graphics.fillStyle(0x191970);
+    graphics.fillRect(12, 36 + jumpOffset, 3, 12 + legOffset);
+    graphics.fillRect(17, 36 + jumpOffset, 3, 12 - legOffset);
+
+    // Shoes (black)
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(11, 46 + jumpOffset + legOffset, 5, 3);
+    graphics.fillRect(16, 46 + jumpOffset - legOffset, 5, 3);
+  }
+
+  /**
+   * Create girl character sprites with animation frames
+   */
+  private createGirlCharacterSprites(): void {
+    const frameWidth = 32;
+    const frameHeight = 50;
+    const frames = 4; // idle, walk1, walk2, jump
+    
+    // Create spritesheet canvas
+    const canvas = this.add.renderTexture(0, 0, frameWidth * frames, frameHeight);
+    
+    // Frame 0: Idle
+    this.drawGirlFrame(canvas, 0, 'idle');
+    
+    // Frame 1: Walk 1
+    this.drawGirlFrame(canvas, 1, 'walk1');
+    
+    // Frame 2: Walk 2  
+    this.drawGirlFrame(canvas, 2, 'walk2');
+    
+    // Frame 3: Jump
+    this.drawGirlFrame(canvas, 3, 'jump');
+    
+    // Generate texture from canvas
+    canvas.saveTexture('player_girl_spritesheet');
+    canvas.destroy();
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawGirlFrameGraphics(frameGraphics, i === 1 ? 'walk1' : i === 2 ? 'walk2' : i === 3 ? 'jump' : 'idle');
+      frameGraphics.generateTexture(`player_girl_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main girl texture (idle frame)
+    const girlGraphics = this.add.graphics();
+    this.drawGirlFrameGraphics(girlGraphics, 'idle');
+    girlGraphics.generateTexture('player_girl', frameWidth, frameHeight);
+    girlGraphics.destroy();
+  }
+
+  /**
+   * Draw girl character frame on render texture
+   */
+  private drawGirlFrame(canvas: Phaser.GameObjects.RenderTexture, frameIndex: number, pose: string): void {
+    const frameWidth = 32;
+    const x = frameIndex * frameWidth;
+    
+    const graphics = this.add.graphics();
+    this.drawGirlFrameGraphics(graphics, pose);
+    
+    canvas.draw(graphics, x, 0);
+    graphics.destroy();
+  }
+
+  /**
+   * Draw girl character graphics for different poses
+   */
+  private drawGirlFrameGraphics(graphics: Phaser.GameObjects.Graphics, pose: string): void {
+    const legOffset = pose === 'walk1' ? 2 : pose === 'walk2' ? -2 : 0;
+    const armOffset = pose === 'walk1' ? -1 : pose === 'walk2' ? 1 : 0;
+    const jumpOffset = pose === 'jump' ? -3 : 0;
+    const dressSwing = pose === 'walk1' ? 1 : pose === 'walk2' ? -1 : 0;
+    
+    // Head (skin tone)
+    graphics.fillStyle(0xfdbcb4);
+    graphics.fillCircle(16, 12 + jumpOffset, 8);
+
+    // Hair (blonde)
+    graphics.fillStyle(0xffd700);
+    graphics.fillCircle(16, 8 + jumpOffset, 7);
+
+    // Eyes
+    graphics.fillStyle(0x000000);
+    graphics.fillCircle(13, 11 + jumpOffset, 1);
+    graphics.fillCircle(19, 11 + jumpOffset, 1);
+
+    // Body (dress - pink) - animated swing
+    graphics.fillStyle(0xff69b4);
+    graphics.fillRect(9 + dressSwing, 20 + jumpOffset, 14, 18);
+
+    // Arms (skin tone) - animated
+    graphics.fillStyle(0xfdbcb4);
+    graphics.fillRect(7, 22 + jumpOffset + armOffset, 3, 12);
+    graphics.fillRect(22, 22 + jumpOffset - armOffset, 3, 12);
+
+    // Legs (skin tone) - animated
+    graphics.fillStyle(0xfdbcb4);
+    graphics.fillRect(12, 38 + jumpOffset, 3, 8 + legOffset);
+    graphics.fillRect(17, 38 + jumpOffset, 3, 8 - legOffset);
+
+    // Shoes (red)
+    graphics.fillStyle(0xff0000);
+    graphics.fillRect(11, 46 + jumpOffset + legOffset, 5, 3);
+    graphics.fillRect(16, 46 + jumpOffset - legOffset, 5, 3);
   }
 
   /**
@@ -326,124 +448,239 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Create enemy sprites with Halloween theme
+   * Create enemy sprites with Halloween theme and animations
    */
   private createEnemySprites(): void {
-    // Ghost sprite
+    this.createGhostSprites();
+    this.createBatSprites();
+    this.createVampireSprites();
+    this.createMummySprites();
+  }
+
+  /**
+   * Create ghost sprites with floating animation frames
+   */
+  private createGhostSprites(): void {
+    const frameWidth = 32;
+    const frameHeight = 40;
+    const frames = 3; // float1, float2, float3
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawGhostFrameGraphics(frameGraphics, i);
+      frameGraphics.generateTexture(`ghost_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main ghost texture (frame 0)
     const ghostGraphics = this.add.graphics();
+    this.drawGhostFrameGraphics(ghostGraphics, 0);
+    ghostGraphics.generateTexture('ghost', frameWidth, frameHeight);
+    ghostGraphics.destroy();
+  }
 
+  /**
+   * Draw ghost frame graphics with floating animation
+   */
+  private drawGhostFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
+    const floatOffset = frame === 1 ? -1 : frame === 2 ? 1 : 0;
+    const tailWave = frame === 1 ? 1 : frame === 2 ? -1 : 0;
+    
     // Ghost body (white with transparency effect)
-    ghostGraphics.fillStyle(0xf0f0f0);
-    ghostGraphics.fillEllipse(16, 20, 28, 32);
+    graphics.fillStyle(0xf0f0f0);
+    graphics.fillEllipse(16, 20 + floatOffset, 28, 32);
 
-    // Ghost tail (wavy bottom) - simplified approach
-    ghostGraphics.fillStyle(0xf0f0f0);
-    // Create wavy bottom using triangles
-    ghostGraphics.fillTriangle(2, 32, 8, 36, 12, 32);
-    ghostGraphics.fillTriangle(12, 32, 16, 28, 20, 32);
-    ghostGraphics.fillTriangle(20, 32, 24, 36, 30, 32);
+    // Ghost tail (wavy bottom) - animated
+    graphics.fillStyle(0xf0f0f0);
+    graphics.fillTriangle(2, 32 + floatOffset, 8 + tailWave, 36 + floatOffset, 12, 32 + floatOffset);
+    graphics.fillTriangle(12, 32 + floatOffset, 16, 28 + floatOffset + tailWave, 20, 32 + floatOffset);
+    graphics.fillTriangle(20, 32 + floatOffset, 24 - tailWave, 36 + floatOffset, 30, 32 + floatOffset);
 
-    // Eyes (black)
-    ghostGraphics.fillStyle(0x000000);
-    ghostGraphics.fillEllipse(10, 16, 4, 6);
-    ghostGraphics.fillEllipse(22, 16, 4, 6);
+    // Eyes (black) - slight blink animation
+    const eyeHeight = frame === 1 ? 4 : 6;
+    graphics.fillStyle(0x000000);
+    graphics.fillEllipse(10, 16 + floatOffset, 4, eyeHeight);
+    graphics.fillEllipse(22, 16 + floatOffset, 4, eyeHeight);
 
     // Mouth (surprised)
-    ghostGraphics.fillEllipse(16, 24, 3, 4);
+    graphics.fillEllipse(16, 24 + floatOffset, 3, 4);
+  }
 
-    ghostGraphics.generateTexture('ghost', 32, 40);
-    ghostGraphics.destroy();
-
-    // Bat sprite
+  /**
+   * Create bat sprites with wing flapping animation
+   */
+  private createBatSprites(): void {
+    const frameWidth = 24;
+    const frameHeight = 20;
+    const frames = 3; // wings up, wings middle, wings down
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawBatFrameGraphics(frameGraphics, i);
+      frameGraphics.generateTexture(`bat_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main bat texture (frame 1 - middle position)
     const batGraphics = this.add.graphics();
+    this.drawBatFrameGraphics(batGraphics, 1);
+    batGraphics.generateTexture('bat', frameWidth, frameHeight);
+    batGraphics.destroy();
+  }
 
+  /**
+   * Draw bat frame graphics with wing flapping animation
+   */
+  private drawBatFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
+    const wingAngle = frame === 0 ? -2 : frame === 2 ? 2 : 0;
+    
     // Bat body
-    batGraphics.fillStyle(0x2d1b0e);
-    batGraphics.fillEllipse(12, 12, 8, 12);
+    graphics.fillStyle(0x2d1b0e);
+    graphics.fillEllipse(12, 12, 8, 12);
 
-    // Bat wings - simplified using triangles
-    batGraphics.fillStyle(0x2d1b0e);
+    // Bat wings - animated flapping
+    graphics.fillStyle(0x2d1b0e);
     // Left wing
-    batGraphics.fillTriangle(4, 10, 0, 6, 8, 12);
-    batGraphics.fillTriangle(2, 14, 6, 18, 8, 12);
+    graphics.fillTriangle(4, 10 + wingAngle, 0, 6 + wingAngle, 8, 12);
+    graphics.fillTriangle(2, 14 - wingAngle, 6, 18 - wingAngle, 8, 12);
     // Right wing  
-    batGraphics.fillTriangle(20, 10, 24, 6, 16, 12);
-    batGraphics.fillTriangle(22, 14, 18, 18, 16, 12);
+    graphics.fillTriangle(20, 10 + wingAngle, 24, 6 + wingAngle, 16, 12);
+    graphics.fillTriangle(22, 14 - wingAngle, 18, 18 - wingAngle, 16, 12);
 
     // Eyes (red)
-    batGraphics.fillStyle(0xff0000);
-    batGraphics.fillCircle(10, 10, 1);
-    batGraphics.fillCircle(14, 10, 1);
+    graphics.fillStyle(0xff0000);
+    graphics.fillCircle(10, 10, 1);
+    graphics.fillCircle(14, 10, 1);
+  }
 
-    batGraphics.generateTexture('bat', 24, 20);
-    batGraphics.destroy();
-
-    // Vampire sprite
+  /**
+   * Create vampire sprites with cape animation
+   */
+  private createVampireSprites(): void {
+    const frameWidth = 32;
+    const frameHeight = 48;
+    const frames = 3; // cape still, cape left, cape right
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawVampireFrameGraphics(frameGraphics, i);
+      frameGraphics.generateTexture(`vampire_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main vampire texture (frame 0)
     const vampireGraphics = this.add.graphics();
+    this.drawVampireFrameGraphics(vampireGraphics, 0);
+    vampireGraphics.generateTexture('vampire', frameWidth, frameHeight);
+    vampireGraphics.destroy();
+  }
 
+  /**
+   * Draw vampire frame graphics with cape animation
+   */
+  private drawVampireFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
+    const capeSwing = frame === 1 ? -2 : frame === 2 ? 2 : 0;
+    
     // Head (pale skin)
-    vampireGraphics.fillStyle(0xe6e6e6);
-    vampireGraphics.fillCircle(16, 12, 8);
+    graphics.fillStyle(0xe6e6e6);
+    graphics.fillCircle(16, 12, 8);
 
     // Hair (black)
-    vampireGraphics.fillStyle(0x000000);
-    vampireGraphics.fillCircle(16, 8, 6);
+    graphics.fillStyle(0x000000);
+    graphics.fillCircle(16, 8, 6);
 
     // Cape collar
-    vampireGraphics.fillStyle(0x8b0000);
-    vampireGraphics.fillRect(8, 18, 16, 4);
+    graphics.fillStyle(0x8b0000);
+    graphics.fillRect(8, 18, 16, 4);
 
-    // Eyes (red)
-    vampireGraphics.fillStyle(0xff0000);
-    vampireGraphics.fillCircle(13, 11, 1);
-    vampireGraphics.fillCircle(19, 11, 1);
+    // Eyes (red) - glowing effect
+    graphics.fillStyle(0xff0000);
+    graphics.fillCircle(13, 11, 1);
+    graphics.fillCircle(19, 11, 1);
+    // Eye glow
+    graphics.fillStyle(0xff6666);
+    graphics.fillCircle(13, 11, 2);
+    graphics.fillCircle(19, 11, 2);
 
     // Fangs
-    vampireGraphics.fillStyle(0xffffff);
-    vampireGraphics.fillTriangle(12, 14, 14, 18, 16, 14);
-    vampireGraphics.fillTriangle(16, 14, 18, 18, 20, 14);
+    graphics.fillStyle(0xffffff);
+    graphics.fillTriangle(12, 14, 14, 18, 16, 14);
+    graphics.fillTriangle(16, 14, 18, 18, 20, 14);
 
-    // Body (black cape)
-    vampireGraphics.fillStyle(0x000000);
-    vampireGraphics.fillRect(6, 22, 20, 24);
+    // Body (black cape) - animated
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(6 + capeSwing, 22, 20, 24);
 
-    // Cape (red interior)
-    vampireGraphics.fillStyle(0x8b0000);
-    vampireGraphics.fillTriangle(6, 22, 2, 46, 10, 46);
-    vampireGraphics.fillTriangle(26, 22, 30, 46, 22, 46);
+    // Cape (red interior) - animated swing
+    graphics.fillStyle(0x8b0000);
+    graphics.fillTriangle(6 + capeSwing, 22, 2 + capeSwing, 46, 10 + capeSwing, 46);
+    graphics.fillTriangle(26 + capeSwing, 22, 30 + capeSwing, 46, 22 + capeSwing, 46);
+  }
 
-    vampireGraphics.generateTexture('vampire', 32, 48);
-    vampireGraphics.destroy();
-
-    // Mummy sprite
+  /**
+   * Create mummy sprites with bandage animation
+   */
+  private createMummySprites(): void {
+    const frameWidth = 32;
+    const frameHeight = 48;
+    const frames = 3; // bandages normal, bandages loose, bandages tight
+    
+    // Create individual frame textures
+    for (let i = 0; i < frames; i++) {
+      const frameGraphics = this.add.graphics();
+      this.drawMummyFrameGraphics(frameGraphics, i);
+      frameGraphics.generateTexture(`mummy_${i}`, frameWidth, frameHeight);
+      frameGraphics.destroy();
+    }
+    
+    // Create main mummy texture (frame 0)
     const mummyGraphics = this.add.graphics();
+    this.drawMummyFrameGraphics(mummyGraphics, 0);
+    mummyGraphics.generateTexture('mummy', frameWidth, frameHeight);
+    mummyGraphics.destroy();
+  }
 
+  /**
+   * Draw mummy frame graphics with bandage animation
+   */
+  private drawMummyFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
+    const bandageOffset = frame === 1 ? 1 : frame === 2 ? -1 : 0;
+    
     // Body base (beige)
-    mummyGraphics.fillStyle(0xf5deb3);
-    mummyGraphics.fillRect(8, 8, 16, 40);
+    graphics.fillStyle(0xf5deb3);
+    graphics.fillRect(8, 8, 16, 40);
 
-    // Bandage wrappings (white) - using rectangles
-    mummyGraphics.fillStyle(0xffffff);
+    // Bandage wrappings (white) - animated
+    graphics.fillStyle(0xffffff);
     for (let y = 10; y < 46; y += 6) {
-      mummyGraphics.fillRect(6, y, 20, 3);
+      const offset = (y % 12 === 0) ? bandageOffset : -bandageOffset;
+      graphics.fillRect(6 + offset, y, 20, 3);
     }
 
     // Head wrappings
-    mummyGraphics.fillStyle(0xffffff);
-    mummyGraphics.fillRect(10, 8, 12, 12);
+    graphics.fillStyle(0xffffff);
+    graphics.fillRect(10 + bandageOffset, 8, 12, 12);
 
-    // Eyes (glowing)
-    mummyGraphics.fillStyle(0xffff00);
-    mummyGraphics.fillCircle(13, 14, 2);
-    mummyGraphics.fillCircle(19, 14, 2);
+    // Eyes (glowing) - pulsing effect
+    const eyeGlow = frame === 1 ? 0xffff99 : 0xffff00;
+    graphics.fillStyle(eyeGlow);
+    graphics.fillCircle(13, 14, 2);
+    graphics.fillCircle(19, 14, 2);
 
     // Eye pupils
-    mummyGraphics.fillStyle(0x000000);
-    mummyGraphics.fillCircle(13, 14, 1);
-    mummyGraphics.fillCircle(19, 14, 1);
+    graphics.fillStyle(0x000000);
+    graphics.fillCircle(13, 14, 1);
+    graphics.fillCircle(19, 14, 1);
 
-    mummyGraphics.generateTexture('mummy', 32, 48);
-    mummyGraphics.destroy();
+    // Loose bandage strips (for frame 1)
+    if (frame === 1) {
+      graphics.fillStyle(0xf0f0f0);
+      graphics.fillRect(4, 25, 2, 8);
+      graphics.fillRect(26, 30, 2, 6);
+    }
   }
 
   /**

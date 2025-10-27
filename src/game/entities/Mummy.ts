@@ -5,6 +5,9 @@ export class Mummy extends BaseEnemy {
   private animationTimer: number;
   private shuffleDelay: number;
   private lastShuffleTime: number;
+  private animationFrame: number;
+  private frameTimer: number;
+  private readonly ANIMATION_SPEED = 500; // ms per frame - slowest for mummy
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string = 'mummy') {
     super(scene, x, y, texture, 'mummy');
@@ -16,6 +19,10 @@ export class Mummy extends BaseEnemy {
     this.animationTimer = 0;
     this.shuffleDelay = 200; // Delay between shuffle steps (ms)
     this.lastShuffleTime = 0;
+    
+    // Initialize animation
+    this.animationFrame = 0;
+    this.frameTimer = 0;
     
     // Configure physics for slow ground walking
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
@@ -62,5 +69,30 @@ export class Mummy extends BaseEnemy {
     
     // Slight transparency to show aged/decayed appearance
     this.setAlpha(0.9);
+  }
+
+  /**
+   * Update bandage animation
+   */
+  private updateAnimation(delta: number): void {
+    this.frameTimer += delta;
+    
+    if (this.frameTimer >= this.ANIMATION_SPEED) {
+      this.frameTimer = 0;
+      this.animationFrame = (this.animationFrame + 1) % 3; // Cycle through 3 frames
+      
+      const frameTexture = `mummy_${this.animationFrame}`;
+      if (this.scene.textures.exists(frameTexture)) {
+        this.setTexture(frameTexture);
+      }
+    }
+  }
+
+  /**
+   * Override update to include animation
+   */
+  update(time: number, delta: number): void {
+    super.update(time, delta);
+    this.updateAnimation(delta);
   }
 }

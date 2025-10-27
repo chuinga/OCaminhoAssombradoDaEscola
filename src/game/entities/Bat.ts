@@ -6,6 +6,9 @@ export class Bat extends BaseEnemy {
   private initialY: number;
   private timeOffset: number;
   private flapSpeed: number;
+  private animationFrame: number;
+  private animationTimer: number;
+  private readonly ANIMATION_SPEED = 150; // ms per frame - faster for wing flapping
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string = 'bat') {
     super(scene, x, y, texture, 'bat');
@@ -18,6 +21,10 @@ export class Bat extends BaseEnemy {
     this.initialY = y;
     this.timeOffset = Math.random() * Math.PI * 2; // Random start phase
     this.flapSpeed = 0.008; // For wing flapping animation effect
+    
+    // Initialize animation
+    this.animationFrame = 0;
+    this.animationTimer = 0;
     
     // Configure physics for floating
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
@@ -47,9 +54,30 @@ export class Bat extends BaseEnemy {
     // Add some randomness to make bat movement more erratic
     const randomOffset = Math.sin(time * 0.01 + this.timeOffset) * 10;
     this.y = this.initialY + floatOffset + randomOffset;
+  }
+
+  /**
+   * Update wing flapping animation
+   */
+  private updateAnimation(delta: number): void {
+    this.animationTimer += delta;
     
-    // Wing flapping effect (scale animation)
-    const flapScale = 1 + Math.sin(time * this.flapSpeed) * 0.1;
-    this.setScale(flapScale, 1);
+    if (this.animationTimer >= this.ANIMATION_SPEED) {
+      this.animationTimer = 0;
+      this.animationFrame = (this.animationFrame + 1) % 3; // Cycle through 3 frames
+      
+      const frameTexture = `bat_${this.animationFrame}`;
+      if (this.scene.textures.exists(frameTexture)) {
+        this.setTexture(frameTexture);
+      }
+    }
+  }
+
+  /**
+   * Override update to include animation
+   */
+  update(time: number, delta: number): void {
+    super.update(time, delta);
+    this.updateAnimation(delta);
   }
 }

@@ -263,7 +263,12 @@
   - Create deployment scripts and documentation
   - _Requirements: 13.1, 13.2, 13.3, 13.4_
 
-- [ ] 13. Enhance audio system with real assets
+- [x] 13. Enhance audio system with real assets
+
+
+
+
+
 - [x] 13.1 Replace placeholder audio with real sound files
 
 
@@ -288,8 +293,14 @@
   - Persist audio preferences in local storage
   - _Requirements: 11.1_
 
-- [ ] 14. Add visual assets and sprites
-- [ ] 14.1 Create character and enemy sprites
+- [-] 14. Add visual assets and sprites
+
+- [x] 14.1 Create character and enemy sprites
+
+
+
+
+
   - Design boy and girl character sprites with animations
   - Create Ghost, Bat, Vampire, and Mummy enemy sprites
   - Add weapon visual effects and animations
