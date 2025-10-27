@@ -325,7 +325,12 @@
   - Create UI elements and button graphics
   - _Requirements: 10.1, 10.4_
 
-- [ ] 15. Implement pause menu and game controls
+- [x] 15. Implement pause menu and game controls
+
+
+
+
+
 - [x] 15.1 Create pause menu interface
 
 
@@ -338,7 +343,12 @@
   - Add keyboard shortcut help screen
   - _Requirements: 3.6_
 
-- [ ] 15.2 Add game settings and preferences
+- [x] 15.2 Add game settings and preferences
+
+
+
+
+
   - Create settings page for audio, controls, and display options
   - Add difficulty selection preview with enemy/item counts
   - Implement control customization options

@@ -24,7 +24,7 @@ export interface Enemy {
   type: 'ghost' | 'bat' | 'vampire' | 'mummy';
   isAlive: boolean;
   
-  update(): void;
+  update(time?: number, delta?: number): void;
   onCollision(): void;
   destroy(): void;
 }

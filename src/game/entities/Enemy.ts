@@ -57,7 +57,7 @@ export abstract class BaseEnemy extends Phaser.Physics.Arcade.Sprite {
   /**
    * Update method called every frame
    */
-  update(): void {
+  update(time?: number, delta?: number): void {
     if (!this.isAlive) return;
     
     // Update enemy-specific movement

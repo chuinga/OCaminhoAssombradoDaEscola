@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/halloween-theme.css";
+import "../styles/accessibility.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,17 +19,28 @@ export const metadata: Metadata = {
   description: "Um jogo web 2D side-scroller onde uma criança deve navegar de casa até à escola evitando monstros assombrados.",
 };
 
+import { ColorblindFilters } from "../components/ui/ColorblindFilters";
+import { AccessibilityProvider } from "../components/AccessibilityProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased respect-motion-preference`}
       >
-        {children}
+        <ColorblindFilters />
+        <a href="#main-content" className="skip-to-content">
+          Saltar para o conteúdo principal
+        </a>
+        <AccessibilityProvider>
+          <main id="main-content">
+            {children}
+          </main>
+        </AccessibilityProvider>
       </body>
     </html>
   );
