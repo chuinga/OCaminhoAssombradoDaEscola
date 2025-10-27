@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Difficulty } from '../../types';
 import { useGameStore } from '../../store/gameStore';
+import { useAudioStore } from '../../store/audioStore';
 import { GameHUD } from './GameHUD';
 import { TouchControls } from './TouchControls';
+import { PauseMenu } from './PauseMenu';
 
 interface PhaserGameComponentProps {
   difficulty?: Difficulty;
@@ -23,6 +25,7 @@ export function PhaserGameComponent({
   const gameSceneRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
   
   // Keyboard state management (similar to touch controls)
   const [keyboardState, setKeyboardState] = useState({
@@ -41,6 +44,9 @@ export function PhaserGameComponent({
     updateScore, 
     setGameStatus 
   } = useGameStore();
+
+  // Get audio store for applying settings
+  const { applySettings } = useAudioStore();
 
   // Browser-level keyboard event handling
   useEffect(() => {
@@ -70,6 +76,13 @@ export function PhaserGameComponent({
           break;
         case 'Space':
           setKeyboardState(prev => ({ ...prev, attack: true }));
+          event.preventDefault();
+          break;
+        case 'Escape':
+          // Handle pause toggle
+          if (gameSceneRef.current && typeof gameSceneRef.current.handlePause === 'function') {
+            gameSceneRef.current.handlePause();
+          }
           event.preventDefault();
           break;
       }
@@ -170,11 +183,25 @@ export function PhaserGameComponent({
               setGameStatus('finished');
               onGameEnd?.(gameEndData.score, gameEndData.victory);
             });
+
+            // Handle pause state changes
+            gameScene.events.on('gamePauseToggled', (pauseData: { isPaused: boolean }) => {
+              console.log('Game pause toggled:', pauseData);
+              setIsPaused(pauseData.isPaused);
+              if (pauseData.isPaused) {
+                setGameStatus('paused');
+              } else {
+                setGameStatus('playing');
+              }
+            });
           }
         }, 100);
 
         // Store destroyPhaserGame function for cleanup
         destroyGameRef.current = destroyPhaserGame;
+
+        // Apply audio settings when game is ready
+        applySettings();
 
       } catch (err) {
         console.error('Failed to create Phaser game:', err);
@@ -203,6 +230,18 @@ export function PhaserGameComponent({
         gameSceneRef.current.setTouchControl(control, pressed);
       }
     };
+
+  // Pause menu handlers
+  const handleResume = () => {
+    if (gameSceneRef.current && typeof gameSceneRef.current.handlePause === 'function') {
+      gameSceneRef.current.handlePause();
+    }
+  };
+
+  const handleQuit = () => {
+    setGameStatus('menu');
+    // The parent component will handle navigation
+  };
 
   if (error) {
     return (
@@ -264,6 +303,13 @@ export function PhaserGameComponent({
           onAttack={handleTouchControl('attack')}
         />
       )}
+
+      {/* Pause Menu overlay */}
+      <PauseMenu
+        isVisible={isPaused}
+        onResume={handleResume}
+        onQuit={handleQuit}
+      />
     </div>
   );
 }

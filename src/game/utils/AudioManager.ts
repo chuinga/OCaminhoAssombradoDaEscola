@@ -11,9 +11,9 @@ export class AudioManager {
   private isInitialized: boolean = false;
   private isMuted: boolean = false;
   
-  // Volume settings
-  private readonly MUSIC_VOLUME = 0.3;
-  private readonly SFX_VOLUME = 0.7;
+  // Volume settings (will be overridden by audio store)
+  private musicVolume = 0.3;
+  private sfxVolume = 0.7;
   
   private constructor() {
     // Private constructor for singleton pattern
@@ -64,7 +64,7 @@ export class AudioManager {
       this.backgroundMusic = new Howl({
         src: ['/assets/audio/background-ambient.mp3'],
         loop: true,
-        volume: this.MUSIC_VOLUME,
+        volume: this.musicVolume,
         autoplay: false,
         onload: () => {
           console.log('Background ambient music loaded successfully');
@@ -112,7 +112,7 @@ export class AudioManager {
         console.log(`Loading real audio file for: ${key}`);
         const sound = new Howl({
           src: [src],
-          volume: this.SFX_VOLUME,
+          volume: this.sfxVolume,
           onload: () => {
             console.log(`Successfully loaded real audio file: ${key}`);
           },
@@ -351,6 +351,7 @@ export class AudioManager {
    */
   public setMusicVolume(volume: number): void {
     const clampedVolume = Math.max(0, Math.min(1, volume));
+    this.musicVolume = clampedVolume;
     if (this.backgroundMusic) {
       this.backgroundMusic.volume(clampedVolume);
       console.log(`Music volume set to: ${clampedVolume}`);
@@ -362,6 +363,7 @@ export class AudioManager {
    */
   public setSFXVolume(volume: number): void {
     const clampedVolume = Math.max(0, Math.min(1, volume));
+    this.sfxVolume = clampedVolume;
     this.sounds.forEach((sound) => {
       sound.volume(clampedVolume);
     });

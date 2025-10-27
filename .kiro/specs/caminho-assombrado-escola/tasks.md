@@ -276,7 +276,12 @@
   - Test audio loading and fallback mechanisms
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 13.2 Add audio controls and settings
+- [x] 13.2 Add audio controls and settings
+
+
+
+
+
   - Implement volume controls for music and sound effects
   - Add mute/unmute functionality accessible during gameplay
   - Create audio settings page or in-game menu

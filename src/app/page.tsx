@@ -66,6 +66,15 @@ export default function Home() {
                 🎮 Jogar
               </Link>
 
+              <div className="mt-4">
+                <Link
+                  href="/configuracoes"
+                  className="inline-block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                >
+                  ⚙️ Configurações de Áudio
+                </Link>
+              </div>
+
               <div className="mt-6 text-sm text-gray-400">
                 <p>Compatível com:</p>
                 <div className="flex justify-center gap-4 mt-2">
