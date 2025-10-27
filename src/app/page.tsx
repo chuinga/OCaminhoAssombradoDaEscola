@@ -61,7 +61,8 @@ export default function Home() {
 
               <Link
                 href="/nome"
-                className="inline-block w-full px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-xl font-bold rounded-lg transition-all transform hover:scale-105 hover:shadow-lg"
+                className="inline-block w-full px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 focus:from-orange-700 focus:to-red-700 text-white text-xl font-bold rounded-lg transition-all transform hover:scale-105 focus:scale-105 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-4 focus:ring-orange-500/50"
+                aria-label="Começar novo jogo"
               >
                 🎮 Jogar
               </Link>
@@ -69,21 +70,24 @@ export default function Home() {
               <div className="mt-4 space-y-2">
                 <Link
                   href="/leaderboard"
-                  className="inline-block w-full px-6 py-3 bg-purple-700 hover:bg-purple-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                  className="inline-block w-full px-6 py-3 bg-purple-700 hover:bg-purple-600 focus:bg-purple-600 text-white font-medium rounded-lg transition-all transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50"
+                  aria-label="Ver leaderboard completo com todas as pontuações"
                 >
                   🏆 Leaderboard Completo
                 </Link>
                 
                 <Link
                   href="/estatisticas"
-                  className="inline-block w-full px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                  className="inline-block w-full px-6 py-3 bg-blue-700 hover:bg-blue-600 focus:bg-blue-600 text-white font-medium rounded-lg transition-all transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
+                  aria-label="Ver estatísticas detalhadas do jogo"
                 >
                   📊 Estatísticas
                 </Link>
                 
                 <Link
                   href="/configuracoes"
-                  className="inline-block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-all transform hover:scale-105"
+                  className="inline-block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 focus:bg-gray-600 text-white font-medium rounded-lg transition-all transform hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500/50"
+                  aria-label="Configurar áudio e acessibilidade"
                 >
                   ⚙️ Configurações de Áudio
                 </Link>
@@ -101,8 +105,8 @@ export default function Home() {
           </div>
 
           {/* Leaderboard Section */}
-          <div className="w-full bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-orange-500/30">
-            <h2 className="text-2xl md:text-3xl font-bold text-orange-400 mb-6 text-center">
+          <section className="w-full bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-orange-500/30" aria-labelledby="leaderboard-title">
+            <h2 id="leaderboard-title" className="text-2xl md:text-3xl font-bold text-orange-400 mb-6 text-center">
               🏆 Top 5 Jogadores
             </h2>
 
@@ -115,7 +119,8 @@ export default function Home() {
                 <p className="text-red-400 mb-4">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-orange-500/50"
+                  aria-label="Tentar carregar o leaderboard novamente"
                 >
                   Tentar Novamente
                 </button>
@@ -130,11 +135,11 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <ol className="space-y-3" aria-label="Top 5 pontuações">
                 {scores.slice(0, 5).map((score, index) => (
-                  <div
+                  <li
                     key={score.scoreId}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all hover:scale-105 ${index === 0
+                    className={`flex items-center justify-between p-4 rounded-lg border transition-all hover:scale-105 focus-within:scale-105 focus-within:ring-4 focus-within:ring-orange-500/50 ${index === 0
                         ? 'bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-yellow-500/50'
                         : index === 1
                           ? 'bg-gradient-to-r from-gray-400/20 to-gray-600/20 border-gray-400/50'
@@ -142,6 +147,9 @@ export default function Home() {
                             ? 'bg-gradient-to-r from-orange-700/20 to-yellow-700/20 border-orange-700/50'
                             : 'bg-gray-800/50 border-gray-600/30'
                       }`}
+                    tabIndex={0}
+                    role="listitem"
+                    aria-label={`${index + 1}º lugar: ${score.firstName} ${score.lastName} com ${score.score.toLocaleString()} pontos`}
                   >
                     <div className="flex items-center gap-4">
                       <span className={`text-2xl font-bold ${index === 0 ? 'text-yellow-400' :
@@ -172,11 +180,11 @@ export default function Home() {
                         {new Date(score.createdAt).toLocaleDateString('pt-PT')}
                       </p>
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ol>
             )}
-          </div>
+          </section>
         </div>
 
         {/* Footer */}

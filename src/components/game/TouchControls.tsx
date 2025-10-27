@@ -303,8 +303,9 @@ export function TouchControls({
           <button
             className={getButtonStyle('moveLeft')}
             {...createTouchHandlers('moveLeft', onMoveLeft, 'light')}
-            aria-label="Move Left"
+            aria-label="Mover para a esquerda"
             data-touch-control
+            tabIndex={0}
           >
             ←
           </button>
@@ -313,8 +314,9 @@ export function TouchControls({
           <button
             className={getButtonStyle('moveRight')}
             {...createTouchHandlers('moveRight', onMoveRight, 'light')}
-            aria-label="Move Right"
+            aria-label="Mover para a direita"
             data-touch-control
+            tabIndex={0}
           >
             →
           </button>
@@ -328,10 +330,11 @@ export function TouchControls({
           <button
             className={getButtonStyle('jump').replace(layout.fontSize.arrows, layout.fontSize.labels)}
             {...createTouchHandlers('jump', onJump, 'medium')}
-            aria-label="Jump"
+            aria-label="Saltar"
             data-touch-control
+            tabIndex={0}
           >
-            ↑<br/>JUMP
+            ↑<br/>SALTAR
           </button>
         </div>
 
@@ -341,20 +344,22 @@ export function TouchControls({
           <button
             className={getButtonStyle('crouch').replace(layout.fontSize.arrows, layout.fontSize.labels)}
             {...createTouchHandlers('crouch', onCrouch, 'light')}
-            aria-label="Crouch"
+            aria-label="Agachar"
             data-touch-control
+            tabIndex={0}
           >
-            ↓<br/>CROUCH
+            ↓<br/>AGACHAR
           </button>
 
           {/* Attack Button */}
           <button
             className={getButtonStyle('attack', 'red', 'red').replace(layout.fontSize.arrows, layout.fontSize.labels)}
             {...createTouchHandlers('attack', onAttack, 'heavy')}
-            aria-label="Attack"
+            aria-label="Atacar"
             data-touch-control
+            tabIndex={0}
           >
-            ⚔<br/>ATTACK
+            ⚔<br/>ATACAR
           </button>
         </div>
       </div>

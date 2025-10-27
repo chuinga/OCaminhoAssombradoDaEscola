@@ -43,20 +43,22 @@ export default function PersonagemPage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Escolha o seu Personagem
           </h1>
-          <p className="text-gray-300">
+          <p className="text-gray-300" id="character-selection-status">
             Olá {firstName}! Selecione o personagem que deseja jogar
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
           {/* Boy Character */}
-          <div
+          <button
             onClick={() => handleCharacterSelect('boy')}
-            className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${
+            className={`w-full cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${
               selectedCharacter === 'boy'
                 ? 'border-purple-500 bg-purple-500/20'
-                : 'border-gray-600 bg-white/10 hover:border-purple-400'
+                : 'border-gray-600 bg-white/10 hover:border-purple-400 focus:border-purple-400'
             }`}
+            aria-pressed={selectedCharacter === 'boy'}
+            aria-label="Selecionar personagem menino"
           >
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center text-4xl">
@@ -67,16 +69,18 @@ export default function PersonagemPage() {
                 Um jovem corajoso pronto para enfrentar os monstros
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Girl Character */}
-          <div
+          <button
             onClick={() => handleCharacterSelect('girl')}
-            className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${
+            className={`w-full cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${
               selectedCharacter === 'girl'
                 ? 'border-purple-500 bg-purple-500/20'
-                : 'border-gray-600 bg-white/10 hover:border-purple-400'
+                : 'border-gray-600 bg-white/10 hover:border-purple-400 focus:border-purple-400'
             }`}
+            aria-pressed={selectedCharacter === 'girl'}
+            aria-label="Selecionar personagem menina"
           >
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-4 bg-pink-500 rounded-full flex items-center justify-center text-4xl">
@@ -87,18 +91,19 @@ export default function PersonagemPage() {
                 Uma jovem destemida pronta para a aventura
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="flex flex-col space-y-4">
           <button
             onClick={handleContinue}
             disabled={!selectedCharacter}
-            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent ${
+            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${
               selectedCharacter
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                ? 'bg-purple-600 hover:bg-purple-700 focus:bg-purple-700 text-white'
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}
+            aria-describedby="character-selection-status"
           >
             {selectedCharacter ? 'Continuar' : 'Selecione um personagem'}
           </button>
@@ -106,7 +111,8 @@ export default function PersonagemPage() {
           <div className="text-center">
             <button
               onClick={() => router.push('/nome')}
-              className="text-gray-400 hover:text-white transition-colors text-sm"
+              className="text-gray-400 hover:text-white focus:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded px-2 py-1"
+              aria-label="Voltar à página de inserção de nome"
             >
               ← Voltar
             </button>

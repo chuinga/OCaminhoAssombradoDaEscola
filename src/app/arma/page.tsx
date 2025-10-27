@@ -127,20 +127,22 @@ export default function ArmaPage() {
             <h1 className="text-4xl font-bold text-white mb-2">
               Escolha a sua Arma
             </h1>
-            <p className="text-gray-300">
+            <p className="text-gray-300" id="weapon-selection-status">
               Selecione a arma que deseja usar na sua jornada
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 mb-8">
             {weapons.map((weaponInfo) => (
-              <div
+              <button
                 key={weaponInfo.id}
                 onClick={() => handleWeaponSelect(weaponInfo.id)}
-                className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${selectedWeapon === weaponInfo.id
+                className={`w-full cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${selectedWeapon === weaponInfo.id
                   ? 'border-purple-500 bg-purple-500/20'
-                  : 'border-gray-600 bg-white/10 hover:border-purple-400'
+                  : 'border-gray-600 bg-white/10 hover:border-purple-400 focus:border-purple-400'
                   }`}
+                aria-pressed={selectedWeapon === weaponInfo.id}
+                aria-label={`Selecionar arma ${weaponInfo.name}: ${weaponInfo.description}`}
               >
                 <div className="text-center mb-4">
                   <div className="w-16 h-16 mx-auto mb-3 bg-gray-700 rounded-full flex items-center justify-center text-3xl">
@@ -193,7 +195,7 @@ export default function ArmaPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -201,10 +203,11 @@ export default function ArmaPage() {
             <button
               onClick={handleContinue}
               disabled={!selectedWeapon}
-              className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent ${selectedWeapon
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+              className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${selectedWeapon
+                ? 'bg-purple-600 hover:bg-purple-700 focus:bg-purple-700 text-white'
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 }`}
+              aria-describedby="weapon-selection-status"
             >
               {selectedWeapon ? 'Continuar' : 'Selecione uma arma'}
             </button>
@@ -212,7 +215,8 @@ export default function ArmaPage() {
             <div className="text-center">
               <button
                 onClick={() => router.push('/personagem')}
-                className="text-gray-400 hover:text-white transition-colors text-sm"
+                className="text-gray-400 hover:text-white focus:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded px-2 py-1"
+                aria-label="Voltar à seleção de personagem"
               >
                 ← Voltar
               </button>

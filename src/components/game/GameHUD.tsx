@@ -52,11 +52,19 @@ export function GameHUD({ className = '' }: GameHUDProps) {
   }[difficulty || 'easy'];
 
   return (
-    <div className={`absolute top-0 left-0 right-0 z-20 pointer-events-none ${className}`}>
+    <div 
+      className={`absolute top-0 left-0 right-0 z-20 pointer-events-none ${className}`}
+      role="banner"
+      aria-label="Interface do jogo"
+    >
       {/* Main HUD with enhanced Halloween styling */}
       <div className="flex justify-between items-start p-2 sm:p-4">
         {/* Left side - Player info with Halloween theme */}
-        <div className="game-hud halloween-card p-2 sm:p-3 rounded-lg">
+        <div 
+          className="game-hud halloween-card p-2 sm:p-3 rounded-lg"
+          role="region"
+          aria-label="Informações do jogador"
+        >
           <div className="text-orange-400 text-xs sm:text-sm font-medium mb-1 flex items-center gap-1">
             <PumpkinIcon size={16} className="text-orange-500" />
             <span className="spooky-text">Player</span>
@@ -78,7 +86,11 @@ export function GameHUD({ className = '' }: GameHUDProps) {
         {/* Right side - Lives and Score with Halloween styling */}
         <div className="flex gap-2 sm:gap-3">
           {/* Lives display with skull icon */}
-          <div className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center min-w-[60px] sm:min-w-[80px]">
+          <div 
+            className="game-hud spooky-card p-2 sm:p-3 rounded-lg text-center min-w-[60px] sm:min-w-[80px]"
+            role="region"
+            aria-label={`Vidas restantes: ${lives}`}
+          >
             <div className="life-indicator text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
               <SkullIcon size={16} className="text-red-500" />
               <span className="spooky-text">Lives</span>
@@ -89,7 +101,11 @@ export function GameHUD({ className = '' }: GameHUDProps) {
           </div>
 
           {/* Score display with enhanced styling */}
-          <div className="game-hud halloween-card p-2 sm:p-3 rounded-lg text-center min-w-[80px] sm:min-w-[100px]">
+          <div 
+            className="game-hud halloween-card p-2 sm:p-3 rounded-lg text-center min-w-[80px] sm:min-w-[100px]"
+            role="region"
+            aria-label={`Pontuação atual: ${score.toLocaleString()} pontos`}
+          >
             <div className="score-indicator text-xs sm:text-sm font-medium mb-1 flex items-center justify-center gap-1">
               <span className="text-yellow-400">⭐</span>
               <span className="spooky-text">Score</span>

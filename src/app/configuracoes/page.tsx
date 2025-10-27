@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { AudioControls } from '../../components/ui/AudioControls';
 import { ControlCustomization } from '../../components/ui/ControlCustomization';
 import { DisplaySettings } from '../../components/ui/DisplaySettings';
+import { AccessibilitySettings } from '../../components/ui/AccessibilitySettings';
 import { GameSettings } from '../../components/ui/GameSettings';
 import { DifficultyPreview } from '../../components/ui/DifficultyPreview';
 import { SettingsImportExport } from '../../components/ui/SettingsImportExport';
-import { ArrowLeft, Settings, Volume2, Keyboard, Monitor, Gamepad2, Target, FileText } from 'lucide-react';
+import { ArrowLeft, Settings, Volume2, Keyboard, Monitor, Eye, Gamepad2, Target, FileText } from 'lucide-react';
 import { useAudioStore } from '../../store/audioStore';
 import { useSettingsStore } from '../../store/settingsStore';
 
-type SettingsTab = 'audio' | 'controls' | 'display' | 'game' | 'difficulty' | 'import-export';
+type SettingsTab = 'audio' | 'controls' | 'display' | 'accessibility' | 'game' | 'difficulty' | 'import-export';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function ConfiguracoesPage() {
     { id: 'audio' as const, label: 'Áudio', icon: Volume2 },
     { id: 'controls' as const, label: 'Controlos', icon: Keyboard },
     { id: 'display' as const, label: 'Exibição', icon: Monitor },
+    { id: 'accessibility' as const, label: 'Acessibilidade', icon: Eye },
     { id: 'game' as const, label: 'Jogo', icon: Gamepad2 },
     { id: 'difficulty' as const, label: 'Dificuldade', icon: Target },
     { id: 'import-export' as const, label: 'Gestão', icon: FileText }
@@ -46,6 +48,8 @@ export default function ConfiguracoesPage() {
         return <ControlCustomization />;
       case 'display':
         return <DisplaySettings />;
+      case 'accessibility':
+        return <AccessibilitySettings />;
       case 'game':
         return <GameSettings />;
       case 'difficulty':
@@ -79,7 +83,8 @@ export default function ConfiguracoesPage() {
       <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-700/50">
         <button
           onClick={handleGoBack}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 focus:bg-gray-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-gray-500/50"
+          aria-label="Voltar à página anterior"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="hidden sm:inline">Voltar</span>
@@ -97,18 +102,21 @@ export default function ConfiguracoesPage() {
         {/* Sidebar Navigation */}
         <div className="lg:w-64 bg-black/30 border-r border-gray-700/50">
           <div className="p-4">
-            <nav className="space-y-2">
+            <nav className="space-y-2" role="tablist" aria-label="Configurações">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
                       activeTab === tab.id
                         ? 'bg-orange-600 text-white'
-                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                        : 'text-gray-300 hover:bg-gray-800 focus:bg-gray-800 hover:text-white focus:text-white'
                     }`}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    aria-controls={`${tab.id}-panel`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{tab.label}</span>
@@ -123,7 +131,12 @@ export default function ConfiguracoesPage() {
         <div className="flex-1 overflow-auto">
           <div className="p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
-              <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-orange-500/20">
+              <div 
+                className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-orange-500/20"
+                role="tabpanel"
+                id={`${activeTab}-panel`}
+                aria-labelledby={`${activeTab}-tab`}
+              >
                 {renderTabContent()}
               </div>
             </div>

@@ -46,7 +46,7 @@ export default function NomePage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             O Caminho Assombrado da Escola
           </h1>
-          <p className="text-gray-300">Insira o seu nome para começar</p>
+          <p className="text-gray-300" id="form-instructions">Insira o seu nome para começar</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,7 +88,8 @@ export default function NomePage() {
 
           <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent"
+            className="w-full bg-purple-600 hover:bg-purple-700 focus:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-purple-500/50"
+            aria-describedby="form-instructions"
           >
             Continuar
           </button>
@@ -97,7 +98,8 @@ export default function NomePage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => router.push('/')}
-            className="text-gray-400 hover:text-white transition-colors text-sm"
+            className="text-gray-400 hover:text-white focus:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded px-2 py-1"
+            aria-label="Voltar à página inicial"
           >
             ← Voltar ao início
           </button>

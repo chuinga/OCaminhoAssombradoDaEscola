@@ -116,21 +116,23 @@ export default function DificuldadePage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Escolha a Dificuldade
           </h1>
-          <p className="text-gray-300">
+          <p className="text-gray-300" id="difficulty-selection-status">
             Selecione o nível de desafio para a sua jornada
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           {difficulties.map((difficultyInfo) => (
-            <div
+            <button
               key={difficultyInfo.id}
               onClick={() => handleDifficultySelect(difficultyInfo.id)}
-              className={`cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 ${
+              className={`w-full cursor-pointer rounded-lg p-6 border-2 transition-all duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${
                 selectedDifficulty === difficultyInfo.id
                   ? 'border-purple-500 bg-purple-500/20'
-                  : 'border-gray-600 bg-white/10 hover:border-purple-400'
+                  : 'border-gray-600 bg-white/10 hover:border-purple-400 focus:border-purple-400'
               }`}
+              aria-pressed={selectedDifficulty === difficultyInfo.id}
+              aria-label={`Selecionar dificuldade ${difficultyInfo.name}: ${difficultyInfo.description}`}
             >
               <div className="text-center mb-4">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-700 rounded-full flex items-center justify-center text-3xl">
@@ -185,7 +187,7 @@ export default function DificuldadePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -193,11 +195,12 @@ export default function DificuldadePage() {
           <button
             onClick={handleContinue}
             disabled={!selectedDifficulty}
-            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent ${
+            className={`w-full font-bold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-purple-500/50 ${
               selectedDifficulty
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                ? 'bg-purple-600 hover:bg-purple-700 focus:bg-purple-700 text-white'
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}
+            aria-describedby="difficulty-selection-status"
           >
             {selectedDifficulty ? 'Começar Jogo' : 'Selecione uma dificuldade'}
           </button>
@@ -205,7 +208,8 @@ export default function DificuldadePage() {
           <div className="text-center">
             <button
               onClick={() => router.push('/arma')}
-              className="text-gray-400 hover:text-white transition-colors text-sm"
+              className="text-gray-400 hover:text-white focus:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded px-2 py-1"
+              aria-label="Voltar à seleção de arma"
             >
               ← Voltar
             </button>
