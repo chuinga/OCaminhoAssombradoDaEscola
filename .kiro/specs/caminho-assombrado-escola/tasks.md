@@ -293,7 +293,12 @@
   - Persist audio preferences in local storage
   - _Requirements: 11.1_
 
-- [-] 14. Add visual assets and sprites
+- [x] 14. Add visual assets and sprites
+
+
+
+
+
 
 - [x] 14.1 Create character and enemy sprites
 
@@ -321,7 +326,12 @@
   - _Requirements: 10.1, 10.4_
 
 - [ ] 15. Implement pause menu and game controls
-- [ ] 15.1 Create pause menu interface
+- [x] 15.1 Create pause menu interface
+
+
+
+
+
   - Design pause menu overlay with resume, settings, and quit options
   - Add visual feedback when game is paused
   - Implement settings menu accessible from pause screen

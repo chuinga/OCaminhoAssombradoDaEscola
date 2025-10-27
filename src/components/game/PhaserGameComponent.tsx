@@ -304,6 +304,17 @@ export function PhaserGameComponent({
         />
       )}
 
+      {/* Pause overlay - visual feedback when game is paused */}
+      {isPaused && (
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] z-40 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-orange-500/30">
+              <p className="text-white text-sm font-medium">PAUSADO</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pause Menu overlay */}
       <PauseMenu
         isVisible={isPaused}
