@@ -42,7 +42,7 @@ export default function ShareButton({
       const shareData = await apiClient.generateShareableScore(scoreId);
       
       // Try native sharing first (mobile devices)
-      if (navigator.share && navigator.canShare) {
+      if (navigator.share) {
         try {
           await navigator.share({
             title: 'O Caminho Assombrado da Escola',

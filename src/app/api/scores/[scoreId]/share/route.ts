@@ -4,11 +4,11 @@ import { fetchWithRetry, validateAwsConfig, handleAwsError } from '@/lib/aws-api
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { scoreId: string } }
+  { params }: { params: Promise<{ scoreId: string }> }
 ) {
   try {
     const baseUrl = validateAwsConfig();
-    const { scoreId } = params;
+    const { scoreId } = await params;
     
     // Validate scoreId parameter
     if (!scoreId || scoreId.trim().length === 0) {

@@ -386,7 +386,12 @@
   - Add battery usage optimization settings
   - _Requirements: 10.1, 10.2, 10.4_
 
-- [ ] 17. Add game analytics and metrics
+- [x] 17. Add game analytics and metrics
+
+
+
+
+
 - [x] 17.1 Implement gameplay analytics
 
 
