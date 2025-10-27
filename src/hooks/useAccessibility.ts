@@ -25,9 +25,14 @@ export const useAccessibility = () => {
     }
 
     // Apply colorblind filters
-    body.classList.remove('colorblind-protanopia', 'colorblind-deuteranopia', 'colorblind-tritanopia');
+    body.classList.remove('colorblind-protanopia', 'colorblind-deuteranopia', 'colorblind-tritanopia', 'colorblind-friendly-ui');
     if (display.colorBlindMode !== 'none') {
       body.classList.add(`colorblind-${display.colorBlindMode}`);
+    }
+
+    // Apply colorblind-friendly UI
+    if (display.colorBlindFriendlyUI) {
+      body.classList.add('colorblind-friendly-ui');
     }
 
     // Apply particle effects setting
@@ -43,6 +48,24 @@ export const useAccessibility = () => {
     } else {
       body.classList.remove('no-screen-shake');
     }
+
+    // Set up audio subtitle events
+    const handleAudioSubtitleToggle = () => {
+      window.dispatchEvent(new CustomEvent('toggleSubtitles', {
+        detail: { enabled: display.audioSubtitles }
+      }));
+    };
+
+    // Set up visual indicator events
+    const handleVisualIndicatorToggle = () => {
+      window.dispatchEvent(new CustomEvent('toggleVisualIndicators', {
+        detail: { enabled: display.visualAudioIndicators }
+      }));
+    };
+
+    // Trigger initial events
+    handleAudioSubtitleToggle();
+    handleVisualIndicatorToggle();
 
     // Handle focus loss pause setting
     if (game.pauseOnFocusLoss) {
@@ -166,6 +189,10 @@ export const useAccessibility = () => {
     particleEffects: display.particleEffects,
     screenShake: display.screenShake,
     showControlHints: game.showControlHints,
-    pauseOnFocusLoss: game.pauseOnFocusLoss
+    pauseOnFocusLoss: game.pauseOnFocusLoss,
+    // New accessibility features
+    audioSubtitles: display.audioSubtitles,
+    visualAudioIndicators: display.visualAudioIndicators,
+    colorBlindFriendlyUI: display.colorBlindFriendlyUI
   };
 };

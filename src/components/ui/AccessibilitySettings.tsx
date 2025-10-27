@@ -232,6 +232,114 @@ export const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({
         </div>
       </div>
 
+      {/* Audio Accessibility */}
+      <div className="bg-gray-800/50 rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-4">
+          <Monitor className="w-5 h-5 text-orange-400" />
+          <div>
+            <h4 className="text-white font-medium">Acessibilidade de Áudio</h4>
+            <p className="text-sm text-gray-400">
+              Opções visuais para eventos de áudio
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* Audio Subtitles */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label 
+                htmlFor="audio-subtitles-toggle"
+                className="text-white font-medium cursor-pointer"
+              >
+                Legendas de Áudio
+              </label>
+              <p className="text-sm text-gray-400">
+                Mostra texto para eventos sonoros do jogo
+              </p>
+            </div>
+            <button
+              id="audio-subtitles-toggle"
+              onClick={() => setDisplaySetting('audioSubtitles', !display.audioSubtitles)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
+                display.audioSubtitles ? 'bg-orange-600' : 'bg-gray-600'
+              }`}
+              role="switch"
+              aria-checked={display.audioSubtitles}
+              aria-label={`${display.audioSubtitles ? 'Desativar' : 'Ativar'} legendas de áudio`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  display.audioSubtitles ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Visual Audio Indicators */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label 
+                htmlFor="visual-indicators-toggle"
+                className="text-white font-medium cursor-pointer"
+              >
+                Indicadores Visuais de Áudio
+              </label>
+              <p className="text-sm text-gray-400">
+                Efeitos visuais para eventos sonoros importantes
+              </p>
+            </div>
+            <button
+              id="visual-indicators-toggle"
+              onClick={() => setDisplaySetting('visualAudioIndicators', !display.visualAudioIndicators)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
+                display.visualAudioIndicators ? 'bg-orange-600' : 'bg-gray-600'
+              }`}
+              role="switch"
+              aria-checked={display.visualAudioIndicators}
+              aria-label={`${display.visualAudioIndicators ? 'Desativar' : 'Ativar'} indicadores visuais de áudio`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  display.visualAudioIndicators ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Colorblind Friendly UI */}
+          <div className="flex items-center justify-between">
+            <div>
+              <label 
+                htmlFor="colorblind-ui-toggle"
+                className="text-white font-medium cursor-pointer"
+              >
+                Interface Amigável para Daltónicos
+              </label>
+              <p className="text-sm text-gray-400">
+                Usa padrões e símbolos além de cores para informação
+              </p>
+            </div>
+            <button
+              id="colorblind-ui-toggle"
+              onClick={() => setDisplaySetting('colorBlindFriendlyUI', !display.colorBlindFriendlyUI)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
+                display.colorBlindFriendlyUI ? 'bg-orange-600' : 'bg-gray-600'
+              }`}
+              role="switch"
+              aria-checked={display.colorBlindFriendlyUI}
+              aria-label={`${display.colorBlindFriendlyUI ? 'Desativar' : 'Ativar'} interface amigável para daltónicos`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  display.colorBlindFriendlyUI ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Keyboard Navigation Help */}
       <div className="bg-blue-900/30 rounded-lg p-4">
         <h4 className="text-blue-300 font-medium mb-2">💡 Navegação por Teclado</h4>

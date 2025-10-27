@@ -430,7 +430,12 @@
   - Add high contrast mode option
   - _Requirements: 10.1_
 
-- [ ] 18.2 Add visual and motor accessibility
+- [x] 18.2 Add visual and motor accessibility
+
+
+
+
+
   - Implement colorblind-friendly color schemes
   - Add subtitle support for audio cues
   - Create simplified control schemes for motor impairments

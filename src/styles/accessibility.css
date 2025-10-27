@@ -298,6 +298,142 @@ button:focus-visible {
   }
 }
 
+/* Audio Subtitle Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Visual Audio Indicator Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes bounceAlert {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes flashWarning {
+  0%, 50%, 100% {
+    opacity: 0.3;
+  }
+  25%, 75% {
+    opacity: 0.8;
+  }
+}
+
+/* Enhanced Visual Indicators */
+.visual-indicator-damage {
+  animation: pulseGlow 0.5s ease-in-out 3;
+}
+
+.visual-indicator-item {
+  animation: bounceAlert 0.8s ease-in-out;
+}
+
+.visual-indicator-health-warning {
+  animation: flashWarning 1s ease-in-out infinite;
+}
+
+/* Colorblind-Friendly Patterns */
+.pattern-healthy {
+  background: linear-gradient(90deg, #22c55e 0%, #22c55e 100%);
+}
+
+.pattern-warning {
+  background: repeating-linear-gradient(
+    45deg,
+    #eab308,
+    #eab308 4px,
+    #ca8a04 4px,
+    #ca8a04 8px
+  );
+}
+
+.pattern-critical {
+  background: repeating-linear-gradient(
+    90deg,
+    #ef4444,
+    #ef4444 2px,
+    #dc2626 2px,
+    #dc2626 4px
+  );
+}
+
+/* Enhanced Focus Indicators for Accessibility */
+.accessibility-focus:focus-visible {
+  outline: 4px solid #f97316 !important;
+  outline-offset: 2px !important;
+  box-shadow: 
+    0 0 0 8px rgba(249, 115, 22, 0.3),
+    0 0 0 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* High Contrast Enhancements */
+.high-contrast .visual-indicator-damage {
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 0 0 6px #000000 !important;
+}
+
+.high-contrast .visual-indicator-item {
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 4px #000000 !important;
+}
+
+/* Reduced Motion Overrides */
+.reduced-motion .visual-indicator-damage,
+.reduced-motion .visual-indicator-item,
+.reduced-motion .visual-indicator-health-warning {
+  animation: none !important;
+}
+
+.reduced-motion .animate-in {
+  animation: none !important;
+}
+
+/* Screen Reader Enhancements */
+.sr-announce {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* Print Styles for Settings Export */
 @media print {
   .no-print {

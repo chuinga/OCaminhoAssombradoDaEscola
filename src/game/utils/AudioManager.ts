@@ -229,6 +229,8 @@ export class AudioManager {
       if (!this.backgroundMusic.playing()) {
         this.backgroundMusic.play();
         console.log('Background music started');
+        // Trigger accessibility events
+        this.triggerAccessibilityEvents('background_music');
       }
     } catch (error) {
       console.warn('Failed to play background music:', error);
@@ -251,6 +253,8 @@ export class AudioManager {
    */
   public playJumpSound(): void {
     this.playSound('jump');
+    // Trigger accessibility events
+    this.triggerAccessibilityEvents('jump');
   }
   
   /**
@@ -259,6 +263,8 @@ export class AudioManager {
    */
   public playDamageSound(): void {
     this.playSound('damage');
+    // Trigger accessibility events
+    this.triggerAccessibilityEvents('damage');
   }
   
   /**
@@ -267,6 +273,8 @@ export class AudioManager {
    */
   public playItemCollectSound(): void {
     this.playSound('item_collect');
+    // Trigger accessibility events
+    this.triggerAccessibilityEvents('item_collect');
   }
   
   /**
@@ -288,6 +296,8 @@ export class AudioManager {
       default:
         console.warn(`Unknown weapon type: ${weaponType}`);
     }
+    // Trigger accessibility events
+    this.triggerAccessibilityEvents('weapon_attack', weaponType);
   }
   
   /**
@@ -408,6 +418,33 @@ export class AudioManager {
   
 
   
+  /**
+   * Trigger accessibility events for audio cues
+   * Requirements: 18.2 - Visual indicators for audio events
+   */
+  private triggerAccessibilityEvents(
+    type: 'jump' | 'damage' | 'item_collect' | 'weapon_attack' | 'background_music',
+    weaponType?: string
+  ): void {
+    try {
+      // Trigger audio subtitle event
+      window.dispatchEvent(new CustomEvent('audioEvent', {
+        detail: { type, weaponType }
+      }));
+
+      // Trigger visual indicator event
+      window.dispatchEvent(new CustomEvent('visualIndicator', {
+        detail: { 
+          type, 
+          weaponType,
+          intensity: type === 'damage' ? 'high' : type === 'weapon_attack' ? 'medium' : 'low'
+        }
+      }));
+    } catch (error) {
+      console.warn('Failed to trigger accessibility events:', error);
+    }
+  }
+
   /**
    * Get debug information about loaded sounds
    */

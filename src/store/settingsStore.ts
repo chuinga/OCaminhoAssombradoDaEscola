@@ -19,6 +19,10 @@ export interface DisplaySettings {
   showFPS: boolean;
   particleEffects: boolean;
   screenShake: boolean;
+  // New accessibility features
+  audioSubtitles: boolean;
+  visualAudioIndicators: boolean;
+  colorBlindFriendlyUI: boolean;
 }
 
 // Game settings
@@ -66,7 +70,11 @@ const defaultDisplay: DisplaySettings = {
   colorBlindMode: 'none',
   showFPS: false,
   particleEffects: true,
-  screenShake: true
+  screenShake: true,
+  // New accessibility features
+  audioSubtitles: false,
+  visualAudioIndicators: true,
+  colorBlindFriendlyUI: false
 };
 
 const defaultGame: GameSettings = {

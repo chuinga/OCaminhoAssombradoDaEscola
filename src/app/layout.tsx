@@ -23,6 +23,9 @@ import { ColorblindFilters } from "../components/ui/ColorblindFilters";
 import { AccessibilityProvider } from "../components/AccessibilityProvider";
 import { KeyboardNavigationHelper } from "../components/ui/KeyboardNavigationHelper";
 import { GlobalScreenReaderAnnouncer } from "../components/ui/GlobalScreenReaderAnnouncer";
+import { AudioSubtitles } from "../components/ui/AudioSubtitles";
+import { VisualAudioIndicators } from "../components/ui/VisualAudioIndicators";
+import { ColorblindFriendlyUI } from "../components/ui/ColorblindFriendlyUI";
 
 export default function RootLayout({
   children,
@@ -43,11 +46,15 @@ export default function RootLayout({
           Saltar para o conteúdo principal
         </a>
         <AccessibilityProvider>
-          <main id="main-content">
-            {children}
-          </main>
-          <KeyboardNavigationHelper />
-          <GlobalScreenReaderAnnouncer />
+          <ColorblindFriendlyUI>
+            <main id="main-content">
+              {children}
+            </main>
+            <KeyboardNavigationHelper />
+            <GlobalScreenReaderAnnouncer />
+            <AudioSubtitles />
+            <VisualAudioIndicators />
+          </ColorblindFriendlyUI>
         </AccessibilityProvider>
       </body>
     </html>
