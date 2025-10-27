@@ -323,125 +323,356 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Draw a spooky tree silhouette
+   */
+  private drawSpookyTree(graphics: Phaser.GameObjects.Graphics, x: number, type: string): void {
+    const treeHeight = 180 + Math.random() * 120;
+    const baseY = 720 - treeHeight;
+    
+    // Tree trunk
+    graphics.fillStyle(0x2d1b0e);
+    const trunkWidth = type === 'gnarled' ? 20 : 12;
+    graphics.fillRect(x, baseY, trunkWidth, treeHeight);
+
+    // Trunk texture
+    graphics.fillStyle(0x1a0f08);
+    for (let i = 0; i < 3; i++) {
+      graphics.fillRect(x + 2, baseY + i * 40, 2, 15);
+    }
+
+    switch (type) {
+      case 'dead':
+        // Completely bare with jagged branches
+        graphics.fillStyle(0x2d1b0e);
+        // Main branches
+        graphics.fillRect(x - 25, baseY + 30, 35, 4);
+        graphics.fillRect(x + trunkWidth, baseY + 20, 30, 3);
+        graphics.fillRect(x - 15, baseY + 50, 20, 3);
+        
+        // Smaller twigs
+        graphics.fillRect(x - 30, baseY + 25, 8, 2);
+        graphics.fillRect(x + trunkWidth + 25, baseY + 15, 10, 2);
+        break;
+        
+      case 'twisted':
+        // Curved trunk and twisted branches
+        graphics.fillStyle(0x2d1b0e);
+        // Curved sections
+        graphics.fillRect(x - 5, baseY + 40, trunkWidth + 10, 8);
+        graphics.fillRect(x + 5, baseY + 80, trunkWidth, 8);
+        
+        // Twisted branches
+        graphics.fillRect(x - 20, baseY + 25, 25, 5);
+        graphics.fillRect(x + trunkWidth - 5, baseY + 35, 28, 4);
+        graphics.fillRect(x - 10, baseY + 60, 15, 3);
+        break;
+        
+      case 'gnarled':
+        // Thick trunk with many branches
+        graphics.fillStyle(0x2d1b0e);
+        // Multiple branch levels
+        for (let level = 0; level < 4; level++) {
+          const branchY = baseY + 20 + level * 25;
+          const leftBranch = 15 + Math.random() * 10;
+          const rightBranch = 15 + Math.random() * 10;
+          
+          graphics.fillRect(x - leftBranch, branchY, leftBranch + 5, 4);
+          graphics.fillRect(x + trunkWidth, branchY + 5, rightBranch, 3);
+        }
+        break;
+        
+      default: // normal
+        // Standard spooky tree
+        graphics.fillStyle(0x2d1b0e);
+        graphics.fillRect(x - 20, baseY + 20, 27, 3);
+        graphics.fillRect(x + 7, baseY + 30, 28, 3);
+        graphics.fillRect(x - 12, baseY + 45, 18, 2);
+    }
+
+    // Sparse dead leaves
+    if (Math.random() > 0.6) {
+      graphics.fillStyle(0x8b4513);
+      const leafCount = Math.floor(Math.random() * 3) + 1;
+      for (let l = 0; l < leafCount; l++) {
+        const leafX = x - 20 + Math.random() * 40;
+        const leafY = baseY + 20 + Math.random() * 40;
+        graphics.fillCircle(leafX, leafY, 3 + Math.random() * 3);
+      }
+    }
+
+    // Hanging moss or cobwebs
+    if (type === 'twisted' && Math.random() > 0.7) {
+      graphics.fillStyle(0x666666, 0.6);
+      graphics.fillRect(x - 10, baseY + 30, 1, 15);
+      graphics.fillRect(x + 15, baseY + 25, 1, 20);
+    }
+  }
+
+  /**
+   * Draw a Halloween-themed house silhouette
+   */
+  private drawHalloweenHouse(graphics: Phaser.GameObjects.Graphics, x: number, type: string): void {
+    let height: number;
+    let width: number;
+    
+    switch (type) {
+      case 'tall':
+        height = 200 + Math.random() * 80;
+        width = 80;
+        break;
+      case 'wide':
+        height = 120 + Math.random() * 60;
+        width = 140;
+        break;
+      case 'spooky':
+        height = 180 + Math.random() * 70;
+        width = 100;
+        break;
+      case 'mansion':
+        height = 250 + Math.random() * 50;
+        width = 160;
+        break;
+      default: // normal
+        height = 150 + Math.random() * 80;
+        width = 100;
+    }
+
+    const baseY = 720 - height;
+
+    // House body
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(x, baseY, width, height);
+
+    // Roof variations
+    if (type === 'spooky') {
+      // Crooked spooky roof
+      graphics.fillTriangle(
+        x - 15, baseY,
+        x + width/2 - 10, baseY - 50,
+        x + width + 15, baseY
+      );
+      // Add chimney
+      graphics.fillRect(x + width - 20, baseY - 30, 12, 25);
+    } else if (type === 'mansion') {
+      // Multiple roof sections
+      graphics.fillTriangle(x - 10, baseY, x + 40, baseY - 40, x + 90, baseY);
+      graphics.fillTriangle(x + 70, baseY, x + 110, baseY - 35, x + width + 10, baseY);
+    } else {
+      // Standard triangular roof
+      graphics.fillTriangle(
+        x - 10, baseY,
+        x + width/2, baseY - 40,
+        x + width + 10, baseY
+      );
+    }
+
+    // Windows with Halloween decorations
+    const windowCount = Math.floor(width / 40);
+    for (let w = 0; w < windowCount; w++) {
+      const windowX = x + 15 + w * 40;
+      const windowY = baseY + 30;
+      
+      // Window frame
+      graphics.fillStyle(0x1a1a1a);
+      graphics.fillRect(windowX, windowY, 20, 25);
+      
+      // Lit windows (Halloween colors)
+      if (Math.random() > 0.4) {
+        const lightColor = Math.random() > 0.7 ? 0xff6600 : 0xffff99; // Orange or yellow
+        graphics.fillStyle(lightColor);
+        graphics.fillRect(windowX + 2, windowY + 2, 16, 21);
+        
+        // Window cross
+        graphics.fillStyle(0x000000);
+        graphics.fillRect(windowX + 9, windowY + 2, 2, 21);
+        graphics.fillRect(windowX + 2, windowY + 12, 16, 2);
+      }
+    }
+
+    // Halloween decorations
+    if (Math.random() > 0.6) {
+      // Porch light
+      graphics.fillStyle(0xff6600);
+      graphics.fillCircle(x + width/2, baseY + height - 10, 3);
+    }
+    
+    if (type === 'spooky' && Math.random() > 0.5) {
+      // Bats around spooky house
+      graphics.fillStyle(0x000000);
+      graphics.fillEllipse(x - 20, baseY - 20, 8, 4);
+      graphics.fillEllipse(x + width + 15, baseY - 30, 6, 3);
+    }
+  }
+
+  /**
    * Create background layer sprites
    */
   private createBackgroundSprites(): void {
-    // Moon and clouds layer
+    // Moon and clouds layer - Enhanced Halloween atmosphere
     const moonCloudsGraphics = this.add.graphics();
 
-    // Night sky gradient
-    moonCloudsGraphics.fillGradientStyle(0x0f0f23, 0x0f0f23, 0x1a1a2e, 0x1a1a2e, 1);
+    // Night sky gradient - deeper Halloween colors
+    moonCloudsGraphics.fillGradientStyle(0x0a0a1a, 0x0a0a1a, 0x1a0a2e, 0x1a0a2e, 1);
     moonCloudsGraphics.fillRect(0, 0, 800, 720);
 
-    // Moon
-    moonCloudsGraphics.fillStyle(0xf5f5dc);
-    moonCloudsGraphics.fillCircle(650, 100, 40);
+    // Full moon with eerie glow
+    moonCloudsGraphics.fillStyle(0xfff8dc);
+    moonCloudsGraphics.fillCircle(650, 100, 45);
+    
+    // Moon glow effect
+    moonCloudsGraphics.fillStyle(0xffff99, 0.3);
+    moonCloudsGraphics.fillCircle(650, 100, 60);
+    moonCloudsGraphics.fillStyle(0xffff99, 0.1);
+    moonCloudsGraphics.fillCircle(650, 100, 80);
 
-    // Moon craters
+    // Moon craters - more detailed
     moonCloudsGraphics.fillStyle(0xe6e6d3);
     moonCloudsGraphics.fillCircle(645, 95, 8);
     moonCloudsGraphics.fillCircle(655, 105, 5);
+    moonCloudsGraphics.fillCircle(640, 110, 3);
+    moonCloudsGraphics.fillCircle(660, 90, 4);
 
-    // Stars
+    // More stars with twinkling effect
     moonCloudsGraphics.fillStyle(0xffffff);
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       const x = Math.random() * 800;
       const y = Math.random() * 300;
-      moonCloudsGraphics.fillCircle(x, y, 1);
+      const size = Math.random() * 2 + 0.5;
+      moonCloudsGraphics.fillCircle(x, y, size);
+      
+      // Add some larger, brighter stars
+      if (Math.random() > 0.8) {
+        moonCloudsGraphics.fillStyle(0xffffcc);
+        moonCloudsGraphics.fillCircle(x, y, size + 1);
+        moonCloudsGraphics.fillStyle(0xffffff);
+      }
     }
 
-    // Clouds
-    moonCloudsGraphics.fillStyle(0x2f2f2f);
-    moonCloudsGraphics.fillEllipse(200, 150, 120, 40);
-    moonCloudsGraphics.fillEllipse(500, 200, 100, 35);
+    // Spooky clouds with more detail
+    moonCloudsGraphics.fillStyle(0x2a2a2a);
+    moonCloudsGraphics.fillEllipse(200, 150, 140, 50);
+    moonCloudsGraphics.fillEllipse(180, 140, 80, 30);
+    moonCloudsGraphics.fillEllipse(220, 160, 100, 35);
+    
+    moonCloudsGraphics.fillEllipse(500, 200, 120, 45);
+    moonCloudsGraphics.fillEllipse(480, 190, 70, 25);
+    moonCloudsGraphics.fillEllipse(520, 210, 90, 30);
+
+    // Wispy cloud edges
+    moonCloudsGraphics.fillStyle(0x404040, 0.5);
+    moonCloudsGraphics.fillEllipse(150, 145, 60, 20);
+    moonCloudsGraphics.fillEllipse(250, 155, 80, 25);
+    moonCloudsGraphics.fillEllipse(450, 195, 70, 20);
+    moonCloudsGraphics.fillEllipse(550, 205, 60, 18);
 
     moonCloudsGraphics.generateTexture('moon_clouds', 800, 720);
     moonCloudsGraphics.destroy();
 
-    // Houses layer
+    // Houses layer - Enhanced Halloween neighborhood
     const housesGraphics = this.add.graphics();
 
-    // Dark sky
-    housesGraphics.fillGradientStyle(0x16213e, 0x16213e, 0x0f1a2e, 0x0f1a2e, 1);
+    // Dark sky with purple tint
+    housesGraphics.fillGradientStyle(0x1a1a3e, 0x1a1a3e, 0x0f0f2e, 0x0f0f2e, 1);
     housesGraphics.fillRect(0, 0, 800, 720);
 
-    // House silhouettes
-    for (let i = 0; i < 5; i++) {
-      const x = i * 160 + 50;
-      const height = 150 + Math.random() * 100;
-
-      // House body
-      housesGraphics.fillStyle(0x000000);
-      housesGraphics.fillRect(x, 720 - height, 120, height);
-
-      // Roof
-      housesGraphics.fillTriangle(
-        x - 10, 720 - height,
-        x + 60, 720 - height - 40,
-        x + 130, 720 - height
-      );
-
-      // Windows (some lit)
-      if (Math.random() > 0.5) {
-        housesGraphics.fillStyle(0xffff99);
-        housesGraphics.fillRect(x + 20, 720 - height + 30, 15, 20);
-        housesGraphics.fillRect(x + 85, 720 - height + 30, 15, 20);
-      }
+    // Halloween house silhouettes with more variety
+    const houseTypes = ['normal', 'tall', 'wide', 'spooky', 'mansion'];
+    for (let i = 0; i < 6; i++) {
+      const x = i * 130 + 30;
+      const houseType = houseTypes[i % houseTypes.length];
+      
+      this.drawHalloweenHouse(housesGraphics, x, houseType);
     }
 
     housesGraphics.generateTexture('houses', 800, 720);
     housesGraphics.destroy();
 
-    // Trees layer
+    // Trees layer - Enhanced spooky forest
     const treesGraphics = this.add.graphics();
 
-    // Darker sky
-    treesGraphics.fillGradientStyle(0x0f3460, 0x0f3460, 0x0a2040, 0x0a2040, 1);
+    // Darker sky with fog effect
+    treesGraphics.fillGradientStyle(0x1a2460, 0x1a2460, 0x0a1040, 0x0a1040, 1);
     treesGraphics.fillRect(0, 0, 800, 720);
 
-    // Spooky trees
-    for (let i = 0; i < 8; i++) {
-      const x = i * 100 + 30;
-      const treeHeight = 200 + Math.random() * 150;
+    // Ground fog
+    treesGraphics.fillStyle(0x404040, 0.3);
+    treesGraphics.fillEllipse(400, 680, 800, 80);
+    treesGraphics.fillStyle(0x505050, 0.2);
+    treesGraphics.fillEllipse(200, 690, 400, 60);
+    treesGraphics.fillEllipse(600, 685, 350, 70);
 
-      // Tree trunk
-      treesGraphics.fillStyle(0x2d1b0e);
-      treesGraphics.fillRect(x, 720 - treeHeight, 15, treeHeight);
-
-      // Tree branches (spooky) - simplified using rectangles
-      treesGraphics.fillStyle(0x2d1b0e);
-      // Left branch
-      treesGraphics.fillRect(x - 20, 720 - treeHeight + 20, 27, 3);
-      // Right branch  
-      treesGraphics.fillRect(x + 7, 720 - treeHeight + 30, 28, 3);
-
-      // Dead leaves (sparse)
-      if (Math.random() > 0.7) {
-        treesGraphics.fillStyle(0x8b4513);
-        treesGraphics.fillCircle(x - 15, 720 - treeHeight + 25, 8);
-        treesGraphics.fillCircle(x + 30, 720 - treeHeight + 35, 6);
-      }
+    // Spooky trees with more variety
+    const treeTypes = ['dead', 'twisted', 'normal', 'gnarled'];
+    for (let i = 0; i < 10; i++) {
+      const x = i * 80 + 20;
+      const treeType = treeTypes[i % treeTypes.length];
+      
+      this.drawSpookyTree(treesGraphics, x, treeType);
     }
 
     treesGraphics.generateTexture('trees', 800, 720);
     treesGraphics.destroy();
 
-    // Street layer
+    // Street layer - Enhanced Halloween street
     const streetGraphics = this.add.graphics();
 
-    // Street/ground
-    streetGraphics.fillGradientStyle(0x533483, 0x533483, 0x2d1b69, 0x2d1b69, 1);
+    // Street/ground with Halloween atmosphere
+    streetGraphics.fillGradientStyle(0x4a2c6a, 0x4a2c6a, 0x2d1b49, 0x2d1b49, 1);
     streetGraphics.fillRect(0, 0, 800, 100);
 
-    // Street lines - using rectangles instead of paths
-    streetGraphics.fillStyle(0x666666);
-    for (let i = 0; i < 800; i += 60) {
-      streetGraphics.fillRect(i, 49, 30, 2);
+    // Cracked asphalt texture
+    streetGraphics.fillStyle(0x3a1c5a);
+    for (let i = 0; i < 15; i++) {
+      const crackX = Math.random() * 800;
+      const crackY = 20 + Math.random() * 60;
+      const crackLength = 20 + Math.random() * 40;
+      streetGraphics.fillRect(crackX, crackY, crackLength, 1);
+      
+      // Branching cracks
+      if (Math.random() > 0.7) {
+        streetGraphics.fillRect(crackX + crackLength/2, crackY, 1, 10);
+      }
     }
 
-    // Sidewalk edge
+    // Street lines - worn and broken
+    streetGraphics.fillStyle(0x666666);
+    for (let i = 0; i < 800; i += 60) {
+      const lineLength = 25 + Math.random() * 10; // Varying lengths
+      const lineY = 49 + (Math.random() - 0.5) * 2; // Slight vertical variation
+      streetGraphics.fillRect(i, lineY, lineLength, 2);
+      
+      // Some lines are faded/broken
+      if (Math.random() > 0.8) {
+        streetGraphics.fillStyle(0x444444);
+        streetGraphics.fillRect(i + lineLength/2, lineY, 5, 2);
+        streetGraphics.fillStyle(0x666666);
+      }
+    }
+
+    // Sidewalk edge with wear
     streetGraphics.fillStyle(0x696969);
     streetGraphics.fillRect(0, 0, 800, 5);
+    
+    // Sidewalk cracks
+    streetGraphics.fillStyle(0x555555);
+    for (let i = 0; i < 10; i++) {
+      const x = i * 80 + Math.random() * 40;
+      streetGraphics.fillRect(x, 0, 1, 5);
+    }
+
+    // Fallen leaves on street
+    streetGraphics.fillStyle(0x8b4513);
+    for (let i = 0; i < 20; i++) {
+      const leafX = Math.random() * 800;
+      const leafY = 10 + Math.random() * 80;
+      streetGraphics.fillEllipse(leafX, leafY, 4, 2);
+    }
+
+    // Puddles reflecting moonlight
+    streetGraphics.fillStyle(0x1a1a3a, 0.7);
+    streetGraphics.fillEllipse(150, 60, 30, 8);
+    streetGraphics.fillEllipse(400, 45, 25, 6);
+    streetGraphics.fillEllipse(650, 70, 35, 10);
 
     streetGraphics.generateTexture('street', 800, 100);
     streetGraphics.destroy();
@@ -768,39 +999,367 @@ export class GameScene extends Phaser.Scene {
    * Create environment sprites
    */
   private createEnvironmentSprites(): void {
-    // School gate
+    // Enhanced Halloween school gate
     const gateGraphics = this.add.graphics();
 
-    // Gate posts
+    // Stone gate posts with texture
     gateGraphics.fillStyle(0x2d1b0e);
-    gateGraphics.fillRect(10, 0, 15, 200);
-    gateGraphics.fillRect(75, 0, 15, 200);
+    gateGraphics.fillRect(10, 0, 18, 200);
+    gateGraphics.fillRect(72, 0, 18, 200);
 
-    // Gate bars
-    gateGraphics.fillStyle(0x000000);
-    for (let i = 0; i < 6; i++) {
-      const x = 25 + i * 10;
-      gateGraphics.fillRect(x, 20, 3, 160);
+    // Stone texture
+    gateGraphics.fillStyle(0x1a0f08);
+    for (let i = 0; i < 8; i++) {
+      gateGraphics.fillRect(12, i * 25, 14, 2);
+      gateGraphics.fillRect(74, i * 25 + 10, 14, 2);
     }
 
-    // Gate top
-    gateGraphics.fillRect(10, 20, 80, 8);
+    // Weathered gate posts caps
+    gateGraphics.fillStyle(0x3d2b1e);
+    gateGraphics.fillRect(8, 0, 22, 8);
+    gateGraphics.fillRect(70, 0, 22, 8);
 
-    // School sign
-    gateGraphics.fillStyle(0x8b4513);
-    gateGraphics.fillRect(20, 40, 60, 30);
+    // Ornate iron gate bars
+    gateGraphics.fillStyle(0x1a1a1a);
+    for (let i = 0; i < 6; i++) {
+      const x = 28 + i * 8;
+      gateGraphics.fillRect(x, 25, 4, 150);
+      
+      // Decorative spear points
+      gateGraphics.fillTriangle(x, 25, x + 2, 15, x + 4, 25);
+      
+      // Rust spots
+      if (Math.random() > 0.6) {
+        gateGraphics.fillStyle(0x8b4513);
+        gateGraphics.fillRect(x + 1, 50 + Math.random() * 100, 2, 3);
+        gateGraphics.fillStyle(0x1a1a1a);
+      }
+    }
 
-    // Sign text background
-    gateGraphics.fillStyle(0xffffff);
-    gateGraphics.fillRect(22, 42, 56, 26);
+    // Gate top with decorative ironwork
+    gateGraphics.fillStyle(0x1a1a1a);
+    gateGraphics.fillRect(10, 25, 80, 6);
+    
+    // Decorative scrollwork
+    gateGraphics.fillStyle(0x2a2a2a);
+    gateGraphics.fillCircle(30, 28, 3);
+    gateGraphics.fillCircle(50, 28, 3);
+    gateGraphics.fillCircle(70, 28, 3);
 
-    // Decorative elements
-    gateGraphics.fillStyle(0xffd700);
-    gateGraphics.fillCircle(15, 10, 3);
-    gateGraphics.fillCircle(85, 10, 3);
+    // Weathered school sign
+    gateGraphics.fillStyle(0x6b4423);
+    gateGraphics.fillRect(18, 45, 64, 35);
+
+    // Sign frame
+    gateGraphics.fillStyle(0x4a2f16);
+    gateGraphics.fillRect(16, 43, 68, 39);
+    gateGraphics.fillRect(18, 45, 64, 35);
+
+    // Aged sign background
+    gateGraphics.fillStyle(0xf0f0e0);
+    gateGraphics.fillRect(20, 47, 60, 31);
+
+    // Weather stains on sign
+    gateGraphics.fillStyle(0xd0d0c0);
+    gateGraphics.fillEllipse(25, 52, 8, 4);
+    gateGraphics.fillEllipse(70, 70, 6, 3);
+
+    // Sign text placeholder (would be "ESCOLA" in actual implementation)
+    gateGraphics.fillStyle(0x2d1b0e);
+    gateGraphics.fillRect(25, 52, 50, 3);
+    gateGraphics.fillRect(25, 58, 45, 3);
+    gateGraphics.fillRect(25, 64, 40, 3);
+
+    // Ivy growing on posts
+    gateGraphics.fillStyle(0x2d4a2d);
+    gateGraphics.fillEllipse(15, 120, 8, 25);
+    gateGraphics.fillEllipse(12, 140, 6, 20);
+    gateGraphics.fillEllipse(85, 110, 7, 30);
+
+    // Gate hinges
+    gateGraphics.fillStyle(0x3a3a3a);
+    gateGraphics.fillRect(25, 40, 6, 4);
+    gateGraphics.fillRect(25, 160, 6, 4);
+
+    // Spooky lanterns (unlit)
+    gateGraphics.fillStyle(0x1a1a1a);
+    gateGraphics.fillRect(5, 35, 8, 12);
+    gateGraphics.fillRect(87, 35, 8, 12);
+    
+    // Lantern glass (dark)
+    gateGraphics.fillStyle(0x0a0a0a);
+    gateGraphics.fillRect(6, 36, 6, 10);
+    gateGraphics.fillRect(88, 36, 6, 10);
 
     gateGraphics.generateTexture('school_gate', 100, 200);
     gateGraphics.destroy();
+
+    // Create weapon attack effects
+    this.createWeaponEffects();
+
+    // Create explosion effects
+    this.createExplosionEffects();
+  }
+
+  /**
+   * Create visual effects for weapon attacks
+   */
+  private createWeaponEffects(): void {
+    // Katana slash effect
+    const katanaSlashGraphics = this.add.graphics();
+    katanaSlashGraphics.fillStyle(0xc0c0c0, 0.8);
+    katanaSlashGraphics.fillEllipse(20, 10, 35, 8);
+    katanaSlashGraphics.fillStyle(0xffffff, 0.6);
+    katanaSlashGraphics.fillEllipse(20, 10, 25, 5);
+    katanaSlashGraphics.generateTexture('katana_slash', 40, 20);
+    katanaSlashGraphics.destroy();
+
+    // Baseball bat impact effect
+    const batImpactGraphics = this.add.graphics();
+    batImpactGraphics.fillStyle(0xffff99, 0.7);
+    batImpactGraphics.fillCircle(15, 15, 12);
+    batImpactGraphics.fillStyle(0xffffff, 0.5);
+    batImpactGraphics.fillCircle(15, 15, 8);
+    // Impact lines
+    batImpactGraphics.fillStyle(0xffff00, 0.8);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * 60) * Math.PI / 180;
+      const x1 = 15 + Math.cos(angle) * 8;
+      const y1 = 15 + Math.sin(angle) * 8;
+      const x2 = 15 + Math.cos(angle) * 18;
+      const y2 = 15 + Math.sin(angle) * 18;
+      batImpactGraphics.fillRect(x1, y1, x2 - x1, 2);
+    }
+    batImpactGraphics.generateTexture('bat_impact', 30, 30);
+    batImpactGraphics.destroy();
+
+    // Laser beam effect
+    const laserBeamGraphics = this.add.graphics();
+    laserBeamGraphics.fillStyle(0x00ff00, 0.9);
+    laserBeamGraphics.fillRect(0, 8, 40, 4);
+    laserBeamGraphics.fillStyle(0x88ff88, 0.7);
+    laserBeamGraphics.fillRect(0, 9, 40, 2);
+    laserBeamGraphics.fillStyle(0xffffff, 0.5);
+    laserBeamGraphics.fillRect(0, 10, 40, 1);
+    laserBeamGraphics.generateTexture('laser_beam', 40, 20);
+    laserBeamGraphics.destroy();
+
+    // Laser projectile
+    const laserProjectileGraphics = this.add.graphics();
+    laserProjectileGraphics.fillStyle(0x00ff00);
+    laserProjectileGraphics.fillEllipse(6, 6, 10, 4);
+    laserProjectileGraphics.fillStyle(0xffffff, 0.8);
+    laserProjectileGraphics.fillEllipse(6, 6, 6, 2);
+    laserProjectileGraphics.generateTexture('laser_projectile', 12, 12);
+    laserProjectileGraphics.destroy();
+  }
+
+  /**
+   * Show weapon attack effect at specified position
+   */
+  public showWeaponEffect(x: number, y: number, weaponType: string): void {
+    let effectKey: string;
+    let duration: number = 200;
+    
+    switch (weaponType) {
+      case 'katana':
+        effectKey = 'katana_slash';
+        break;
+      case 'baseball':
+        effectKey = 'bat_impact';
+        duration = 300;
+        break;
+      case 'laser':
+        effectKey = 'laser_beam';
+        duration = 150;
+        break;
+      default:
+        return;
+    }
+    
+    const effect = this.add.image(x, y, effectKey);
+    effect.setAlpha(0.8);
+    effect.setScale(1.2);
+    
+    // Animate the effect
+    this.tweens.add({
+      targets: effect,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      alpha: 0,
+      duration: duration,
+      ease: 'Power2',
+      onComplete: () => {
+        effect.destroy();
+      }
+    });
+  }
+
+  /**
+   * Show explosion effect at specified position
+   */
+  public showExplosion(x: number, y: number, size: 'small' | 'medium' | 'large' = 'medium'): void {
+    const explosionFrames = ['explosion_0', 'explosion_1', 'explosion_2', 'explosion_3', 'explosion_4'];
+    let currentFrame = 0;
+    
+    const explosion = this.add.image(x, y, explosionFrames[0]);
+    
+    // Scale based on size
+    const scale = size === 'small' ? 0.5 : size === 'large' ? 1.5 : 1.0;
+    explosion.setScale(scale);
+    
+    // Animate through explosion frames
+    const frameTimer = this.time.addEvent({
+      delay: 80,
+      callback: () => {
+        currentFrame++;
+        if (currentFrame < explosionFrames.length) {
+          explosion.setTexture(explosionFrames[currentFrame]);
+        } else {
+          explosion.destroy();
+          frameTimer.destroy();
+        }
+      },
+      repeat: explosionFrames.length - 1
+    });
+    
+    // Screen shake effect for larger explosions
+    if (size === 'large') {
+      this.cameras.main.shake(200, 0.01);
+    }
+  }
+
+  /**
+   * Create laser projectile
+   */
+  public createLaserProjectile(x: number, y: number, direction: number): Phaser.GameObjects.Image {
+    const projectile = this.add.image(x, y, 'laser_projectile');
+    this.physics.add.existing(projectile);
+    
+    const body = projectile.body as Phaser.Physics.Arcade.Body;
+    body.setVelocityX(direction * 500); // 500px/s as per requirements
+    
+    // Add glow effect
+    projectile.setTint(0x00ff00);
+    
+    // Destroy projectile after 2 seconds or when it goes off screen
+    this.time.delayedCall(2000, () => {
+      if (projectile.active) {
+        projectile.destroy();
+      }
+    });
+    
+    return projectile;
+  }
+
+  /**
+   * Create bazooka rocket projectile
+   */
+  public createBazookaRocket(x: number, y: number, direction: number): Phaser.GameObjects.Image {
+    const rocket = this.add.image(x, y, 'bazooka_rocket');
+    this.physics.add.existing(rocket);
+    
+    const body = rocket.body as Phaser.Physics.Arcade.Body;
+    body.setVelocityX(direction * 300); // Slower than laser
+    
+    // Flip rocket if going left
+    if (direction < 0) {
+      rocket.setFlipX(true);
+    }
+    
+    // Add exhaust trail effect
+    const exhaustTimer = this.time.addEvent({
+      delay: 50,
+      callback: () => {
+        if (rocket.active) {
+          const exhaustX = rocket.x - (direction * 15);
+          const exhaustY = rocket.y + (Math.random() - 0.5) * 4;
+          
+          const exhaust = this.add.circle(exhaustX, exhaustY, 2, 0xff4500, 0.7);
+          this.tweens.add({
+            targets: exhaust,
+            alpha: 0,
+            scale: 0.5,
+            duration: 200,
+            onComplete: () => exhaust.destroy()
+          });
+        }
+      },
+      repeat: -1
+    });
+    
+    // Destroy rocket after 3 seconds
+    this.time.delayedCall(3000, () => {
+      if (rocket.active) {
+        exhaustTimer.destroy();
+        rocket.destroy();
+      }
+    });
+    
+    return rocket;
+  }
+
+  /**
+   * Create explosion visual effects
+   */
+  private createExplosionEffects(): void {
+    // Create multiple explosion frames for animation
+    for (let frame = 0; frame < 5; frame++) {
+      const explosionGraphics = this.add.graphics();
+      const size = 20 + frame * 15;
+      const alpha = 1 - (frame * 0.15);
+      
+      // Outer explosion (orange/red)
+      explosionGraphics.fillStyle(0xff4500, alpha);
+      explosionGraphics.fillCircle(30, 30, size);
+      
+      // Middle explosion (yellow)
+      explosionGraphics.fillStyle(0xffa500, alpha * 0.8);
+      explosionGraphics.fillCircle(30, 30, size * 0.7);
+      
+      // Inner explosion (white/yellow)
+      explosionGraphics.fillStyle(0xffff00, alpha * 0.6);
+      explosionGraphics.fillCircle(30, 30, size * 0.4);
+      
+      // Core (white)
+      if (frame < 3) {
+        explosionGraphics.fillStyle(0xffffff, alpha * 0.9);
+        explosionGraphics.fillCircle(30, 30, size * 0.2);
+      }
+      
+      // Explosion sparks
+      explosionGraphics.fillStyle(0xff6600, alpha);
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * 45) * Math.PI / 180;
+        const sparkDistance = size + frame * 5;
+        const sparkX = 30 + Math.cos(angle) * sparkDistance;
+        const sparkY = 30 + Math.sin(angle) * sparkDistance;
+        explosionGraphics.fillCircle(sparkX, sparkY, 2);
+      }
+      
+      explosionGraphics.generateTexture(`explosion_${frame}`, 60, 60);
+      explosionGraphics.destroy();
+    }
+
+    // Bazooka rocket projectile
+    const rocketGraphics = this.add.graphics();
+    // Rocket body
+    rocketGraphics.fillStyle(0x666666);
+    rocketGraphics.fillRect(0, 6, 20, 8);
+    // Rocket nose
+    rocketGraphics.fillStyle(0x444444);
+    rocketGraphics.fillTriangle(20, 6, 25, 10, 20, 14);
+    // Rocket fins
+    rocketGraphics.fillTriangle(0, 6, 0, 2, 5, 6);
+    rocketGraphics.fillTriangle(0, 14, 0, 18, 5, 14);
+    // Exhaust flame
+    rocketGraphics.fillStyle(0xff4500, 0.8);
+    rocketGraphics.fillTriangle(0, 8, -8, 10, 0, 12);
+    rocketGraphics.fillStyle(0xffff00, 0.6);
+    rocketGraphics.fillTriangle(0, 9, -5, 10, 0, 11);
+    
+    rocketGraphics.generateTexture('bazooka_rocket', 33, 20);
+    rocketGraphics.destroy();
   }
 
   /**

@@ -307,7 +307,13 @@
   - Implement sprite animations for movement and attacks
   - _Requirements: 2.1, 2.2, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 14.2 Add background and environment art
+- [x] 14.2 Add background and environment art
+
+
+
+
+
+
   - Create parallax background layers (moon_clouds, houses, trees, street)
   - Design school gate artwork
   - Add visual effects for weapon attacks and explosions
