@@ -1,8 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export const ColorblindFilters: React.FC = () => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
+
   return (
     <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
       <defs>
@@ -10,10 +20,7 @@ export const ColorblindFilters: React.FC = () => {
         <filter id="protanopia-filter">
           <feColorMatrix
             type="matrix"
-            values="0.567 0.433 0.000 0.000 0.000
-                    0.558 0.442 0.000 0.000 0.000
-                    0.000 0.242 0.758 0.000 0.000
-                    0.000 0.000 0.000 1.000 0.000"
+            values="0.567 0.433 0.000 0.000 0.000 0.558 0.442 0.000 0.000 0.000 0.000 0.242 0.758 0.000 0.000 0.000 0.000 0.000 1.000 0.000"
           />
         </filter>
 
@@ -21,10 +28,7 @@ export const ColorblindFilters: React.FC = () => {
         <filter id="deuteranopia-filter">
           <feColorMatrix
             type="matrix"
-            values="0.625 0.375 0.000 0.000 0.000
-                    0.700 0.300 0.000 0.000 0.000
-                    0.000 0.300 0.700 0.000 0.000
-                    0.000 0.000 0.000 1.000 0.000"
+            values="0.625 0.375 0.000 0.000 0.000 0.700 0.300 0.000 0.000 0.000 0.000 0.300 0.700 0.000 0.000 0.000 0.000 0.000 1.000 0.000"
           />
         </filter>
 
@@ -32,10 +36,7 @@ export const ColorblindFilters: React.FC = () => {
         <filter id="tritanopia-filter">
           <feColorMatrix
             type="matrix"
-            values="0.950 0.050 0.000 0.000 0.000
-                    0.000 0.433 0.567 0.000 0.000
-                    0.000 0.475 0.525 0.000 0.000
-                    0.000 0.000 0.000 1.000 0.000"
+            values="0.950 0.050 0.000 0.000 0.000 0.000 0.433 0.567 0.000 0.000 0.000 0.475 0.525 0.000 0.000 0.000 0.000 0.000 1.000 0.000"
           />
         </filter>
       </defs>
