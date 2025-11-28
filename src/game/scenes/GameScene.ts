@@ -1152,29 +1152,6 @@ export class GameScene extends Phaser.Scene {
     katanaSlashGraphics.destroy();
 
     // Baseball bat impact effect
-    const batImpactGraphics = this.add.graphics();
-    batImpactGraphics.fillStyle(0xffff99, 0.7);
-    batImpactGraphics.fillCircle(15, 15, 12);
-    batImpactGraphics.fillStyle(0xffffff, 0.5);
-    batImpactGraphics.fillCircle(15, 15, 8);
-    // Impact lines
-    batImpactGraphics.fillStyle(0xffff00, 0.8);
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * 60) * Math.PI / 180;
-      const x1 = 15 + Math.cos(angle) * 8;
-      const y1 = 15 + Math.sin(angle) * 8;
-      const x2 = 15 + Math.cos(angle) * 18;
-      const y2 = 15 + Math.sin(angle) * 18;
-      batImpactGraphics.fillRect(x1, y1, x2 - x1, 2);
-    }
-    batImpactGraphics.generateTexture('bat_impact', 30, 30);
-    batImpactGraphics.destroy();
-
-    // Laser beam effect
-    const laserBeamGraphics = this.add.graphics();
-    laserBeamGraphics.fillStyle(0x00ff00, 0.9);
-    laserBeamGraphics.fillRect(0, 8, 40, 4);
-    laserBeamGraphics.fillStyle(0x88ff88, 0.7);
     laserBeamGraphics.fillRect(0, 9, 40, 2);
     laserBeamGraphics.fillStyle(0xffffff, 0.5);
     laserBeamGraphics.fillRect(0, 10, 40, 1);
