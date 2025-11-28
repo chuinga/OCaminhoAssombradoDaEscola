@@ -6,14 +6,14 @@ import { useGameStore } from './gameStore';
 // Example React component usage
 export function ExampleComponent() {
   const {
-    firstName,
-    lastName,
-    character,
-    weapon,
-    difficulty,
+    firstName: _firstName,
+    lastName: _lastName,
+    character: _character,
+    weapon: _weapon,
+    difficulty: _difficulty,
     lives,
     score,
-    gameStatus,
+    gameStatus: _gameStatus,
     setPlayerName,
     setCharacter,
     setWeapon,
@@ -25,53 +25,53 @@ export function ExampleComponent() {
   } = useGameStore();
 
   // Example usage patterns:
-  
+
   // Setting player name (Requirement 1.3)
-  const handleNameSubmit = (first: string, last: string) => {
+  const _handleNameSubmit = (first: string, last: string) => {
     setPlayerName(first, last);
   };
 
   // Setting character selection (Requirement 2.4)
-  const handleCharacterSelect = (selectedCharacter: 'boy' | 'girl') => {
+  const _handleCharacterSelect = (selectedCharacter: 'boy' | 'girl') => {
     setCharacter(selectedCharacter);
   };
 
   // Setting weapon selection (Requirement 2.4)
-  const handleWeaponSelect = (selectedWeapon: 'katana' | 'laser' | 'baseball' | 'bazooka') => {
+  const _handleWeaponSelect = (selectedWeapon: 'katana' | 'laser' | 'baseball' | 'bazooka') => {
     setWeapon(selectedWeapon);
   };
 
   // Setting difficulty (Requirement 2.6)
-  const handleDifficultySelect = (selectedDifficulty: 'easy' | 'medium' | 'impossible') => {
+  const _handleDifficultySelect = (selectedDifficulty: 'easy' | 'medium' | 'impossible') => {
     setDifficulty(selectedDifficulty);
   };
 
   // Game progress updates (Requirement 7.1)
-  const handlePlayerDamage = () => {
+  const _handlePlayerDamage = () => {
     if (lives > 0) {
       updateLives(lives - 1);
     }
   };
 
-  const handleScoreIncrease = (points: number) => {
+  const _handleScoreIncrease = (points: number) => {
     updateScore(score + points);
   };
 
   // Game state management
-  const startGame = () => {
+  const _startGame = () => {
     setGameStatus('playing');
   };
 
-  const pauseGame = () => {
+  const _pauseGame = () => {
     setGameStatus('paused');
   };
 
-  const endGame = () => {
+  const _endGame = () => {
     setGameStatus('finished');
   };
 
   // Reset everything when starting a new game
-  const startNewGame = () => {
+  const _startNewGame = () => {
     resetGame();
   };
 

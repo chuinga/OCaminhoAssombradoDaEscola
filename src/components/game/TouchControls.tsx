@@ -28,10 +28,10 @@ export function TouchControls({
   onAttack,
   className = ''
 }: TouchControlsProps) {
-  const { isMobile, isTablet, isPortrait, width, height } = useResponsive();
+  const { isMobile, isTablet, isPortrait: _isPortrait, width: _width, height: _height } = useResponsive();
   const { triggerActionHaptic } = useHapticFeedback();
   const [showControls, setShowControls] = useState(false);
-  
+
   // Button state for visual feedback
   const [buttonStates, setButtonStates] = useState<Record<string, ButtonState>>({
     moveLeft: { isPressed: false, pressStartTime: 0 },
@@ -56,7 +56,7 @@ export function TouchControls({
   useEffect(() => {
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     setShowControls(isTouchDevice && (isMobile || isTablet));
-    
+
     // Optimize touch performance
     if (isTouchDevice) {
       optimizeTouchPerformance();
@@ -85,12 +85,12 @@ export function TouchControls({
       const deltaX = touch.clientX - gestureState.startX;
       const deltaY = touch.clientY - gestureState.startY;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
+
       // Only trigger gestures if movement is significant (> 50px)
       if (distance > 50) {
         const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
         let gestureType: typeof gestureState.gestureType = null;
-        
+
         // Determine gesture direction based on angle
         if (angle >= -45 && angle <= 45) {
           gestureType = 'swipe-right';
@@ -101,14 +101,14 @@ export function TouchControls({
         } else if (angle >= -135 && angle <= -45) {
           gestureType = 'swipe-up';
         }
-        
+
         // Only update if gesture type changed
         if (gestureType && gestureType !== gestureState.gestureType) {
           setGestureState(prev => ({ ...prev, gestureType }));
-          
+
           // Trigger haptic feedback for gesture
           triggerActionHaptic('gesture');
-          
+
           // Execute gesture action
           switch (gestureType) {
             case 'swipe-left':
@@ -130,7 +130,7 @@ export function TouchControls({
           }
         }
       }
-      
+
       setGestureState(prev => ({
         ...prev,
         currentX: touch.clientX,
@@ -174,36 +174,36 @@ export function TouchControls({
 
   // Enhanced touch event handlers with haptic and visual feedback
   const createTouchHandlers = (
-    buttonKey: string, 
+    buttonKey: string,
     callback: (pressed: boolean) => void,
-    hapticIntensity: 'light' | 'medium' | 'heavy' = 'light'
+    _hapticIntensity: 'light' | 'medium' | 'heavy' = 'light'
   ) => {
     const handleTouchStart = (e: React.TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       // Trigger haptic feedback
       triggerActionHaptic('button-press');
-      
+
       // Update visual state
       setButtonStates(prev => ({
         ...prev,
         [buttonKey]: { isPressed: true, pressStartTime: Date.now() }
       }));
-      
+
       callback(true);
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       // Update visual state
       setButtonStates(prev => ({
         ...prev,
         [buttonKey]: { isPressed: false, pressStartTime: 0 }
       }));
-      
+
       callback(false);
     };
 
@@ -211,36 +211,36 @@ export function TouchControls({
     const handleMouseDown = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       setButtonStates(prev => ({
         ...prev,
         [buttonKey]: { isPressed: true, pressStartTime: Date.now() }
       }));
-      
+
       callback(true);
     };
 
     const handleMouseUp = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       setButtonStates(prev => ({
         ...prev,
         [buttonKey]: { isPressed: false, pressStartTime: 0 }
       }));
-      
+
       callback(false);
     };
 
     const handleMouseLeave = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       setButtonStates(prev => ({
         ...prev,
         [buttonKey]: { isPressed: false, pressStartTime: 0 }
       }));
-      
+
       callback(false);
     };
 
@@ -260,11 +260,11 @@ export function TouchControls({
     const pressedOpacity = isPressed ? 'opacity-90' : `opacity-${Math.round(layout.opacity * 100)}`;
     const pressedShadow = isPressed ? 'shadow-inner' : 'shadow-lg';
     const glowEffect = isPressed ? 'ring-2 ring-white/50' : '';
-    
+
     if (accentColor) {
       return `${layout.buttonSize} bg-${accentColor}-600/70 backdrop-blur-sm border-2 border-${accentColor}-400/50 ${layout.borderRadius} flex items-center justify-center text-white ${layout.fontSize.labels} font-bold hover:bg-${accentColor}-600/90 active:bg-${accentColor}-700/90 transition-all duration-150 select-none ${pressedScale} ${pressedOpacity} ${pressedShadow} ${glowEffect}`;
     }
-    
+
     return `${layout.buttonSize} bg-${baseColor}/50 backdrop-blur-sm border-2 border-white/30 ${layout.borderRadius} flex items-center justify-center text-white ${layout.fontSize.arrows} font-bold hover:bg-${baseColor}/70 active:bg-${baseColor}/80 transition-all duration-150 select-none ${pressedScale} ${pressedOpacity} ${pressedShadow} ${glowEffect}`;
   };
 
@@ -273,7 +273,7 @@ export function TouchControls({
       {/* Gesture detection overlay */}
       {gestureState.isGesturing && (
         <div className="absolute inset-0 pointer-events-none">
-          <div 
+          <div
             className="absolute w-2 h-2 bg-white/60 rounded-full animate-pulse"
             style={{
               left: gestureState.currentX - 4,
@@ -282,7 +282,7 @@ export function TouchControls({
             }}
           />
           {gestureState.gestureType && (
-            <div 
+            <div
               className="absolute bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium"
               style={{
                 left: gestureState.currentX + 10,
@@ -334,7 +334,7 @@ export function TouchControls({
             data-touch-control
             tabIndex={0}
           >
-            ↑<br/>SALTAR
+            ↑<br />SALTAR
           </button>
         </div>
 
@@ -348,7 +348,7 @@ export function TouchControls({
             data-touch-control
             tabIndex={0}
           >
-            ↓<br/>AGACHAR
+            ↓<br />AGACHAR
           </button>
 
           {/* Attack Button */}
@@ -359,7 +359,7 @@ export function TouchControls({
             data-touch-control
             tabIndex={0}
           >
-            ⚔<br/>ATACAR
+            ⚔<br />ATACAR
           </button>
         </div>
       </div>
