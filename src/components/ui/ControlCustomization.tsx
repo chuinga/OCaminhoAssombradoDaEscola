@@ -34,7 +34,7 @@ export const ControlCustomization: React.FC<ControlCustomizationProps> = ({
   const handleKeyCapture = (event: KeyboardEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const key = event.code;
     if (key && !tempKeys.includes(key)) {
       setTempKeys(prev => [...prev, key]);
@@ -44,12 +44,12 @@ export const ControlCustomization: React.FC<ControlCustomizationProps> = ({
 
   const startListening = () => {
     setListeningForKey(true);
-    
+
     const handleKey = (event: KeyboardEvent) => {
       handleKeyCapture(event);
       document.removeEventListener('keydown', handleKey);
     };
-    
+
     document.addEventListener('keydown', handleKey);
   };
 
@@ -147,15 +147,14 @@ export const ControlCustomization: React.FC<ControlCustomizationProps> = ({
                     )}
                   </div>
                 ))}
-                
+
                 {isEditing && (
                   <button
                     onClick={startListening}
-                    className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-                      listeningForKey
+                    className={`px-3 py-1 rounded-lg text-sm transition-colors ${listeningForKey
                         ? 'bg-yellow-600 text-white animate-pulse'
                         : 'bg-blue-600 hover:bg-blue-500 text-white'
-                    }`}
+                      }`}
                     disabled={listeningForKey}
                   >
                     {listeningForKey ? 'Pressione uma tecla...' : '+ Adicionar Tecla'}
@@ -172,7 +171,7 @@ export const ControlCustomization: React.FC<ControlCustomizationProps> = ({
         <ul className="text-xs text-blue-200 space-y-1">
           <li>• Pode atribuir múltiplas teclas à mesma ação</li>
           <li>• As alterações são guardadas automaticamente</li>
-          <li>• Use "Restaurar" para voltar aos controlos padrão</li>
+          <li>• Use &quot;Restaurar&quot; para voltar aos controlos padrão</li>
         </ul>
       </div>
     </div>

@@ -33,7 +33,7 @@ export class GameScene extends Phaser.Scene {
 
   // Difficulty configuration
   private difficulty: 'easy' | 'medium' | 'impossible' = 'easy';
-  
+
   // Game mode configuration
   private gameMode: 'story' | 'endless' | 'timeAttack' | 'survival' | 'practice' = 'story';
 
@@ -54,7 +54,7 @@ export class GameScene extends Phaser.Scene {
 
   // Analytics tracking
   private sceneLoadStartTime: number = 0;
-  
+
   // Game mode specific properties
   private timeRemaining: number = 0; // For time attack mode
   private survivalLives: number = 3; // For survival mode
@@ -64,7 +64,7 @@ export class GameScene extends Phaser.Scene {
   // Performance monitoring
   private performanceMonitor: AdvancedPerformanceMonitor;
   private performanceDebugger: PerformanceDebugger;
-  
+
   // Performance optimization
   private frameSkipCounter: number = 0;
   private lastQualityCheck: number = 0;
@@ -103,7 +103,7 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'GameScene' });
-    
+
     // Initialize performance monitoring
     this.performanceMonitor = new AdvancedPerformanceMonitor();
     this.performanceDebugger = PerformanceDebugger.getInstance();
@@ -122,7 +122,7 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize difficulty configuration
     this.difficultyConfig = this.getDifficultyConfig();
-    
+
     // Initialize game mode specific settings
     this.initializeGameMode();
 
@@ -155,7 +155,7 @@ export class GameScene extends Phaser.Scene {
   private createPlayerSprites(): void {
     this.createBoyCharacterSprites();
     this.createGirlCharacterSprites();
-    
+
     // Create default player texture (will be overridden by character selection)
     const defaultGraphics = this.add.graphics();
     defaultGraphics.fillStyle(0x00ff00);
@@ -171,26 +171,26 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 32;
     const frameHeight = 50;
     const frames = 4; // idle, walk1, walk2, jump
-    
+
     // Create spritesheet canvas
     const canvas = this.add.renderTexture(0, 0, frameWidth * frames, frameHeight);
-    
+
     // Frame 0: Idle
     this.drawBoyFrame(canvas, 0, 'idle');
-    
+
     // Frame 1: Walk 1
     this.drawBoyFrame(canvas, 1, 'walk1');
-    
+
     // Frame 2: Walk 2  
     this.drawBoyFrame(canvas, 2, 'walk2');
-    
+
     // Frame 3: Jump
     this.drawBoyFrame(canvas, 3, 'jump');
-    
+
     // Generate texture from canvas
     canvas.saveTexture('player_boy_spritesheet');
     canvas.destroy();
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -198,7 +198,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`player_boy_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main boy texture (idle frame)
     const boyGraphics = this.add.graphics();
     this.drawBoyFrameGraphics(boyGraphics, 'idle');
@@ -212,10 +212,10 @@ export class GameScene extends Phaser.Scene {
   private drawBoyFrame(canvas: Phaser.GameObjects.RenderTexture, frameIndex: number, pose: string): void {
     const frameWidth = 32;
     const x = frameIndex * frameWidth;
-    
+
     const graphics = this.add.graphics();
     this.drawBoyFrameGraphics(graphics, pose);
-    
+
     canvas.draw(graphics, x, 0);
     graphics.destroy();
   }
@@ -227,7 +227,7 @@ export class GameScene extends Phaser.Scene {
     const legOffset = pose === 'walk1' ? 2 : pose === 'walk2' ? -2 : 0;
     const armOffset = pose === 'walk1' ? -1 : pose === 'walk2' ? 1 : 0;
     const jumpOffset = pose === 'jump' ? -3 : 0;
-    
+
     // Head (skin tone)
     graphics.fillStyle(0xfdbcb4);
     graphics.fillCircle(16, 12 + jumpOffset, 8);
@@ -268,26 +268,26 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 32;
     const frameHeight = 50;
     const frames = 4; // idle, walk1, walk2, jump
-    
+
     // Create spritesheet canvas
     const canvas = this.add.renderTexture(0, 0, frameWidth * frames, frameHeight);
-    
+
     // Frame 0: Idle
     this.drawGirlFrame(canvas, 0, 'idle');
-    
+
     // Frame 1: Walk 1
     this.drawGirlFrame(canvas, 1, 'walk1');
-    
+
     // Frame 2: Walk 2  
     this.drawGirlFrame(canvas, 2, 'walk2');
-    
+
     // Frame 3: Jump
     this.drawGirlFrame(canvas, 3, 'jump');
-    
+
     // Generate texture from canvas
     canvas.saveTexture('player_girl_spritesheet');
     canvas.destroy();
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -295,7 +295,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`player_girl_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main girl texture (idle frame)
     const girlGraphics = this.add.graphics();
     this.drawGirlFrameGraphics(girlGraphics, 'idle');
@@ -309,10 +309,10 @@ export class GameScene extends Phaser.Scene {
   private drawGirlFrame(canvas: Phaser.GameObjects.RenderTexture, frameIndex: number, pose: string): void {
     const frameWidth = 32;
     const x = frameIndex * frameWidth;
-    
+
     const graphics = this.add.graphics();
     this.drawGirlFrameGraphics(graphics, pose);
-    
+
     canvas.draw(graphics, x, 0);
     graphics.destroy();
   }
@@ -325,7 +325,7 @@ export class GameScene extends Phaser.Scene {
     const armOffset = pose === 'walk1' ? -1 : pose === 'walk2' ? 1 : 0;
     const jumpOffset = pose === 'jump' ? -3 : 0;
     const dressSwing = pose === 'walk1' ? 1 : pose === 'walk2' ? -1 : 0;
-    
+
     // Head (skin tone)
     graphics.fillStyle(0xfdbcb4);
     graphics.fillCircle(16, 12 + jumpOffset, 8);
@@ -365,7 +365,7 @@ export class GameScene extends Phaser.Scene {
   private drawSpookyTree(graphics: Phaser.GameObjects.Graphics, x: number, type: string): void {
     const treeHeight = 180 + Math.random() * 120;
     const baseY = 720 - treeHeight;
-    
+
     // Tree trunk
     graphics.fillStyle(0x2d1b0e);
     const trunkWidth = type === 'gnarled' ? 20 : 12;
@@ -385,25 +385,25 @@ export class GameScene extends Phaser.Scene {
         graphics.fillRect(x - 25, baseY + 30, 35, 4);
         graphics.fillRect(x + trunkWidth, baseY + 20, 30, 3);
         graphics.fillRect(x - 15, baseY + 50, 20, 3);
-        
+
         // Smaller twigs
         graphics.fillRect(x - 30, baseY + 25, 8, 2);
         graphics.fillRect(x + trunkWidth + 25, baseY + 15, 10, 2);
         break;
-        
+
       case 'twisted':
         // Curved trunk and twisted branches
         graphics.fillStyle(0x2d1b0e);
         // Curved sections
         graphics.fillRect(x - 5, baseY + 40, trunkWidth + 10, 8);
         graphics.fillRect(x + 5, baseY + 80, trunkWidth, 8);
-        
+
         // Twisted branches
         graphics.fillRect(x - 20, baseY + 25, 25, 5);
         graphics.fillRect(x + trunkWidth - 5, baseY + 35, 28, 4);
         graphics.fillRect(x - 10, baseY + 60, 15, 3);
         break;
-        
+
       case 'gnarled':
         // Thick trunk with many branches
         graphics.fillStyle(0x2d1b0e);
@@ -412,12 +412,12 @@ export class GameScene extends Phaser.Scene {
           const branchY = baseY + 20 + level * 25;
           const leftBranch = 15 + Math.random() * 10;
           const rightBranch = 15 + Math.random() * 10;
-          
+
           graphics.fillRect(x - leftBranch, branchY, leftBranch + 5, 4);
           graphics.fillRect(x + trunkWidth, branchY + 5, rightBranch, 3);
         }
         break;
-        
+
       default: // normal
         // Standard spooky tree
         graphics.fillStyle(0x2d1b0e);
@@ -451,7 +451,7 @@ export class GameScene extends Phaser.Scene {
   private drawHalloweenHouse(graphics: Phaser.GameObjects.Graphics, x: number, type: string): void {
     let height: number;
     let width: number;
-    
+
     switch (type) {
       case 'tall':
         height = 200 + Math.random() * 80;
@@ -485,7 +485,7 @@ export class GameScene extends Phaser.Scene {
       // Crooked spooky roof
       graphics.fillTriangle(
         x - 15, baseY,
-        x + width/2 - 10, baseY - 50,
+        x + width / 2 - 10, baseY - 50,
         x + width + 15, baseY
       );
       // Add chimney
@@ -498,7 +498,7 @@ export class GameScene extends Phaser.Scene {
       // Standard triangular roof
       graphics.fillTriangle(
         x - 10, baseY,
-        x + width/2, baseY - 40,
+        x + width / 2, baseY - 40,
         x + width + 10, baseY
       );
     }
@@ -508,17 +508,17 @@ export class GameScene extends Phaser.Scene {
     for (let w = 0; w < windowCount; w++) {
       const windowX = x + 15 + w * 40;
       const windowY = baseY + 30;
-      
+
       // Window frame
       graphics.fillStyle(0x1a1a1a);
       graphics.fillRect(windowX, windowY, 20, 25);
-      
+
       // Lit windows (Halloween colors)
       if (Math.random() > 0.4) {
         const lightColor = Math.random() > 0.7 ? 0xff6600 : 0xffff99; // Orange or yellow
         graphics.fillStyle(lightColor);
         graphics.fillRect(windowX + 2, windowY + 2, 16, 21);
-        
+
         // Window cross
         graphics.fillStyle(0x000000);
         graphics.fillRect(windowX + 9, windowY + 2, 2, 21);
@@ -530,9 +530,9 @@ export class GameScene extends Phaser.Scene {
     if (Math.random() > 0.6) {
       // Porch light
       graphics.fillStyle(0xff6600);
-      graphics.fillCircle(x + width/2, baseY + height - 10, 3);
+      graphics.fillCircle(x + width / 2, baseY + height - 10, 3);
     }
-    
+
     if (type === 'spooky' && Math.random() > 0.5) {
       // Bats around spooky house
       graphics.fillStyle(0x000000);
@@ -555,7 +555,7 @@ export class GameScene extends Phaser.Scene {
     // Full moon with eerie glow
     moonCloudsGraphics.fillStyle(0xfff8dc);
     moonCloudsGraphics.fillCircle(650, 100, 45);
-    
+
     // Moon glow effect
     moonCloudsGraphics.fillStyle(0xffff99, 0.3);
     moonCloudsGraphics.fillCircle(650, 100, 60);
@@ -576,7 +576,7 @@ export class GameScene extends Phaser.Scene {
       const y = Math.random() * 300;
       const size = Math.random() * 2 + 0.5;
       moonCloudsGraphics.fillCircle(x, y, size);
-      
+
       // Add some larger, brighter stars
       if (Math.random() > 0.8) {
         moonCloudsGraphics.fillStyle(0xffffcc);
@@ -590,7 +590,7 @@ export class GameScene extends Phaser.Scene {
     moonCloudsGraphics.fillEllipse(200, 150, 140, 50);
     moonCloudsGraphics.fillEllipse(180, 140, 80, 30);
     moonCloudsGraphics.fillEllipse(220, 160, 100, 35);
-    
+
     moonCloudsGraphics.fillEllipse(500, 200, 120, 45);
     moonCloudsGraphics.fillEllipse(480, 190, 70, 25);
     moonCloudsGraphics.fillEllipse(520, 210, 90, 30);
@@ -617,7 +617,7 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < 6; i++) {
       const x = i * 130 + 30;
       const houseType = houseTypes[i % houseTypes.length];
-      
+
       this.drawHalloweenHouse(housesGraphics, x, houseType);
     }
 
@@ -643,7 +643,7 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < 10; i++) {
       const x = i * 80 + 20;
       const treeType = treeTypes[i % treeTypes.length];
-      
+
       this.drawSpookyTree(treesGraphics, x, treeType);
     }
 
@@ -664,10 +664,10 @@ export class GameScene extends Phaser.Scene {
       const crackY = 20 + Math.random() * 60;
       const crackLength = 20 + Math.random() * 40;
       streetGraphics.fillRect(crackX, crackY, crackLength, 1);
-      
+
       // Branching cracks
       if (Math.random() > 0.7) {
-        streetGraphics.fillRect(crackX + crackLength/2, crackY, 1, 10);
+        streetGraphics.fillRect(crackX + crackLength / 2, crackY, 1, 10);
       }
     }
 
@@ -677,11 +677,11 @@ export class GameScene extends Phaser.Scene {
       const lineLength = 25 + Math.random() * 10; // Varying lengths
       const lineY = 49 + (Math.random() - 0.5) * 2; // Slight vertical variation
       streetGraphics.fillRect(i, lineY, lineLength, 2);
-      
+
       // Some lines are faded/broken
       if (Math.random() > 0.8) {
         streetGraphics.fillStyle(0x444444);
-        streetGraphics.fillRect(i + lineLength/2, lineY, 5, 2);
+        streetGraphics.fillRect(i + lineLength / 2, lineY, 5, 2);
         streetGraphics.fillStyle(0x666666);
       }
     }
@@ -689,7 +689,7 @@ export class GameScene extends Phaser.Scene {
     // Sidewalk edge with wear
     streetGraphics.fillStyle(0x696969);
     streetGraphics.fillRect(0, 0, 800, 5);
-    
+
     // Sidewalk cracks
     streetGraphics.fillStyle(0x555555);
     for (let i = 0; i < 10; i++) {
@@ -732,7 +732,7 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 32;
     const frameHeight = 40;
     const frames = 3; // float1, float2, float3
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -740,7 +740,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`ghost_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main ghost texture (frame 0)
     const ghostGraphics = this.add.graphics();
     this.drawGhostFrameGraphics(ghostGraphics, 0);
@@ -754,7 +754,7 @@ export class GameScene extends Phaser.Scene {
   private drawGhostFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
     const floatOffset = frame === 1 ? -1 : frame === 2 ? 1 : 0;
     const tailWave = frame === 1 ? 1 : frame === 2 ? -1 : 0;
-    
+
     // Ghost body (white with transparency effect)
     graphics.fillStyle(0xf0f0f0);
     graphics.fillEllipse(16, 20 + floatOffset, 28, 32);
@@ -782,7 +782,7 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 24;
     const frameHeight = 20;
     const frames = 3; // wings up, wings middle, wings down
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -790,7 +790,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`bat_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main bat texture (frame 1 - middle position)
     const batGraphics = this.add.graphics();
     this.drawBatFrameGraphics(batGraphics, 1);
@@ -803,7 +803,7 @@ export class GameScene extends Phaser.Scene {
    */
   private drawBatFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
     const wingAngle = frame === 0 ? -2 : frame === 2 ? 2 : 0;
-    
+
     // Bat body
     graphics.fillStyle(0x2d1b0e);
     graphics.fillEllipse(12, 12, 8, 12);
@@ -830,7 +830,7 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 32;
     const frameHeight = 48;
     const frames = 3; // cape still, cape left, cape right
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -838,7 +838,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`vampire_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main vampire texture (frame 0)
     const vampireGraphics = this.add.graphics();
     this.drawVampireFrameGraphics(vampireGraphics, 0);
@@ -851,7 +851,7 @@ export class GameScene extends Phaser.Scene {
    */
   private drawVampireFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
     const capeSwing = frame === 1 ? -2 : frame === 2 ? 2 : 0;
-    
+
     // Head (pale skin)
     graphics.fillStyle(0xe6e6e6);
     graphics.fillCircle(16, 12, 8);
@@ -895,7 +895,7 @@ export class GameScene extends Phaser.Scene {
     const frameWidth = 32;
     const frameHeight = 48;
     const frames = 3; // bandages normal, bandages loose, bandages tight
-    
+
     // Create individual frame textures
     for (let i = 0; i < frames; i++) {
       const frameGraphics = this.add.graphics();
@@ -903,7 +903,7 @@ export class GameScene extends Phaser.Scene {
       frameGraphics.generateTexture(`mummy_${i}`, frameWidth, frameHeight);
       frameGraphics.destroy();
     }
-    
+
     // Create main mummy texture (frame 0)
     const mummyGraphics = this.add.graphics();
     this.drawMummyFrameGraphics(mummyGraphics, 0);
@@ -916,7 +916,7 @@ export class GameScene extends Phaser.Scene {
    */
   private drawMummyFrameGraphics(graphics: Phaser.GameObjects.Graphics, frame: number): void {
     const bandageOffset = frame === 1 ? 1 : frame === 2 ? -1 : 0;
-    
+
     // Body base (beige)
     graphics.fillStyle(0xf5deb3);
     graphics.fillRect(8, 8, 16, 40);
@@ -1061,10 +1061,10 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < 6; i++) {
       const x = 28 + i * 8;
       gateGraphics.fillRect(x, 25, 4, 150);
-      
+
       // Decorative spear points
       gateGraphics.fillTriangle(x, 25, x + 2, 15, x + 4, 25);
-      
+
       // Rust spots
       if (Math.random() > 0.6) {
         gateGraphics.fillStyle(0x8b4513);
@@ -1076,7 +1076,7 @@ export class GameScene extends Phaser.Scene {
     // Gate top with decorative ironwork
     gateGraphics.fillStyle(0x1a1a1a);
     gateGraphics.fillRect(10, 25, 80, 6);
-    
+
     // Decorative scrollwork
     gateGraphics.fillStyle(0x2a2a2a);
     gateGraphics.fillCircle(30, 28, 3);
@@ -1122,7 +1122,7 @@ export class GameScene extends Phaser.Scene {
     gateGraphics.fillStyle(0x1a1a1a);
     gateGraphics.fillRect(5, 35, 8, 12);
     gateGraphics.fillRect(87, 35, 8, 12);
-    
+
     // Lantern glass (dark)
     gateGraphics.fillStyle(0x0a0a0a);
     gateGraphics.fillRect(6, 36, 6, 10);
@@ -1197,7 +1197,7 @@ export class GameScene extends Phaser.Scene {
   public showWeaponEffect(x: number, y: number, weaponType: string): void {
     let effectKey: string;
     let duration: number = 200;
-    
+
     switch (weaponType) {
       case 'katana':
         effectKey = 'katana_slash';
@@ -1213,11 +1213,11 @@ export class GameScene extends Phaser.Scene {
       default:
         return;
     }
-    
+
     const effect = this.add.image(x, y, effectKey);
     effect.setAlpha(0.8);
     effect.setScale(1.2);
-    
+
     // Animate the effect
     this.tweens.add({
       targets: effect,
@@ -1238,13 +1238,13 @@ export class GameScene extends Phaser.Scene {
   public showExplosion(x: number, y: number, size: 'small' | 'medium' | 'large' = 'medium'): void {
     const explosionFrames = ['explosion_0', 'explosion_1', 'explosion_2', 'explosion_3', 'explosion_4'];
     let currentFrame = 0;
-    
+
     const explosion = this.add.image(x, y, explosionFrames[0]);
-    
+
     // Scale based on size
     const scale = size === 'small' ? 0.5 : size === 'large' ? 1.5 : 1.0;
     explosion.setScale(scale);
-    
+
     // Animate through explosion frames
     const frameTimer = this.time.addEvent({
       delay: 80,
@@ -1259,7 +1259,7 @@ export class GameScene extends Phaser.Scene {
       },
       repeat: explosionFrames.length - 1
     });
-    
+
     // Screen shake effect for larger explosions
     if (size === 'large') {
       this.cameras.main.shake(200, 0.01);
@@ -1272,20 +1272,20 @@ export class GameScene extends Phaser.Scene {
   public createLaserProjectile(x: number, y: number, direction: number): Phaser.GameObjects.Image {
     const projectile = this.add.image(x, y, 'laser_projectile');
     this.physics.add.existing(projectile);
-    
+
     const body = projectile.body as Phaser.Physics.Arcade.Body;
     body.setVelocityX(direction * 500); // 500px/s as per requirements
-    
+
     // Add glow effect
     projectile.setTint(0x00ff00);
-    
+
     // Destroy projectile after 2 seconds or when it goes off screen
     this.time.delayedCall(2000, () => {
       if (projectile.active) {
         projectile.destroy();
       }
     });
-    
+
     return projectile;
   }
 
@@ -1295,15 +1295,15 @@ export class GameScene extends Phaser.Scene {
   public createBazookaRocket(x: number, y: number, direction: number): Phaser.GameObjects.Image {
     const rocket = this.add.image(x, y, 'bazooka_rocket');
     this.physics.add.existing(rocket);
-    
+
     const body = rocket.body as Phaser.Physics.Arcade.Body;
     body.setVelocityX(direction * 300); // Slower than laser
-    
+
     // Flip rocket if going left
     if (direction < 0) {
       rocket.setFlipX(true);
     }
-    
+
     // Add exhaust trail effect
     const exhaustTimer = this.time.addEvent({
       delay: 50,
@@ -1311,7 +1311,7 @@ export class GameScene extends Phaser.Scene {
         if (rocket.active) {
           const exhaustX = rocket.x - (direction * 15);
           const exhaustY = rocket.y + (Math.random() - 0.5) * 4;
-          
+
           const exhaust = this.add.circle(exhaustX, exhaustY, 2, 0xff4500, 0.7);
           this.tweens.add({
             targets: exhaust,
@@ -1324,7 +1324,7 @@ export class GameScene extends Phaser.Scene {
       },
       repeat: -1
     });
-    
+
     // Destroy rocket after 3 seconds
     this.time.delayedCall(3000, () => {
       if (rocket.active) {
@@ -1332,7 +1332,7 @@ export class GameScene extends Phaser.Scene {
         rocket.destroy();
       }
     });
-    
+
     return rocket;
   }
 
@@ -1345,25 +1345,25 @@ export class GameScene extends Phaser.Scene {
       const explosionGraphics = this.add.graphics();
       const size = 20 + frame * 15;
       const alpha = 1 - (frame * 0.15);
-      
+
       // Outer explosion (orange/red)
       explosionGraphics.fillStyle(0xff4500, alpha);
       explosionGraphics.fillCircle(30, 30, size);
-      
+
       // Middle explosion (yellow)
       explosionGraphics.fillStyle(0xffa500, alpha * 0.8);
       explosionGraphics.fillCircle(30, 30, size * 0.7);
-      
+
       // Inner explosion (white/yellow)
       explosionGraphics.fillStyle(0xffff00, alpha * 0.6);
       explosionGraphics.fillCircle(30, 30, size * 0.4);
-      
+
       // Core (white)
       if (frame < 3) {
         explosionGraphics.fillStyle(0xffffff, alpha * 0.9);
         explosionGraphics.fillCircle(30, 30, size * 0.2);
       }
-      
+
       // Explosion sparks
       explosionGraphics.fillStyle(0xff6600, alpha);
       for (let i = 0; i < 8; i++) {
@@ -1373,7 +1373,7 @@ export class GameScene extends Phaser.Scene {
         const sparkY = 30 + Math.sin(angle) * sparkDistance;
         explosionGraphics.fillCircle(sparkX, sparkY, 2);
       }
-      
+
       explosionGraphics.generateTexture(`explosion_${frame}`, 60, 60);
       explosionGraphics.destroy();
     }
@@ -1394,7 +1394,7 @@ export class GameScene extends Phaser.Scene {
     rocketGraphics.fillTriangle(0, 8, -8, 10, 0, 12);
     rocketGraphics.fillStyle(0xffff00, 0.6);
     rocketGraphics.fillTriangle(0, 9, -5, 10, 0, 11);
-    
+
     rocketGraphics.generateTexture('bazooka_rocket', 33, 20);
     rocketGraphics.destroy();
   }
@@ -1406,7 +1406,7 @@ export class GameScene extends Phaser.Scene {
     // Start scene creation profiling
     this.performanceDebugger.startProfile('scene-creation');
     this.performanceDebugger.setMarker('scene-create-start');
-    
+
     // Set world bounds
     this.physics.world.setBounds(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT);
 
@@ -1588,7 +1588,7 @@ export class GameScene extends Phaser.Scene {
 
     // Set player collision with world bounds
     this.player.setCollideWorldBounds(true);
-    
+
     // Set lives based on game mode
     this.setPlayerLivesForGameMode();
 
@@ -1840,16 +1840,16 @@ export class GameScene extends Phaser.Scene {
    */
   private updateTimeAttackMode(delta: number): void {
     this.timeRemaining -= delta / 1000; // Convert delta to seconds
-    
+
     if (this.timeRemaining <= 0) {
       this.timeRemaining = 0;
       // End game due to time running out
       this.endGame(false, 'Time ran out!');
     }
-    
+
     // Emit time update for HUD
     this.events.emit('timeUpdate', { timeRemaining: Math.ceil(this.timeRemaining) });
-    
+
     // Also emit to window for React components
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('timeUpdate', {
@@ -1864,25 +1864,25 @@ export class GameScene extends Phaser.Scene {
   private updateEndlessMode(): void {
     // Calculate distance traveled
     this.endlessDistance = this.player.x;
-    
+
     // Increase difficulty every 1000px
     const newMultiplier = 1 + Math.floor(this.endlessDistance / 1000) * 0.2;
     if (newMultiplier > this.difficultyMultiplier) {
       this.difficultyMultiplier = newMultiplier;
-      
+
       // Update spawn rates based on multiplier
       const baseConfig = this.getDifficultyConfig();
       this.difficultyConfig.enemySpawnRate = Math.floor(baseConfig.enemySpawnRate * this.difficultyMultiplier);
       this.difficultyConfig.lifeItemSpawnRate = Math.max(1, Math.floor(baseConfig.lifeItemSpawnRate / this.difficultyMultiplier));
-      
+
       console.log(`Endless mode difficulty increased: ${this.difficultyMultiplier}x`);
     }
-    
+
     // Extend world bounds as player progresses
     if (this.endlessDistance > this.WORLD_WIDTH - 1000) {
       this.WORLD_WIDTH += 1000;
       this.physics.world.setBounds(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT);
-      
+
       // Update background layers
       if (this.backgroundLayers.street) {
         this.backgroundLayers.street.setSize(this.WORLD_WIDTH, 100);
@@ -1897,14 +1897,14 @@ export class GameScene extends Phaser.Scene {
         this.backgroundLayers.moon_clouds.setSize(this.WORLD_WIDTH, this.WORLD_HEIGHT);
       }
     }
-    
+
     // Emit distance update for HUD
     this.events.emit('distanceUpdate', { distance: Math.floor(this.endlessDistance) });
-    
+
     // Also emit to window for React components
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('distanceUpdate', {
-        detail: { 
+        detail: {
           distance: Math.floor(this.endlessDistance),
           difficultyMultiplier: this.difficultyMultiplier
         }
@@ -1918,9 +1918,9 @@ export class GameScene extends Phaser.Scene {
   private updateSurvivalMode(): void {
     // Lives are already tracked by the player entity
     // Just emit survival stats for HUD
-    this.events.emit('survivalUpdate', { 
+    this.events.emit('survivalUpdate', {
       lives: this.player.lives,
-      maxLives: this.survivalLives 
+      maxLives: this.survivalLives
     });
   }
 
@@ -1961,10 +1961,10 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     // Start performance measurement
     this.performanceMonitor.startUpdateMeasurement();
-    
+
     // Update performance optimizer
     performanceOptimizer.update();
-    
+
     // Check if we should skip this frame for performance
     const optimizationSettings = performanceOptimizer.getOptimizationSettings();
     if (optimizationSettings.skipFrames) {
@@ -1974,12 +1974,12 @@ export class GameScene extends Phaser.Scene {
         return; // Skip every other frame
       }
     }
-    
+
     // Debug: Count update calls
     this.updateCallCount++;
     if (this.updateCallCount % 60 === 0) { // Log every 60 frames
       console.log('Update called', this.updateCallCount, 'times');
-      
+
       // Update performance metrics and log if performance is low
       const metrics = this.performanceMonitor.update();
       if (metrics.isLowPerformance) {
@@ -1988,7 +1988,7 @@ export class GameScene extends Phaser.Scene {
           frameTime: metrics.frameTime,
           activeObjects: metrics.activeObjects,
         });
-        
+
         // Apply emergency optimizations if performance is critically low
         if (metrics.fps < 15) {
           performanceOptimizer.applyEmergencyOptimizations();
@@ -1998,13 +1998,13 @@ export class GameScene extends Phaser.Scene {
 
     // Apply battery optimization settings
     this.applyBatteryOptimizations();
-    
+
     // Apply performance optimizations
     this.applyPerformanceOptimizations();
 
     // Update player
     this.player.update(time, delta);
-    
+
     // Update game mode specific logic
     this.updateGameMode(time, delta);
 
@@ -2031,21 +2031,21 @@ export class GameScene extends Phaser.Scene {
 
     // Check for game end conditions
     this.checkGameEndConditions();
-    
+
     // Record object count for performance monitoring
     const totalObjects = this.enemies.children.size + this.lifeItems.children.size + 1; // +1 for player
     this.performanceMonitor.recordObjectCount(totalObjects);
-    
+
     // Cull off-screen objects if optimization is enabled
     if (optimizationSettings.cullOffscreenObjects) {
       this.cullOffscreenObjects();
     }
-    
+
     // Force garbage collection periodically if enabled
     if (optimizationSettings.aggressiveGarbageCollection && this.updateCallCount % 300 === 0) {
       performanceOptimizer.forceGarbageCollection();
     }
-    
+
     // End performance measurement
     this.performanceMonitor.endUpdateMeasurement();
   }
@@ -2174,7 +2174,7 @@ export class GameScene extends Phaser.Scene {
 
     if (shouldAttack) {
       this.player.attack();
-      
+
       // Track weapon usage for analytics
       const weaponType = this.registry.get('weapon');
       if (weaponType) {
@@ -2355,17 +2355,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Check if player can avoid damage based on position and enemy type
-   * Requirements: 4.5, 4.6
-   */
-  private canPlayerAvoidDamage(player: Player, enemy: Phaser.GameObjects.GameObject): boolean {
-    // Get enemy type from the enemy object
-    const enemyType = (enemy as any).type;
-
-    if (!enemyType) return false;
-
-    // Player crouching avoids damage from floating enemies (Ghost, Bat)
-    if (player.isCrouching && (enemyType === 'ghost' || enemyType === 'bat')) {
       return true;
     }
 
@@ -2417,7 +2406,7 @@ export class GameScene extends Phaser.Scene {
 
     // Calculate game time for achievements
     const achievementStore = useAchievementStore.getState();
-    const gameTime = achievementStore.sessionStats?.gameStartTime ? 
+    const gameTime = achievementStore.sessionStats?.gameStartTime ?
       (Date.now() - achievementStore.sessionStats.gameStartTime) / 1000 : 0;
 
     // Trigger game completion achievements
@@ -2550,7 +2539,7 @@ export class GameScene extends Phaser.Scene {
     this.player.addScore(100); // +100 points for each enemy eliminated
 
     // Get enemy type for achievement tracking
-    const enemyType = (enemy as any).type || 'unknown';
+    const enemyType = (enemy as { type?: string }).type || 'unknown';
     const weaponType = this.player.weapon?.type || 'unknown';
 
     // Trigger enemy killed achievement
@@ -2788,7 +2777,7 @@ export class GameScene extends Phaser.Scene {
       this.endGame(true, 'Reached school gate');
       return;
     }
-    
+
     // Time attack mode - time runs out is handled in updateTimeAttackMode
     // Endless mode - no end condition, continues indefinitely
     // Survival mode - uses standard life check
@@ -2800,10 +2789,10 @@ export class GameScene extends Phaser.Scene {
    */
   private endGame(victory: boolean, reason: string): void {
     console.log(`Game ended: ${victory ? 'Victory' : 'Defeat'} - ${reason}`);
-    
+
     // Calculate final score based on game mode
     let finalScore = this.player.score;
-    
+
     if (this.gameMode === 'timeAttack' && victory) {
       // Bonus points for remaining time
       const timeBonus = Math.floor(this.timeRemaining * 10);
@@ -2971,7 +2960,7 @@ export class GameScene extends Phaser.Scene {
       // Reduce enemy spawn rate for better performance
       const baseSpawnInterval = this.enemySpawnInterval;
       const optimizedInterval = baseSpawnInterval * (optimizationLevel === 'high' ? 1.5 : 1.2);
-      
+
       if (this.enemySpawnInterval !== optimizedInterval) {
         this.enemySpawnInterval = optimizedInterval;
         console.log(`Battery optimization: Adjusted enemy spawn interval to ${optimizedInterval}ms`);
@@ -3018,7 +3007,7 @@ export class GameScene extends Phaser.Scene {
     if (optimizationSettings.reduceUpdateFrequency) {
       const baseSpawnInterval = 2000; // Base interval
       const optimizedInterval = baseSpawnInterval * 1.5; // Reduce spawn frequency
-      
+
       if (this.enemySpawnInterval !== optimizedInterval) {
         this.enemySpawnInterval = optimizedInterval;
         console.log(`Performance optimization: Reduced enemy spawn frequency`);
@@ -3038,22 +3027,22 @@ export class GameScene extends Phaser.Scene {
   private shouldUpdateParallax(): boolean {
     const optimizationSettings = performanceOptimizer.getOptimizationSettings();
     const batteryOptimizationLevel = batteryOptimizer.getOptimizationLevel();
-    
+
     // Always update on high quality
     if (!optimizationSettings.reduceUpdateFrequency && batteryOptimizationLevel === 'none') {
       return true;
     }
-    
+
     // Update every 2nd frame on medium optimization
     if (batteryOptimizationLevel === 'medium' || optimizationSettings.reduceUpdateFrequency) {
       return this.updateCallCount % 2 === 0;
     }
-    
+
     // Update every 4th frame on high optimization
     if (batteryOptimizationLevel === 'high') {
       return this.updateCallCount % 4 === 0;
     }
-    
+
     return true;
   }
 
@@ -3062,12 +3051,12 @@ export class GameScene extends Phaser.Scene {
    */
   private shouldUpdateSpawning(): boolean {
     const optimizationSettings = performanceOptimizer.getOptimizationSettings();
-    
+
     // Always update spawning unless we're in aggressive optimization mode
     if (!optimizationSettings.reduceUpdateFrequency) {
       return true;
     }
-    
+
     // Update every 2nd frame when optimizing
     return this.updateCallCount % 2 === 0;
   }
@@ -3095,68 +3084,13 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Cull life items that are too far off-screen
-    this.lifeItems.children.entries.forEach((item) => {
-      const itemSprite = item as Phaser.Physics.Arcade.Sprite;
-      if (itemSprite.x < screenLeft || itemSprite.x > screenRight) {
-        itemSprite.setActive(false);
-        itemSprite.setVisible(false);
-        if (itemSprite.body) {
-          itemSprite.body.enable = false;
-        }
-      }
-    });
-  }
 
-  /**
-   * Get current performance optimization status for debugging
-   */
-  getPerformanceStatus(): {
-    optimizationSettings: any;
-    performanceSettings: any;
-    metrics: any;
-    frameSkipCounter: number;
-  } {
-    return {
-      optimizationSettings: performanceOptimizer.getOptimizationSettings(),
-      performanceSettings: usePerformanceStore.getState().settings,
-      metrics: performanceOptimizer.getMetrics(),
-      frameSkipCounter: this.frameSkipCounter,
-    };
-  }
-
-  /**
-   * Initialize achievements and trigger game start event
-   */
-  private initializeAchievements(): void {
-    const achievementStore = useAchievementStore.getState();
-    
-    // Initialize achievements if not already done
-    achievementStore.initializeAchievements();
-    
-    // Reset session stats for new game
-    achievementStore.resetSessionStats();
-    
-    // Trigger game start achievement check
-    achievementStore.triggerAchievementCheck('game_started', 1, {
-      character: this.registry.get('character'),
-      weapon: this.registry.get('weapon'),
-      difficulty: this.difficulty,
-      gameMode: this.gameMode
-    });
-  }
-
-  /**
-   * Trigger achievement for enemy elimination
-   */
-  private triggerEnemyKilledAchievement(enemyType: string, weapon: string, multiKill = false): void {
-    const achievementStore = useAchievementStore.getState();
-    
     achievementStore.triggerAchievementCheck('enemy_killed', 1, {
       enemyType,
       weapon,
       multiKill
     });
-    
+
     // Also trigger weapon usage tracking
     achievementStore.triggerAchievementCheck('weapon_used', 1, {
       weapon
@@ -3168,7 +3102,7 @@ export class GameScene extends Phaser.Scene {
    */
   private triggerLifeCollectedAchievement(): void {
     const achievementStore = useAchievementStore.getState();
-    
+
     achievementStore.triggerAchievementCheck('life_collected', 1);
   }
 
@@ -3177,7 +3111,7 @@ export class GameScene extends Phaser.Scene {
    */
   private triggerDamageTakenAchievement(): void {
     const achievementStore = useAchievementStore.getState();
-    
+
     achievementStore.triggerAchievementCheck('damage_taken', 1);
   }
 
@@ -3186,7 +3120,7 @@ export class GameScene extends Phaser.Scene {
    */
   private triggerScoreAchievement(score: number): void {
     const achievementStore = useAchievementStore.getState();
-    
+
     achievementStore.triggerAchievementCheck('score_reached', score);
   }
 
@@ -3195,7 +3129,7 @@ export class GameScene extends Phaser.Scene {
    */
   private triggerGameCompletionAchievement(survived: boolean, finalScore: number, gameTime: number): void {
     const achievementStore = useAchievementStore.getState();
-    
+
     if (survived) {
       achievementStore.triggerAchievementCheck('game_completed', 1, {
         character: this.registry.get('character'),
@@ -3205,17 +3139,17 @@ export class GameScene extends Phaser.Scene {
         finalScore,
         gameTime
       });
-      
+
       // Check for difficulty-specific achievements
       achievementStore.triggerAchievementCheck('difficulty_completed', 1, {
         difficulty: this.difficulty
       });
-      
+
       // Check for perfect run (no damage taken)
       if (this.player.lives === 10) {
         achievementStore.triggerAchievementCheck('perfect_run', 1);
       }
-      
+
       // Check for speed run (less than 5 minutes)
       if (gameTime < 300) {
         achievementStore.triggerAchievementCheck('speed_run', gameTime);
